@@ -1,0 +1,357 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/scene-studio-workflow.schema.json",
+  "title": "SceneStudioWorkflow JSON",
+  "description": "场景制作台继续编辑用的 workflow 格式。允许保存画布 UI 状态，但不得作为运行规格直接执行。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "workflow_id",
+    "workflow_type",
+    "pack_version_ref",
+    "canvas",
+    "nodes",
+    "links",
+    "hash_policy"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "scene_studio_workflow.v1" },
+    "workflow_id": { "type": "string", "minLength": 1 },
+    "workflow_type": { "type": "string", "const": "scene_studio_workflow" },
+    "pack_version_ref": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string" },
+    "source_event_id": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "canvas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["viewport"],
+      "properties": {
+        "viewport": { "$ref": "#/$defs/viewport" },
+        "zoom": { "type": "number", "minimum": 0.1, "maximum": 4 },
+        "grid": { "type": "string", "enum": ["dot", "line", "none"] },
+        "selected_object_ref": { "type": "string" },
+        "panel_state": { "$ref": "#/$defs/panel_state" }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/workflow_node" }
+    },
+    "links": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/workflow_link" }
+    },
+    "reroutes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reroute" }
+    },
+    "groups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/group" }
+    },
+    "subgraphs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/subgraph" }
+    },
+    "draft_history": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/draft_history_item" }
+    },
+    "queue_progress": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/queue_progress" }
+    },
+    "last_error_focus": { "$ref": "#/$defs/error_focus" },
+    "validation_snapshot": { "$ref": "#/$defs/validation_snapshot" },
+    "local_rerun_summary": { "$ref": "#/$defs/local_rerun_summary" },
+    "hash_policy": { "$ref": "#/$defs/hash_policy" }
+  },
+  "$defs": {
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "zoom"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "zoom": { "type": "number", "minimum": 0.1, "maximum": 4 }
+      }
+    },
+    "panel_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "right_panel_open": { "type": "boolean" },
+        "bottom_drawer_open": { "type": "boolean" },
+        "active_tab": {
+          "type": "string",
+          "enum": ["inspector", "ports", "dependencies", "status", "partial_rerun", "queue", "history", "results"]
+        }
+      }
+    },
+    "workflow_node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "node_type", "title", "position", "size", "inputs", "outputs", "status"],
+      "properties": {
+        "node_id": { "type": "string", "minLength": 1 },
+        "node_type": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "position": { "$ref": "#/$defs/point" },
+        "size": { "$ref": "#/$defs/size" },
+        "flags": { "$ref": "#/$defs/node_flags" },
+        "widgets": { "$ref": "#/$defs/safe_object" },
+        "params": { "$ref": "#/$defs/safe_object" },
+        "inputs": { "type": "array", "items": { "$ref": "#/$defs/port" } },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/port" } },
+        "status": { "$ref": "#/$defs/node_status" },
+        "governance": { "$ref": "#/$defs/governance_summary" },
+        "subgraph_ref": { "type": "string" }
+      }
+    },
+    "workflow_link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["link_id", "source_node_id", "source_port_id", "target_node_id", "target_port_id", "data_type"],
+      "properties": {
+        "link_id": { "type": "string", "minLength": 1 },
+        "source_node_id": { "type": "string", "minLength": 1 },
+        "source_port_id": { "type": "string", "minLength": 1 },
+        "target_node_id": { "type": "string", "minLength": 1 },
+        "target_port_id": { "type": "string", "minLength": 1 },
+        "data_type": { "type": "string", "minLength": 1 },
+        "reroute_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_id", "name", "direction", "data_type"],
+      "properties": {
+        "port_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "direction": { "type": "string", "enum": ["input", "output"] },
+        "data_type": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "hidden": { "type": "boolean" },
+        "candidate_output_type": { "type": "string" },
+        "receipt_required": { "type": "boolean" }
+      }
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "number", "minimum": 1 },
+        "height": { "type": "number", "minimum": 1 }
+      }
+    },
+    "node_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "selected": { "type": "boolean" },
+        "dragging": { "type": "boolean" },
+        "collapsed": { "type": "boolean" },
+        "disabled": { "type": "boolean" },
+        "bypassed": { "type": "boolean" },
+        "locked": { "type": "boolean" }
+      }
+    },
+    "node_status": {
+      "type": "string",
+      "enum": ["draft", "ready", "invalid", "blocked", "queued", "running", "cached", "completed", "error", "disabled", "bypassed"]
+    },
+    "governance_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "candidate_only": { "type": "boolean" },
+        "non_formal": { "type": "boolean" },
+        "required_gate": { "type": "string" },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "receipt_rule_ref": { "type": "string" },
+        "capability_requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "external_software_refs": { "type": "array", "items": { "type": "string" } },
+        "permission_requirement_refs": { "type": "array", "items": { "type": "string" } }
+        ,
+        "requires_capability": { "type": "boolean" },
+        "requires_external_software": { "type": "boolean" }
+      }
+    },
+    "reroute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reroute_id", "position"],
+      "properties": {
+        "reroute_id": { "type": "string", "minLength": 1 },
+        "position": { "$ref": "#/$defs/point" },
+        "link_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group_id", "title", "bounds", "node_ids"],
+      "properties": {
+        "group_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "bounds": { "$ref": "#/$defs/rect" },
+        "node_ids": { "type": "array", "items": { "type": "string" } },
+        "collapsed": { "type": "boolean" },
+        "kind": { "type": "string", "enum": ["visual_group", "micro_scene", "subflow"] }
+      }
+    },
+    "subgraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subgraph_id", "nodes"],
+      "properties": {
+        "subgraph_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "inputs": { "type": "array", "items": { "$ref": "#/$defs/port" } },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/port" } },
+        "nodes": { "type": "array", "items": { "$ref": "#/$defs/workflow_node" } },
+        "links": { "type": "array", "items": { "$ref": "#/$defs/workflow_link" } }
+      }
+    },
+    "rect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 1 },
+        "height": { "type": "number", "minimum": 1 }
+      }
+    },
+    "draft_history_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draft_ref", "created_at", "summary"],
+      "properties": {
+        "draft_ref": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "summary": { "type": "string" },
+        "receipt_ref": { "type": "string" },
+        "workflow_hash": { "type": "string" },
+        "workflow_json": { "type": "string" }
+      }
+    },
+    "queue_progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["job_id", "percent", "status"],
+      "properties": {
+        "job_id": { "type": "string", "minLength": 1 },
+        "current_node_id": { "type": "string" },
+        "percent": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "type": "string" }
+      }
+    },
+    "error_focus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "code"],
+      "properties": {
+        "node_id": { "type": "string", "minLength": 1 },
+        "link_id": { "type": "string" },
+        "code": { "type": "string", "minLength": 1 },
+        "review_ref": { "type": "string" }
+      }
+    },
+    "validation_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "valid": { "type": "boolean" },
+        "workflow_hash": { "type": "string" },
+        "scene_flow_spec_hash": { "type": "string" },
+        "errors": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "local_rerun_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "changed_node_ids": { "type": "array", "items": { "type": "string" } },
+        "affected_node_ids": { "type": "array", "items": { "type": "string" } },
+        "cached_node_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "hash_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization"],
+      "properties": {
+        "algorithm": { "type": "string", "const": "sha256" },
+        "canonicalization": { "type": "string", "const": "json_canonical_v1" },
+        "includes_ui_fields": { "type": "boolean", "const": true }
+      }
+    },
+    "safe_object": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "raw_secret",
+            "credential_value",
+            "session_cookie",
+            "auth_header",
+            "plain_password",
+            "access_token",
+            "refresh_token",
+            "provider_private_config"
+          ]
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/safe_value" }
+    },
+    "safe_value": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/safe_value" }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "not": {
+              "enum": [
+                "raw_secret",
+                "credential_value",
+                "session_cookie",
+                "auth_header",
+                "plain_password",
+                "access_token",
+                "refresh_token",
+                "provider_private_config"
+              ]
+            }
+          },
+          "additionalProperties": { "$ref": "#/$defs/safe_value" }
+        }
+      ]
+    }
+  }
+}

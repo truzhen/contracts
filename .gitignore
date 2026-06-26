@@ -1,0 +1,19 @@
+# go.work（开发期本地串三仓用，不进任何仓）
+go.work
+go.work.sum
+truzhen.work
+truzhen.work.sum
+
+# 测试 / 构建产物
+*.test
+*.out
+*.prof
+coverage.txt
+
+# 系统
+.DS_Store
+
+# 编辑器
+.idea/
+.vscode/
+*.swp

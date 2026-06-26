@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/scene-runtime-plan-candidate.schema.json",
+  "title": "SceneRuntimePlanCandidate",
+  "description": "从制作台 workflow 转换出的后端候选生成计划。不得包含 UI-only 字段，不得直接表达真实发送或真实执行命令。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "candidate_only",
+    "non_formal",
+    "plan_candidate_id",
+    "workflow_ref",
+    "pack_version_ref",
+    "transaction_ref",
+    "source_event_id",
+    "business_object_ref",
+    "object_state_version",
+    "policy_snapshot_ref",
+    "scene_flow_spec_ref",
+    "scene_flow_spec_hash",
+    "runtime_nodes",
+    "runtime_edges",
+    "candidate_outputs",
+    "base_gate_handoff",
+    "receipt_link",
+    "hash_policy"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "scene_runtime_plan_candidate.v1" },
+    "candidate_only": { "type": "boolean", "const": true },
+    "non_formal": { "type": "boolean", "const": true },
+    "plan_candidate_id": { "type": "string", "minLength": 1 },
+    "workflow_ref": { "type": "string", "minLength": 1 },
+    "pack_version_ref": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string", "minLength": 1 },
+    "source_event_id": { "type": "string", "minLength": 1 },
+    "business_object_ref": { "type": "string", "minLength": 1 },
+    "object_state_version": { "type": "integer", "minimum": 1 },
+    "policy_snapshot_ref": { "type": "string", "minLength": 1 },
+    "scene_flow_spec_ref": { "type": "string", "minLength": 1 },
+    "scene_flow_spec_hash": { "type": "string", "minLength": 1 },
+    "runtime_nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/runtime_node" } },
+    "runtime_edges": { "type": "array", "items": { "$ref": "#/$defs/runtime_edge" } },
+    "candidate_outputs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/candidate_output" } },
+    "base_gate_handoff": { "$ref": "#/$defs/base_gate_handoff" },
+    "receipt_link": { "$ref": "#/$defs/receipt_link" },
+    "hash_policy": { "$ref": "#/$defs/hash_policy" }
+  },
+  "$defs": {
+    "runtime_node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "node_type", "title", "safe_inputs", "idempotency_key"],
+      "properties": {
+        "node_id": { "type": "string", "minLength": 1 },
+        "node_type": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "safe_inputs": { "$ref": "#/$defs/runtime_safe_object" },
+        "gate_policy_ref": { "type": "string" },
+        "receipt_rule_ref": { "type": "string" },
+        "capability_requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "external_software_refs": { "type": "array", "items": { "type": "string" } },
+        "permission_requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "idempotency_key": { "type": "string", "minLength": 1 }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["x"] },
+          { "required": ["y"] },
+          { "required": ["position"] },
+          { "required": ["selected"] },
+          { "required": ["dragging"] },
+          { "required": ["viewport"] },
+          { "required": ["zoom"] }
+        ]
+      }
+    },
+    "runtime_edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["edge_id", "source_node_id", "source_port_id", "target_node_id", "target_port_id", "data_type"],
+      "properties": {
+        "edge_id": { "type": "string", "minLength": 1 },
+        "source_node_id": { "type": "string", "minLength": 1 },
+        "source_port_id": { "type": "string", "minLength": 1 },
+        "target_node_id": { "type": "string", "minLength": 1 },
+        "target_port_id": { "type": "string", "minLength": 1 },
+        "data_type": { "type": "string", "minLength": 1 }
+      }
+    },
+    "candidate_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_type", "source_node_id", "requires_gate", "requires_receipt"],
+      "properties": {
+        "candidate_type": {
+          "type": "string",
+          "enum": ["TaskCandidate", "CommunicationDraftCandidate", "ExecutionIntentCandidate", "GateCandidate", "ReceiptCandidate", "ReadModelPreview"]
+        },
+        "source_node_id": { "type": "string", "minLength": 1 },
+        "requires_gate": { "type": "boolean" },
+        "requires_receipt": { "type": "boolean" }
+      }
+    },
+    "base_gate_handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_ref", "required_gate", "pending_owner", "side_effect_class"],
+      "properties": {
+        "candidate_ref": { "type": "string", "minLength": 1 },
+        "required_gate": { "type": "string", "minLength": 1 },
+        "pending_owner": { "type": "boolean", "const": true },
+        "side_effect_class": { "type": "string", "enum": ["candidate_generation", "gateway_candidate", "controlled_provider"] }
+      }
+    },
+    "receipt_link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_ref", "candidate_ref", "transaction_ref", "source_event_id", "pack_version_ref"],
+      "properties": {
+        "receipt_ref": { "type": "string", "minLength": 1 },
+        "candidate_ref": { "type": "string", "minLength": 1 },
+        "transaction_ref": { "type": "string", "minLength": 1 },
+        "source_event_id": { "type": "string", "minLength": 1 },
+        "pack_version_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "hash_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "includes_ui_fields"],
+      "properties": {
+        "algorithm": { "type": "string", "const": "sha256" },
+        "canonicalization": { "type": "string", "const": "json_canonical_v1" },
+        "includes_ui_fields": { "type": "boolean", "const": false }
+      }
+    },
+    "runtime_safe_object": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "raw_secret",
+            "credential_value",
+            "session_cookie",
+            "auth_header",
+            "plain_password",
+            "access_token",
+            "refresh_token",
+            "provider_private_config",
+            "x",
+            "y",
+            "position",
+            "selected",
+            "dragging",
+            "viewport",
+            "zoom",
+            "canvas",
+            "panel_state",
+            "groups",
+            "reroutes"
+          ]
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/runtime_safe_value" }
+    },
+    "runtime_safe_value": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/runtime_safe_value" }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "not": {
+              "enum": [
+                "raw_secret",
+                "credential_value",
+                "session_cookie",
+                "auth_header",
+                "plain_password",
+                "access_token",
+                "refresh_token",
+                "provider_private_config",
+                "x",
+                "y",
+                "position",
+                "selected",
+                "dragging",
+                "viewport",
+                "zoom",
+                "canvas",
+                "panel_state",
+                "groups",
+                "reroutes"
+              ]
+            }
+          },
+          "additionalProperties": { "$ref": "#/$defs/runtime_safe_value" }
+        }
+      ]
+    }
+  },
+  "not": {
+    "anyOf": [
+      { "required": ["canvas"] },
+      { "required": ["viewport"] },
+      { "required": ["zoom"] },
+      { "required": ["selected"] },
+      { "required": ["dragging"] }
+    ]
+  }
+}

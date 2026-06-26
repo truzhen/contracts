@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/spines/intent-classification.schema.json",
+  "title": "IntentClassification",
+  "description": "意图分类只产候选路由，永不授予执行；requires_base_gate / receipt_required 恒为 true。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent_event_id",
+    "transaction_ref",
+    "classification_types",
+    "candidate_only",
+    "non_formal",
+    "requires_base_gate",
+    "receipt_required"
+  ],
+  "properties": {
+    "intent_event_id": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string", "minLength": 1 },
+    "classification_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "task_request",
+          "communication_request",
+          "memory_request",
+          "execution_request",
+          "object_update_request",
+          "scene_flow_trigger",
+          "goal_review_trigger",
+          "unknown"
+        ]
+      }
+    },
+    "candidate_targets": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "TaskCandidate",
+          "MemoryRequestCandidate",
+          "CommunicationDraftCandidate",
+          "ExecutionIntentCandidate",
+          "BusinessObjectCandidate",
+          "SceneFlowRunCandidate",
+          "CapabilityInvocationCandidate",
+          "PackCandidate"
+        ]
+      }
+    },
+    "candidate_only": { "const": true },
+    "non_formal": { "const": true },
+    "requires_base_gate": { "const": true },
+    "receipt_required": { "const": true },
+    "risk_class": { "type": "string" },
+    "model_gateway_ref": { "type": "string" }
+  }
+}

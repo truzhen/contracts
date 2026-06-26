@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/scene-flow-spec.schema.json",
+  "title": "SceneFlowSpec",
+  "description": "06 Scene Flow Engine 验证和运行的中性流程规格。禁止 UI-only 字段。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["flow_id", "title", "version", "nodes", "edges"],
+  "properties": {
+    "flow_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "version": { "type": "string", "minLength": 1 },
+    "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/scene_flow_node" } },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/scene_flow_edge" } }
+  },
+  "$defs": {
+    "scene_flow_node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "title"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["start", "end", "condition", "parallel_split", "join", "human_approval", "wait_event", "business_object", "task", "model", "memory", "communication", "execution", "capability", "receipt", "advice", "challenge", "compare_gate", "future_shadow"]
+        },
+        "title": { "type": "string" },
+        "slot_ref": { "type": "string" },
+        "knowledge_as_of_date": { "type": "string", "description": "advice/challenge 节点法律依据检索的案发时点 as_of（YYYY-MM-DD）；运行时按案件 transaction 注入的 run-state knowledge_as_of_date 优先，缺省时落到本字段，使知识库按当时生效法条版本检索。" },
+        "gateway": { "type": "string" },
+        "candidate_type": { "type": "string" },
+        "gate_policy": { "$ref": "#/$defs/gate_policy" },
+        "dangerous_permissions": { "type": "array", "items": { "type": "string" } }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["x"] },
+          { "required": ["y"] },
+          { "required": ["position"] },
+          { "required": ["selected"] },
+          { "required": ["dragging"] },
+          { "required": ["viewport"] },
+          { "required": ["zoom"] },
+          { "required": ["animated"] }
+        ]
+      }
+    },
+    "scene_flow_edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "condition": { "type": "string" }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["x"] },
+          { "required": ["y"] },
+          { "required": ["position"] },
+          { "required": ["selected"] },
+          { "required": ["dragging"] },
+          { "required": ["animated"] }
+        ]
+      }
+    },
+    "gate_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_gate", "pending_owner_confirmation"],
+      "properties": {
+        "required_gate": { "type": "string", "minLength": 1 },
+        "pending_owner_confirmation": { "type": "boolean" }
+      }
+    }
+  },
+  "not": {
+    "anyOf": [
+      { "required": ["canvas"] },
+      { "required": ["viewport"] },
+      { "required": ["zoom"] },
+      { "required": ["position"] },
+      { "required": ["selected"] },
+      { "required": ["dragging"] }
+    ]
+  }
+}

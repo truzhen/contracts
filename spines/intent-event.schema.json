@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/spines/intent-event.schema.json",
+  "title": "IntentEvent",
+  "description": "意图主线统一入口事件：所有外部输入先落 IntentEvent 再分流为候选。candidate_only/non_formal 恒为 true。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent_event_id",
+    "source",
+    "raw_input_summary",
+    "transaction_ref",
+    "payload_hash",
+    "candidate_only",
+    "non_formal",
+    "created_at"
+  ],
+  "properties": {
+    "intent_event_id": { "type": "string", "minLength": 1 },
+    "source": {
+      "enum": [
+        "agent_suggestion_input",
+        "user_message_input",
+        "external_message_input",
+        "external_file_input",
+        "task_failure_input",
+        "time_trigger_input",
+        "pack_run_event_input",
+        "scene_flow_event_input",
+        "goal_review_input"
+      ]
+    },
+    "source_ref": { "type": "string" },
+    "raw_input_summary": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string", "minLength": 1 },
+    "object_ref": { "type": "string" },
+    "person_ref": { "type": "string" },
+    "related_person_refs": { "type": "array", "items": { "type": "string" } },
+    "related_object_refs": { "type": "array", "items": { "type": "string" } },
+    "actor_ref": { "type": "string" },
+    "risk_hint": { "type": "string" },
+    "desired_outcome": { "type": "string" },
+    "payload_hash": { "type": "string", "minLength": 1 },
+    "candidate_targets": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "TaskCandidate",
+          "MemoryRequestCandidate",
+          "CommunicationDraftCandidate",
+          "ExecutionIntentCandidate",
+          "BusinessObjectCandidate",
+          "SceneFlowRunCandidate",
+          "CapabilityInvocationCandidate",
+          "PackCandidate"
+        ]
+      }
+    },
+    "candidate_only": { "const": true },
+    "non_formal": { "const": true },
+    "created_at": { "type": "string" }
+  }
+}

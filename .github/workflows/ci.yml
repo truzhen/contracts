@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: build
+        run: go build ./...
+      - name: vet
+        run: go vet ./...
+      - name: test
+        run: go test ./...
+      - name: no-reverse-deps（零反向依赖把守）
+        run: |
+          if go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs'; then
+            echo "::error::契约出现反向依赖（import 了基座或包），违反零反向依赖原则"
+            exit 1
+          fi
+          echo "零反向依赖 OK"
+      - name: schema-json-valid（schema JSON 合法性）
+        run: python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json')];print('schema JSON 合法')"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

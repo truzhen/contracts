@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/spines/intent-receipt.schema.json",
+  "title": "IntentReceipt",
+  "description": "intake / 分流步骤的候选域回执（ref-only 证据物料）；正式回执由 Base Gate + Receipt Ledger 在候选正式化时签发。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_candidate_ref",
+    "intent_event_id",
+    "transaction_ref",
+    "action",
+    "status",
+    "candidate_only",
+    "non_formal",
+    "created_at"
+  ],
+  "properties": {
+    "receipt_candidate_ref": { "type": "string", "minLength": 1 },
+    "intent_event_id": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string", "minLength": 1 },
+    "action": { "enum": ["intent_routed", "intent_pending_owner", "intent_suppressed"] },
+    "status": { "type": "string", "minLength": 1 },
+    "candidate_refs": { "type": "array", "items": { "type": "string" } },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "candidate_only": { "const": true },
+    "non_formal": { "const": true },
+    "created_at": { "type": "string" }
+  }
+}

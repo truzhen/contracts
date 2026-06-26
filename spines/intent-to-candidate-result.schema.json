@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/spines/intent-to-candidate-result.schema.json",
+  "title": "IntentToCandidateResult",
+  "description": "IntentEvent 分流产物：八类候选之一，每个候选信封携带 intent_event_id（source_event_id + payload.intent_event_id）。正式输出永远被阻断。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent_event_id", "transaction_ref", "candidate_only", "non_formal"],
+  "properties": {
+    "intent_event_id": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string", "minLength": 1 },
+    "candidate_refs": { "type": "array", "items": { "type": "string" } },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["candidate_only", "non_formal", "payload", "source_event_id", "transaction_ref"],
+        "properties": {
+          "candidate_ref": { "type": "string" },
+          "transaction_ref": { "type": "string", "minLength": 1 },
+          "source_event_id": { "type": "string", "minLength": 1 },
+          "receipt_ref": { "type": "string" },
+          "candidate_only": { "const": true },
+          "non_formal": { "const": true },
+          "payload": {}
+        }
+      }
+    },
+    "candidate_only": { "const": true },
+    "non_formal": { "const": true },
+    "blocked_formal_outputs": {
+      "type": "array",
+      "items": { "enum": ["FormalTask", "FormalMemory", "SendResult", "ExecutionResult"] }
+    }
+  }
+}

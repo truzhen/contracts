@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/scene-studio-node-info.schema.json",
+  "title": "SceneStudioNodeInfo",
+  "description": "场景制作台节点库公开契约。节点定义来自后端 scoped port，不暴露全量 registry 或 raw provider config。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_only", "non_formal", "scope", "source", "nodes", "categories", "common_nodes", "receipt_ref"],
+  "properties": {
+    "candidate_only": { "type": "boolean", "const": true },
+    "non_formal": { "type": "boolean", "const": true },
+    "scope": { "type": "string", "const": "scene-studio" },
+    "source": { "type": "string", "minLength": 1 },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node_info" } },
+    "categories": { "type": "array", "items": { "type": "string" } },
+    "common_nodes": { "type": "array", "items": { "type": "string" } },
+    "missing_node": { "$ref": "#/$defs/missing_node" },
+    "receipt_ref": { "type": "string", "minLength": 1 },
+    "cropped": { "type": "boolean" }
+  },
+  "$defs": {
+    "node_info": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_type",
+        "display_name",
+        "category",
+        "description",
+        "inputs",
+        "outputs",
+        "governance_tags",
+        "risk_level",
+        "required_gate",
+        "receipt_rule",
+        "capability_requirements",
+        "adapter_mode",
+        "deprecated",
+        "experimental",
+        "disabled",
+        "search_aliases",
+        "preview"
+      ],
+      "properties": {
+        "node_type": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "inputs": { "type": "array", "items": { "$ref": "#/$defs/port" } },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/port" } },
+        "governance_tags": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "required_gate": { "type": "string", "minLength": 1 },
+        "receipt_rule": { "type": "string", "minLength": 1 },
+        "capability_requirements": { "type": "array", "items": { "type": "string" } },
+        "adapter_mode": { "type": "string", "minLength": 1 },
+        "deprecated": { "type": "boolean" },
+        "experimental": { "type": "boolean" },
+        "disabled": { "type": "boolean" },
+        "search_aliases": { "type": "array", "items": { "type": "string" } },
+        "gateway_ref": { "type": "string" },
+        "preview": { "$ref": "#/$defs/preview" },
+        "direct_real_send": { "type": "boolean", "const": false },
+        "direct_real_execution": { "type": "boolean", "const": false },
+        "raw_provider_config_exposed": { "type": "boolean", "const": false }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["raw_provider_config"] },
+          { "required": ["provider_private_config"] },
+          { "required": ["credential_value"] },
+          { "required": ["session_cookie"] }
+        ]
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_id", "name", "direction", "data_type", "requirement"],
+      "properties": {
+        "port_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "direction": { "type": "string", "enum": ["input", "output"] },
+        "data_type": { "type": "string", "minLength": 1 },
+        "requirement": { "type": "string", "enum": ["required", "optional", "hidden"] },
+        "candidate_output_type": { "type": "string" },
+        "receipt_required": { "type": "boolean" },
+        "description": { "type": "string" }
+      }
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "typical_use", "candidate_outputs", "requires_base_gate", "requires_receipt_link", "provider_config_safe"],
+      "properties": {
+        "summary": { "type": "string" },
+        "typical_use": { "type": "string" },
+        "candidate_outputs": { "type": "array", "items": { "type": "string" } },
+        "requires_base_gate": { "type": "boolean" },
+        "requires_receipt_link": { "type": "boolean" },
+        "provider_config_safe": { "type": "boolean", "const": true }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["raw_provider_config"] },
+          { "required": ["provider_private_config"] },
+          { "required": ["credential_value"] }
+        ]
+      }
+    },
+    "missing_node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_type", "display_name", "category", "risk_level", "required_gate", "receipt_rule", "reason", "candidate_only", "non_formal"],
+      "properties": {
+        "node_type": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string" },
+        "category": { "type": "string", "const": "missing_node" },
+        "risk_level": { "type": "string", "const": "high" },
+        "required_gate": { "type": "string", "minLength": 1 },
+        "receipt_rule": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string" },
+        "candidate_only": { "type": "boolean", "const": true },
+        "non_formal": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}

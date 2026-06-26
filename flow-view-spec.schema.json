@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/flow-view-spec.schema.json",
+  "title": "FlowViewSpec",
+  "description": "前端展示用的流程视图规格。允许 UI-only 字段，但不得进入 Runtime。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "flow_id", "view_id", "viewport", "nodes"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "flow_view_spec.v1" },
+    "flow_id": { "type": "string", "minLength": 1 },
+    "view_id": { "type": "string", "minLength": 1 },
+    "viewport": { "$ref": "#/$defs/viewport" },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/view_node" } },
+    "groups": { "type": "array", "items": { "$ref": "#/$defs/group" } },
+    "reroutes": { "type": "array", "items": { "$ref": "#/$defs/reroute" } },
+    "panel_state": { "$ref": "#/$defs/safe_object" }
+  },
+  "$defs": {
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "zoom"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "zoom": { "type": "number", "minimum": 0.1, "maximum": 4 }
+      }
+    },
+    "view_node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "x", "y"],
+      "properties": {
+        "node_id": { "type": "string", "minLength": 1 },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 1 },
+        "height": { "type": "number", "minimum": 1 },
+        "selected": { "type": "boolean" },
+        "dragging": { "type": "boolean" },
+        "collapsed": { "type": "boolean" }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group_id", "title", "node_ids"],
+      "properties": {
+        "group_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "node_ids": { "type": "array", "items": { "type": "string" } },
+        "collapsed": { "type": "boolean" }
+      }
+    },
+    "reroute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reroute_id", "x", "y"],
+      "properties": {
+        "reroute_id": { "type": "string", "minLength": 1 },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "link_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "safe_object": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "raw_secret",
+            "credential_value",
+            "session_cookie",
+            "auth_header",
+            "plain_password",
+            "access_token",
+            "refresh_token",
+            "provider_private_config"
+          ]
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/safe_value" }
+    },
+    "safe_value": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/safe_value" }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "not": {
+              "enum": [
+                "raw_secret",
+                "credential_value",
+                "session_cookie",
+                "auth_header",
+                "plain_password",
+                "access_token",
+                "refresh_token",
+                "provider_private_config"
+              ]
+            }
+          },
+          "additionalProperties": { "$ref": "#/$defs/safe_value" }
+        }
+      ]
+    }
+  }
+}

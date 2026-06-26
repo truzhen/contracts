@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/spines/intent-inbox-item.schema.json",
+  "title": "IntentInboxItem",
+  "description": "每个 IntentEvent 恰一条 inbox 处置行。pending_owner = 无法分类待 Owner 处置，不得静默丢弃。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent_inbox_item_id",
+    "intent_event_id",
+    "transaction_ref",
+    "source",
+    "status",
+    "candidate_only",
+    "non_formal",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "intent_inbox_item_id": { "type": "string", "minLength": 1 },
+    "intent_event_id": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string", "minLength": 1 },
+    "source": {
+      "enum": [
+        "agent_suggestion_input",
+        "user_message_input",
+        "external_message_input",
+        "external_file_input",
+        "task_failure_input",
+        "time_trigger_input",
+        "pack_run_event_input",
+        "scene_flow_event_input",
+        "goal_review_input"
+      ]
+    },
+    "status": { "enum": ["routed", "pending_owner", "suppressed"] },
+    "status_reason": { "type": "string" },
+    "classification_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "task_request",
+          "communication_request",
+          "memory_request",
+          "execution_request",
+          "object_update_request",
+          "scene_flow_trigger",
+          "goal_review_trigger",
+          "unknown"
+        ]
+      }
+    },
+    "candidate_refs": { "type": "array", "items": { "type": "string" } },
+    "receipt_candidate_ref": { "type": "string" },
+    "candidate_only": { "const": true },
+    "non_formal": { "const": true },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  }
+}

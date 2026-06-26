@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/scene-pack-spec.schema.json",
+  "title": "ScenePackSpec JSON",
+  "description": "Scene Pack 的不可变运行图纸。只保存模板和声明，不保存 BusinessObject 实例状态。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "pack_id",
+    "pack_spec_version",
+    "pack_version_ref",
+    "immutable",
+    "scene_flow_spec_ref",
+    "scene_flow_spec_hash",
+    "business_object_schema_refs",
+    "capability_requirements",
+    "receipt_rules",
+    "export_policy"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "scene_pack_spec.v1" },
+    "pack_id": { "type": "string", "minLength": 1 },
+    "pack_spec_version": { "type": "string", "minLength": 1 },
+    "pack_version_ref": { "type": "string", "minLength": 1 },
+    "immutable": { "type": "boolean", "const": true },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "work_modes": { "type": "array", "items": { "$ref": "#/$defs/work_mode" } },
+    "allowed_mode_transitions": { "type": "array", "items": { "$ref": "#/$defs/work_mode_transition" } },
+    "transaction_flow": { "$ref": "#/$defs/transaction_flow" },
+    "workbench_surface": { "$ref": "#/$defs/workbench_surface" },
+    "scene_flow_spec_ref": { "type": "string", "minLength": 1 },
+    "scene_flow_spec_hash": { "type": "string", "minLength": 1 },
+    "business_object_schema_refs": { "type": "array", "items": { "type": "string" } },
+    "capability_requirements": { "type": "array", "items": { "$ref": "#/$defs/capability_requirement" } },
+    "role_slots": { "type": "array", "items": { "$ref": "#/$defs/role_slot" } },
+    "external_software_refs": { "type": "array", "items": { "type": "string" } },
+    "permission_requirements": { "type": "array", "items": { "type": "string" } },
+    "receipt_rules": { "type": "array", "items": { "$ref": "#/$defs/receipt_rule" } },
+    "knowledge_scopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scope_ref", "display_name", "mount_policy", "knowledge_kinds"],
+        "additionalProperties": false,
+        "properties": {
+          "scope_ref": { "type": "string", "minLength": 3 },
+          "display_name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "scene_ref": { "type": "string" },
+          "mount_policy": { "type": "string", "enum": ["mount_on_pack_enable", "manual_owner_mount"] },
+          "knowledge_kinds": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["law_article", "sop", "case", "glossary", "checklist", "index"] },
+            "minItems": 1
+          },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "export_policy": { "$ref": "#/$defs/export_policy" },
+    "hash_policy": { "$ref": "#/$defs/hash_policy" }
+  },
+  "$defs": {
+    "work_mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode_id", "display_name", "capability_refs", "surface_slots"],
+      "properties": {
+        "mode_id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "capability_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "role_slot_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "business_object_schema_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "surface_slots": { "type": "array", "items": { "$ref": "#/$defs/surface_slot" }, "minItems": 1 },
+        "entry_policy": { "type": "string", "enum": ["manual", "runtime_suggested", "transaction_flow_driven"] }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["script"] },
+          { "required": ["function_body"] },
+          { "required": ["business_logic"] },
+          { "required": ["raw_command"] },
+          { "required": ["component_code"] }
+        ]
+      }
+    },
+    "work_mode_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from_mode", "to_mode", "trigger"],
+      "properties": {
+        "from_mode": { "type": "string", "minLength": 1 },
+        "to_mode": { "type": "string", "minLength": 1 },
+        "trigger": { "type": "string", "enum": ["owner_selected", "runtime_candidate", "transaction_flow_step", "provider_event", "manual_review"] },
+        "required_gate": { "type": "string" },
+        "blocked_behavior": { "type": "string", "enum": ["stay_current_mode", "show_blocked_candidate", "request_owner_choice"] }
+      }
+    },
+    "transaction_flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scene_flow_spec_ref"],
+      "properties": {
+        "scene_flow_spec_ref": { "type": "string", "minLength": 1 },
+        "scene_flow_spec_hash": { "type": "string" },
+        "flow_role": { "type": "string", "enum": ["primary_transaction_flow", "supporting_flow", "reference_only"] }
+      }
+    },
+    "workbench_surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surface_ref", "layout", "mode_tabs"],
+      "properties": {
+        "surface_ref": { "type": "string", "minLength": 1 },
+        "layout": { "type": "string", "enum": ["conversation_left_info_right"] },
+        "mode_tabs": { "type": "array", "items": { "$ref": "#/$defs/workbench_mode_tab" }, "minItems": 1 }
+      }
+    },
+    "workbench_mode_tab": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode_id", "label", "slots"],
+      "properties": {
+        "mode_id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "slots": { "type": "array", "items": { "$ref": "#/$defs/surface_slot" }, "minItems": 1 }
+      }
+    },
+    "surface_slot": {
+      "type": "string",
+      "enum": [
+        "pack.dashboard",
+        "pack.object.list",
+        "pack.object.detail",
+        "pack.flow.canvas",
+        "pack.task.panel",
+        "pack.candidate.card",
+        "pack.receipt.timeline",
+        "pack.risk.panel",
+        "pack.settings"
+      ]
+    },
+    "capability_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability_ref", "scope", "required_gate"],
+      "properties": {
+        "capability_ref": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "required_gate": { "type": "string", "minLength": 1 }
+      }
+    },
+    "role_slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot_id", "responsibility", "default_role_pack_ref", "slice_scope_policy"],
+      "properties": {
+        "slot_id": { "type": "string", "minLength": 1 },
+        "responsibility": { "type": "string", "minLength": 1 },
+        "default_role_pack_ref": { "type": "string", "minLength": 1 },
+        "slice_scope_policy": { "type": "string", "minLength": 1 },
+        "required_role": { "type": "string" }
+      }
+    },
+    "receipt_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_rule_ref", "event_type", "append_only"],
+      "properties": {
+        "receipt_rule_ref": { "type": "string", "minLength": 1 },
+        "event_type": { "type": "string", "minLength": 1 },
+        "append_only": { "type": "boolean", "const": true }
+      }
+    },
+    "export_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exclude_local_database", "exclude_dependency_dirs", "exclude_build_dirs", "exclude_raw_artifacts"],
+      "properties": {
+        "exclude_local_database": { "type": "boolean", "const": true },
+        "exclude_dependency_dirs": { "type": "boolean", "const": true },
+        "exclude_build_dirs": { "type": "boolean", "const": true },
+        "exclude_raw_artifacts": { "type": "boolean", "const": true }
+      }
+    },
+    "hash_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization"],
+      "properties": {
+        "algorithm": { "type": "string", "const": "sha256" },
+        "canonicalization": { "type": "string", "const": "json_canonical_v1" }
+      }
+    }
+  },
+  "not": {
+    "anyOf": [
+      { "required": ["business_object_id"] },
+      { "required": ["state_version"] },
+      { "required": ["object_state"] },
+      { "required": ["viewport"] },
+      { "required": ["zoom"] },
+      { "required": ["runtime_code"] },
+      { "required": ["executable_logic"] },
+      { "required": ["business_logic"] },
+      { "required": ["script"] },
+      { "required": ["function_body"] },
+      { "required": ["component_code"] },
+      { "required": ["raw_command"] }
+    ]
+  }
+}
