@@ -29,6 +29,8 @@
 | `scene-studio-workflow.schema.json` | 制作台工作流。 |
 | `visual-unit-spec.schema.json` | **client layer**：前端 7 类主权视觉单元（pod/object/capsule/candidate/execution/receipt/setting）封顶规格契约。 |
 | `transaction-object-projection.schema.json` | **client layer**：事务对象（05 BusinessObject）前端只读投影 DTO 契约。 |
+| `candidate-envelope.schema.json` | **client layer**：候选统一包装（`candidates.CandidateEnvelope` 的 JSON 表达，候选卡面向）。 |
+| `receipt-envelope.schema.json` | **client layer**：回执链包装（`receipts.ReceiptEnvelope` 的 JSON 表达，回执卡面向）。 |
 
 ## client layer 契约面（前端面向收敛）
 
@@ -38,6 +40,7 @@ client layer（Web / 桌面等多端前端）面向以下 contracts 契约收敛
 |---|---|
 | `visual-unit-spec.schema.json` | ✅ 已对齐（前端 vendor 副本 + 一致性测试） |
 | `transaction-object-projection.schema.json` | ⏳ 契约已就绪，待前端对齐（codegen 单元） |
-| ReadModel 具体形状 / candidate / receipt / 秘书动作等 | ⏳ 待契约化 + 对齐（前端形态稳定后统一推） |
+| `candidate-envelope.schema.json` / `receipt-envelope.schema.json` | ✅ 契约就绪（对齐 contracts Go struct 真相源，候选卡/回执卡面向），待前端对齐 |
+| ReadModel 具体形状 / 秘书动作 / 其他 candidate 子类型等 | ⏳ 待契约化 + 对齐（前端形态稳定后统一推） |
 
 > 前端消费机制：有运行时常量数据的 DTO（如视觉单元规格表）用 vendor 副本 + 运行时一致性校验；纯 type DTO 待 codegen（JSON Schema → TS type 生成）。
