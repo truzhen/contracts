@@ -27,3 +27,17 @@
 | `scene-runtime-plan-candidate.schema.json` | 场景运行时计划候选。 |
 | `scene-studio-node-info.schema.json` | 制作台节点信息。 |
 | `scene-studio-workflow.schema.json` | 制作台工作流。 |
+| `visual-unit-spec.schema.json` | **client layer**：前端 7 类主权视觉单元（pod/object/capsule/candidate/execution/receipt/setting）封顶规格契约。 |
+| `transaction-object-projection.schema.json` | **client layer**：事务对象（05 BusinessObject）前端只读投影 DTO 契约。 |
+
+## client layer 契约面（前端面向收敛）
+
+client layer（Web / 桌面等多端前端）面向以下 contracts 契约收敛跨边界 DTO（前端不手写后端形状，面向契约单一来源）：
+
+| 契约 | 前端对齐状态 |
+|---|---|
+| `visual-unit-spec.schema.json` | ✅ 已对齐（前端 vendor 副本 + 一致性测试） |
+| `transaction-object-projection.schema.json` | ⏳ 契约已就绪，待前端对齐（codegen 单元） |
+| ReadModel 具体形状 / candidate / receipt / 秘书动作等 | ⏳ 待契约化 + 对齐（前端形态稳定后统一推） |
+
+> 前端消费机制：有运行时常量数据的 DTO（如视觉单元规格表）用 vendor 副本 + 运行时一致性校验；纯 type DTO 待 codegen（JSON Schema → TS type 生成）。
