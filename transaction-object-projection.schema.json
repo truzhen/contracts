@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/transaction-object-projection.schema.json",
+  "title": "TransactionObjectProjection",
+  "description": "事务对象（05 BusinessObject）的前端只读投影 DTO。client layer 展示用，绝不作真相源；围绕 transaction_ref 聚合人/事/进度与各类引用（object/scene/pack/knowledge/receipt/evidence ref）。client layer（Web/桌面等多端）渲染事务对象卡时面向本契约；source 标识投影来源（真实 ReadModel / 空 / 错误 / 候选预览）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "summary", "source"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "scene_name": { "type": "string" },
+    "progress_text": { "type": "string" },
+    "person": { "type": "string" },
+    "object": { "type": "string" },
+    "status": { "type": "string" },
+    "transaction_ref": { "type": "string" },
+    "object_ref": { "type": "string" },
+    "scene_ref": { "type": "string" },
+    "scene_pack_ref": { "type": "string" },
+    "pack_ref": { "type": "string" },
+    "pack_version_ref": { "type": "string" },
+    "knowledge_scope_ref": { "type": "string" },
+    "receipt_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "last_message": { "type": "string" },
+    "current_context": { "type": "string" },
+    "next_step": { "type": "string" },
+    "capsule_summary": { "type": "string" },
+    "risk": { "type": "string" },
+    "source": { "$ref": "#/$defs/projection_source" }
+  },
+  "$defs": {
+    "projection_source": {
+      "type": "string",
+      "enum": ["business_object_readmodel", "empty", "error", "candidate_preview"],
+      "description": "投影来源：真实业务对象 ReadModel / 空 / 错误 / 候选预览。"
+    }
+  }
+}

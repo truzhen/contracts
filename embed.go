@@ -28,6 +28,13 @@ var FlowViewSpecSchemaJSON []byte
 //go:embed visual-unit-spec.schema.json
 var VisualUnitSpecSchemaJSON []byte
 
+// TransactionObjectProjectionSchemaJSON is contracts/transaction-object-projection.schema.json
+// （事务对象 05 BusinessObject 的前端只读投影 DTO 契约，client layer 渲染事务对象卡的单一来源；
+// T12 阶段A：client layer 契约面补全）。
+//
+//go:embed transaction-object-projection.schema.json
+var TransactionObjectProjectionSchemaJSON []byte
+
 // Intent Spine 五件套（T12 阶段3：契约收敛进 contracts/spines/）。
 
 // IntentEventSchemaJSON is contracts/spines/intent-event.schema.json.
