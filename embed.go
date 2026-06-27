@@ -35,6 +35,20 @@ var VisualUnitSpecSchemaJSON []byte
 //go:embed transaction-object-projection.schema.json
 var TransactionObjectProjectionSchemaJSON []byte
 
+// CandidateEnvelopeSchemaJSON is contracts/candidate-envelope.schema.json
+// （candidates.CandidateEnvelope 的 JSON 表达，client layer 候选卡面向、CI 校验；
+// T12 阶段A：client layer 契约面补全）。
+//
+//go:embed candidate-envelope.schema.json
+var CandidateEnvelopeSchemaJSON []byte
+
+// ReceiptEnvelopeSchemaJSON is contracts/receipt-envelope.schema.json
+// （receipts.ReceiptEnvelope 的 JSON 表达，client layer 回执卡面向、CI 校验；
+// T12 阶段A：client layer 契约面补全）。
+//
+//go:embed receipt-envelope.schema.json
+var ReceiptEnvelopeSchemaJSON []byte
+
 // Intent Spine 五件套（T12 阶段3：契约收敛进 contracts/spines/）。
 
 // IntentEventSchemaJSON is contracts/spines/intent-event.schema.json.

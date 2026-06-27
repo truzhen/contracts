@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/candidate-envelope.schema.json",
+  "title": "CandidateEnvelope",
+  "description": "所有候选对象的统一包装（candidates.CandidateEnvelope 的 JSON 表达，供 client layer 与 CI 校验）。AI Proposer 产出，默认 candidate_only=true、non_formal=true（候选域与执行域双态隔离铁律）。payload 为具体候选载荷（任意形状）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_only", "non_formal", "payload"],
+  "properties": {
+    "candidate_ref": { "type": "string" },
+    "transaction_ref": { "type": "string" },
+    "source_event_id": { "type": "string" },
+    "receipt_ref": { "type": "string" },
+    "candidate_only": { "type": "boolean" },
+    "non_formal": { "type": "boolean" },
+    "payload": {}
+  }
+}

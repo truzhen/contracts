@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/receipt-envelope.schema.json",
+  "title": "ReceiptEnvelope",
+  "description": "回执链的基础包装（receipts.ReceiptEnvelope 的 JSON 表达，Evidence Spine 落点，供 client layer 回执卡与 CI 校验）。Receipt ≠ Memory；Sensitive payload 必须 SecureStore。含哈希链（previous_hash/payload_hash/hash + sequence）保证可回放可验证。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["receipt_id", "sequence", "previous_hash", "payload_hash", "hash"],
+  "properties": {
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "transaction_ref": { "type": "string" },
+    "candidate_ref": { "type": "string" },
+    "decision_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "sequence": { "type": "integer" },
+    "previous_hash": { "type": "string" },
+    "payload_hash": { "type": "string" },
+    "hash": { "type": "string" }
+  }
+}
