@@ -21,6 +21,13 @@ var ScenePackSpecSchemaJSON []byte
 //go:embed flow-view-spec.schema.json
 var FlowViewSpecSchemaJSON []byte
 
+// VisualUnitSpecSchemaJSON is contracts/visual-unit-spec.schema.json
+// （前端 7 类主权视觉单元封顶规格契约，client layer 多端单一来源；
+// T12 阶段A：client layer 契约收敛起步）。
+//
+//go:embed visual-unit-spec.schema.json
+var VisualUnitSpecSchemaJSON []byte
+
 // Intent Spine 五件套（T12 阶段3：契约收敛进 contracts/spines/）。
 
 // IntentEventSchemaJSON is contracts/spines/intent-event.schema.json.

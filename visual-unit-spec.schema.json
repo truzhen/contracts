@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/visual-unit-spec.schema.json",
+  "title": "VisualUnitSpec",
+  "description": "前端 7 类主权视觉单元的封顶规格契约（pod/object/capsule/candidate/execution/receipt/setting）。治理红线：固定 7 类，不得发明第八类、不得新增宽度或绕过 GatedAction。client layer（Web/桌面/移动等多端）按此规格渲染主权视觉单元，本 schema 为跨端单一来源契约；前端实现的 VISUAL_UNIT_SPECS 是其符合本契约的实例。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "visual_type",
+    "label",
+    "fixedWidthPx",
+    "baseHeightPx",
+    "minHeightPx",
+    "maxHeightPx",
+    "heightPolicy",
+    "requiredSlots",
+    "requiredRefs",
+    "allowedActions",
+    "v4GenerationRule"
+  ],
+  "properties": {
+    "visual_type": { "$ref": "#/$defs/visual_unit_type" },
+    "label": { "type": "string", "minLength": 1 },
+    "fixedWidthPx": { "type": "integer", "minimum": 1 },
+    "baseHeightPx": { "type": "integer", "minimum": 1 },
+    "minHeightPx": { "type": "integer", "minimum": 1 },
+    "maxHeightPx": { "type": "integer", "minimum": 1 },
+    "heightPolicy": { "type": "string", "const": "variable-height-only" },
+    "requiredSlots": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/visual_unit_slot" },
+      "uniqueItems": true
+    },
+    "requiredRefs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/visual_unit_required_ref" },
+      "uniqueItems": true
+    },
+    "allowedActions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/visual_unit_allowed_action" },
+      "uniqueItems": true
+    },
+    "v4GenerationRule": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "visual_unit_type": {
+      "type": "string",
+      "enum": ["pod", "object", "capsule", "candidate", "execution", "receipt", "setting"],
+      "description": "固定 7 类主权视觉单元，不得发明第八类（治理红线）。"
+    },
+    "visual_unit_slot": {
+      "type": "string",
+      "enum": ["identity", "status", "summary", "refs", "actions", "evidence", "relations"]
+    },
+    "visual_unit_required_ref": {
+      "type": "string",
+      "enum": ["transaction_ref", "candidate_ref", "receipt_ref", "evidence_ref", "source"]
+    },
+    "visual_unit_allowed_action": {
+      "type": "string",
+      "enum": ["read_only", "gated_action", "candidate_review", "owner_decision"]
+    },
+    "card_risk_level": {
+      "type": "string",
+      "enum": ["safe", "warning", "critical"],
+      "description": "卡片风险等级（BaseVisualUnit.risk）。"
+    }
+  }
+}
