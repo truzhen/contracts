@@ -2,7 +2,7 @@
 
 > Truzhen 主权事务操作层的**契约 SDK**：纯接口、类型与 JSON Schema，零反向依赖。
 
-`github.com/truzhen/contracts` 是 Truzhen 三仓架构的**契约层**，定义基座与包之间一切跨边界的数据形状（候选信封、门控决议、回执、注册切片、ReadModel 投影、监控事件、三主线引用等）以及机器可校验的 JSON Schema。它**只声明形状，不含任何实现**（无 DB、无网络、无副作用），因此谁都可以安全依赖它，而它谁都不依赖。
+`github.com/truzhen/contracts` 是 Truzhen 五落点架构的**契约层**，定义基座、包层和 client layer 之间一切跨边界的数据形状（Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控决议、回执、注册切片、监控事件、三主线引用等）以及机器可校验的 JSON Schema。它**只声明形状，不含任何实现**（无 DB、无网络、无副作用），因此谁都可以安全依赖它，而它谁都不依赖。
 
 ## 依赖方向（单向不可逆）
 
@@ -16,6 +16,7 @@
 
 - **基座**（`github.com/lights314/truzhenos`，私有）**实现**这些契约。
 - **包**（`github.com/truzhen/packs`，开放）**面向**这些契约编写，物理上 import 不到基座内部。
+- **客户端**（`github.com/truzhen/truzhen-client-web-desktop`，私有）通过 vendor / codegen 消费 schema，不私造稳定 DTO。
 - **契约本身零反向依赖**：只依赖 Go 标准库，不依赖基座或包。可用 `go list -deps ./...` 验证。
 
 ## 作为 SDK 使用
@@ -31,6 +32,8 @@ import (
 ```sh
 go get github.com/truzhen/contracts@latest
 ```
+
+当前基座消费版本：`github.com/truzhen/contracts v0.2.0`。破坏性变更不得落到 `v0.x` patch 假装兼容；跨仓边界变化必须同步更新 `truzhenos`、`truzhen-packs` 和 client repo 的治理说明。
 
 ## 子包总览
 

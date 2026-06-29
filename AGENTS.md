@@ -3,11 +3,12 @@
 本仓 = Truzhen **契约层** SDK（`github.com/truzhen/contracts`，开源 Apache-2.0）。智能体只读本文件即可独立维护本仓。
 
 ## 1. 本仓职责
-定义基座与包之间**一切跨边界的数据形状**：候选信封、门控决议、回执 / 审计、注册切片、ReadModel 投影、监控事件、三主线引用，以及机器可校验的 `*.schema.json`。纯类型 / 接口 / 常量，无实现。
+定义五落点之间**一切跨边界的数据形状**：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控决议、回执 / 审计、注册切片、监控事件、三主线引用，以及机器可校验的 `*.schema.json`。纯类型 / 接口 / 常量，无实现。当前公开版本为 `v0.2.0`，由 `truzhenos` 通过 `go.mod require github.com/truzhen/contracts v0.2.0` 消费。
 
 ## 2. 禁止事项
 - **禁止写实现**：不得引入 DB、网络、文件 I/O、time / rand 副作用、并发逻辑——那些属于基座 `truzhenos`。
 - **禁止反向依赖**：不得 import `github.com/lights314/truzhenos` 或 `github.com/truzhen/packs`。
+- **禁止吸收产品实现**：client repo 只能 vendor / codegen 消费本仓 schema；本仓不得反向引入 React/Tauri、Pack 安装脚本或 provider registry。
 - **禁止真凭据**：`secrets/` 只放引用形状；任何 API key / token / 口令 / terminal_sn / 激活码绝不进本仓。
 - **禁止无意识破坏边界**：删字段 / 改必填 / 改语义不升 major。
 
@@ -16,6 +17,7 @@
 - `MODULES.md`（子包清单）
 - `CLAUDE.md`（铁律速记）
 - 改 scene-pack schema 前读对应 `*.schema.json` 与基座设计文档 `docs/design/scene-pack-vertical-profession-workbench-upgrade-20260626.md`（在基座仓 truzhenos）。
+- 改 client layer schema 前同时核对 client 仓 `/Users/li/Documents/truzhen-client-web-desktop/src/contracts/CONTRACTS_VENDOR.md`，确认 vendor / codegen 消费方式。
 
 ## 4. 常用验证命令
 ```sh

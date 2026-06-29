@@ -1,6 +1,6 @@
 # truzhen-contracts 子包清单
 
-每个子包只声明跨边界的数据形状（类型 / 接口 / 常量），无实现、无副作用。
+每个子包只声明跨边界的数据形状（类型 / 接口 / 常量），无实现、无副作用。本仓是五落点中的 **Pack / Candidate / Receipt / Surface / ReadModel schema** 权威源。
 
 | 子包 | 职责（一句话） |
 |---|---|
@@ -38,9 +38,9 @@ client layer（Web / 桌面等多端前端）面向以下 contracts 契约收敛
 
 | 契约 | 前端对齐状态 |
 |---|---|
-| `visual-unit-spec.schema.json` | ✅ 已对齐（前端 vendor 副本 + 一致性测试） |
-| `transaction-object-projection.schema.json` | ⏳ 契约已就绪，待前端对齐（codegen 单元） |
-| `candidate-envelope.schema.json` / `receipt-envelope.schema.json` | ✅ 契约就绪（对齐 contracts Go struct 真相源，候选卡/回执卡面向），待前端对齐 |
+| `visual-unit-spec.schema.json` | ✅ 已对齐（client 仓 vendor 副本 + codegen 类型 + 一致性测试） |
+| `transaction-object-projection.schema.json` | ✅ 已对齐（client 仓 codegen 到 `src/contracts/generated/transaction-object-projection.ts`，`types/transactionObject.ts` 消费生成类型） |
+| `candidate-envelope.schema.json` / `receipt-envelope.schema.json` | ⏳ 契约已就绪（对齐 contracts Go struct 真相源，候选卡/回执卡面向），待 client 仓 vendor / codegen |
 | ReadModel 具体形状 / 秘书动作 / 其他 candidate 子类型等 | ⏳ 待契约化 + 对齐（前端形态稳定后统一推） |
 
-> 前端消费机制：有运行时常量数据的 DTO（如视觉单元规格表）用 vendor 副本 + 运行时一致性校验；纯 type DTO 待 codegen（JSON Schema → TS type 生成）。
+> 前端消费机制：有运行时常量数据的 DTO（如视觉单元规格表）用 vendor 副本 + 运行时一致性校验；纯 type DTO 用 JSON Schema → TS codegen 生成，生成物只读勿手改。

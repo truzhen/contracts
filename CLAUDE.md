@@ -1,6 +1,6 @@
 # CLAUDE.md — truzhen-contracts
 
-本仓是 Truzhen 三仓架构的**契约层**（`github.com/truzhen/contracts`），开源、Apache-2.0。供 Claude Code / Agent 在本仓工作时加载。**完整纪律见 `AGENTS.md`。**
+本仓是 Truzhen 五落点架构的**契约层**（`github.com/truzhen/contracts`），开源、Apache-2.0。供 Claude Code / Agent 在本仓工作时加载。**完整纪律见 `AGENTS.md`。**
 
 > 文档纪律：中文为主，英文只用于专有名词、命令、文件名、路径、代码标识。
 
