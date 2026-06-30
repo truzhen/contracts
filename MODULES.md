@@ -13,6 +13,7 @@
 | `readmodels/` | 前端投影信封：ReadModelEnvelope（ReadModel ≠ 真相源）。 |
 | `monitoring/` | 统一监控契约：MonitoringRun/MonitoringEvent、CollectorSnapshot、RedactionFinding、SupportDiagnosticBundle、FaultIncident 等。 |
 | `secrets/` | secret **引用**契约：SecretRef、SensitivePayload。只声明「对密文的引用」形状，**不含任何真凭据值**。 |
+| `cloud/` | 官方云服务共享契约：Entitlement、License、Payment、PackListing、Session、Release、WebSurface；只声明 cloud / os / client 可共同消费的数据形状，不包含云端实现、部署、支付 provider 或 secret。 |
 | `events/` | 模块事件类型：ModuleEvent。 |
 | `modules/` | 模块契约描述：ModuleContract。 |
 | 顶层 | `embed.go`（嵌入下列 `*.schema.json` 供 Go 服务与 CI 校验）、`pack_knowledge_mount.go`（Pack 知识挂载契约）。 |
@@ -31,6 +32,7 @@
 | `transaction-object-projection.schema.json` | **client layer**：事务对象（05 BusinessObject）前端只读投影 DTO 契约。 |
 | `candidate-envelope.schema.json` | **client layer**：候选统一包装（`candidates.CandidateEnvelope` 的 JSON 表达，候选卡面向）。 |
 | `receipt-envelope.schema.json` | **client layer**：回执链包装（`receipts.ReceiptEnvelope` 的 JSON 表达，回执卡面向）。 |
+| `cloud/*.schema.json` | **cloud layer**：官方云服务共享 DTO，包括 Entitlement、License、Payment、PackListing、Session、Release、WebSurface。 |
 
 ## client layer 契约面（前端面向收敛）
 
@@ -42,5 +44,6 @@ client layer（Web / 桌面等多端前端）面向以下 contracts 契约收敛
 | `transaction-object-projection.schema.json` | ✅ 已对齐（client 仓 codegen 到 `src/contracts/generated/transaction-object-projection.ts`，`types/transactionObject.ts` 消费生成类型） |
 | `candidate-envelope.schema.json` / `receipt-envelope.schema.json` | ⏳ 契约已就绪（对齐 contracts Go struct 真相源，候选卡/回执卡面向），待 client 仓 vendor / codegen |
 | ReadModel 具体形状 / 秘书动作 / 其他 candidate 子类型等 | ⏳ 待契约化 + 对齐（前端形态稳定后统一推） |
+| `cloud/*.schema.json` | ✅ 已新增（cloud / os / client 的官方云服务共享形状）。 |
 
 > 前端消费机制：有运行时常量数据的 DTO（如视觉单元规格表）用 vendor 副本 + 运行时一致性校验；纯 type DTO 用 JSON Schema → TS codegen 生成，生成物只读勿手改。

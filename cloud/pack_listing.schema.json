@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/pack_listing.schema.json",
+  "title": "CloudPackListing",
+  "type": "object",
+  "required": ["listing_ref", "pack_ref", "version_ref", "status", "artifact"],
+  "properties": {
+    "listing_ref": {"type": "string"},
+    "pack_ref": {"type": "string"},
+    "version_ref": {"type": "string"},
+    "author_account_ref": {"type": "object"},
+    "status": {"type": "string", "enum": ["candidate", "reviewing", "published", "suspended", "withdrawn"]},
+    "artifact": {
+      "type": "object",
+      "required": ["algorithm", "digest"],
+      "properties": {
+        "artifact_ref": {"type": "string"},
+        "algorithm": {"type": "string"},
+        "digest": {"type": "string"},
+        "size_bytes": {"type": "integer"}
+      }
+    },
+    "display_name": {"type": "string"},
+    "summary": {"type": "string"},
+    "price_cents": {"type": "integer"},
+    "currency": {"type": "string"},
+    "published_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

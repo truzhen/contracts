@@ -75,3 +75,38 @@ var IntentToCandidateResultSchemaJSON []byte
 //
 //go:embed spines/intent-receipt.schema.json
 var IntentReceiptSchemaJSON []byte
+
+// CloudEntitlementSchemaJSON is contracts/cloud/entitlement.schema.json.
+//
+//go:embed cloud/entitlement.schema.json
+var CloudEntitlementSchemaJSON []byte
+
+// CloudLicenseSchemaJSON is contracts/cloud/license.schema.json.
+//
+//go:embed cloud/license.schema.json
+var CloudLicenseSchemaJSON []byte
+
+// CloudPaymentSchemaJSON is contracts/cloud/payment.schema.json.
+//
+//go:embed cloud/payment.schema.json
+var CloudPaymentSchemaJSON []byte
+
+// CloudPackListingSchemaJSON is contracts/cloud/pack_listing.schema.json.
+//
+//go:embed cloud/pack_listing.schema.json
+var CloudPackListingSchemaJSON []byte
+
+// CloudSessionSchemaJSON is contracts/cloud/session.schema.json.
+//
+//go:embed cloud/session.schema.json
+var CloudSessionSchemaJSON []byte
+
+// CloudReleaseSchemaJSON is contracts/cloud/release.schema.json.
+//
+//go:embed cloud/release.schema.json
+var CloudReleaseSchemaJSON []byte
+
+// CloudWebSurfaceSchemaJSON is contracts/cloud/web_surface.schema.json.
+//
+//go:embed cloud/web_surface.schema.json
+var CloudWebSurfaceSchemaJSON []byte

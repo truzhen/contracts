@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/release.schema.json",
+  "title": "CloudReleaseReceipt",
+  "type": "object",
+  "required": ["release_ref", "candidate_ref", "deploy_target", "artifact_digest", "smoke_state", "created_at"],
+  "properties": {
+    "release_ref": {"type": "string"},
+    "candidate_ref": {"type": "string"},
+    "deploy_target": {"type": "string", "enum": ["local", "staging", "production"]},
+    "artifact_digest": {"type": "string"},
+    "smoke_state": {"type": "string", "enum": ["pending", "passed", "failed", "blocked"]},
+    "preflight_ref": {"type": "string"},
+    "rollback_ref": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

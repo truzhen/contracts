@@ -37,7 +37,21 @@ go get github.com/truzhen/contracts@latest
 
 ## 子包总览
 
-完整清单见 [MODULES.md](MODULES.md)。核心：`base/`（主权门控核心类型）、`candidates/`（AI 候选域）、`gates/`（门控裁定）、`receipts/`（回执/审计）、`spines/`（事务/意图/证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（secret **引用**契约，不含真凭据）、`events/`、`modules/`。
+完整清单见 [MODULES.md](MODULES.md)。核心：`base/`（主权门控核心类型）、`candidates/`（AI 候选域）、`gates/`（门控裁定）、`receipts/`（回执/审计）、`spines/`（事务/意图/证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（secret **引用**契约，不含真凭据）、`cloud/`（官方云服务共享 DTO）、`events/`、`modules/`。
+
+## Cloud 契约
+
+`cloud/` 只放官方云服务共享形状，供 `truzhen-cloud`、`truzhenos` 本地 Cloud proxy / License Gate 消费端和 client layer 共同对齐。当前包含：
+
+- `CloudEntitlement`
+- `LicenseToken` / `LocalActivationToken` / `LicenseValidationResult`
+- `PaymentOrder` / `PaymentWebhook`
+- `CloudPackListing`
+- `CloudSession`
+- `CloudReleaseCandidate` / `CloudReleaseReceipt`
+- `CloudWebSurface` / `CloudWebRoute`
+
+这些类型不包含 DB、HTTP client、支付 provider、部署脚本、secret 值或本地主权链实现。
 
 ## 版本策略
 

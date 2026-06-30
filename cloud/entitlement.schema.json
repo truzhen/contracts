@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/entitlement.schema.json",
+  "title": "CloudEntitlement",
+  "type": "object",
+  "required": ["entitlement_ref", "account_ref", "scope", "status", "issued_at"],
+  "properties": {
+    "entitlement_ref": {"type": "string"},
+    "owner_ref": {"type": "string"},
+    "account_ref": {"$ref": "#/$defs/cloud_account_ref"},
+    "pack_ref": {"type": "string"},
+    "capability_ref": {"type": "string"},
+    "scope": {"type": "string", "enum": ["pack", "capability", "organization"]},
+    "status": {"type": "string", "enum": ["candidate", "active", "suspended", "revoked", "expired"]},
+    "order_ref": {"type": "string"},
+    "license_ref": {"type": "string"},
+    "starts_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "metadata": {"type": "object", "additionalProperties": {"type": "string"}}
+  },
+  "$defs": {
+    "cloud_account_ref": {
+      "type": "object",
+      "required": ["provider", "subject"],
+      "properties": {
+        "provider": {"type": "string"},
+        "subject": {"type": "string"}
+      }
+    }
+  }
+}

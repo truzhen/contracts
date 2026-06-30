@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/payment.schema.json",
+  "title": "PaymentWebhook",
+  "type": "object",
+  "required": ["webhook_ref", "provider", "order_ref", "event_id", "received_at"],
+  "properties": {
+    "webhook_ref": {"type": "string"},
+    "provider": {"type": "string", "enum": ["wechat", "lakala", "shouqianba", "manual"]},
+    "order_ref": {"type": "string"},
+    "event_id": {"type": "string"},
+    "signature_ref": {"type": "string"},
+    "payload_digest": {"type": "string"},
+    "received_at": {"type": "string", "format": "date-time"},
+    "receipt_ref": {"type": "string"},
+    "processing_note": {"type": "string"}
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/web_surface.schema.json",
+  "title": "CloudWebSurface",
+  "type": "object",
+  "required": ["surface_ref", "route", "owner_module", "publish_state"],
+  "properties": {
+    "surface_ref": {"type": "string"},
+    "route": {"type": "string"},
+    "entry": {"type": "string"},
+    "owner_module": {"type": "string"},
+    "publish_state": {"type": "string", "enum": ["draft", "release_candidate", "published", "not_ready"]},
+    "asset_digests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_ref", "algorithm", "digest"],
+        "properties": {
+          "asset_ref": {"type": "string"},
+          "algorithm": {"type": "string"},
+          "digest": {"type": "string"},
+          "path": {"type": "string"}
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["route", "requires_login"],
+        "properties": {
+          "route": {"type": "string"},
+          "entry": {"type": "string"},
+          "data_sources": {"type": "array", "items": {"type": "string"}},
+          "requires_login": {"type": "boolean"},
+          "runtime_config_keys": {"type": "array", "items": {"type": "string"}},
+          "forbidden_inlines": {"type": "array", "items": {"type": "string"}},
+          "blocked_reason": {"type": "string"}
+        }
+      }
+    }
+  }
+}

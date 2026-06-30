@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/session.schema.json",
+  "title": "CloudSession",
+  "type": "object",
+  "required": ["session_ref", "account_ref", "roles", "issued_at", "expires_at"],
+  "properties": {
+    "session_ref": {"type": "string"},
+    "account_ref": {
+      "type": "object",
+      "required": ["provider", "subject"],
+      "properties": {
+        "provider": {"type": "string"},
+        "subject": {"type": "string"}
+      }
+    },
+    "roles": {"type": "array", "items": {"type": "string", "enum": ["owner", "admin", "author", "customer", "support"]}},
+    "identity_provider": {"type": "string"},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "revoked_at": {"type": "string", "format": "date-time"},
+    "metadata": {"type": "object", "additionalProperties": {"type": "string"}}
+  }
+}

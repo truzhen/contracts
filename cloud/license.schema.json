@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.truzhen.cloud/cloud/license.schema.json",
+  "title": "LicenseToken",
+  "type": "object",
+  "required": ["license_ref", "entitlement_ref", "status", "issued_at"],
+  "properties": {
+    "license_ref": {"type": "string"},
+    "entitlement_ref": {"type": "string"},
+    "account_ref": {"type": "object"},
+    "device_binding_ref": {"type": "string"},
+    "token_digest": {"type": "string"},
+    "status": {"type": "string", "enum": ["candidate", "active", "suspended", "revoked", "expired"]},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "metadata": {"type": "object", "additionalProperties": {"type": "string"}}
+  }
+}
