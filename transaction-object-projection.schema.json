@@ -13,6 +13,7 @@
     "scene_name": { "type": "string" },
     "progress_text": { "type": "string" },
     "person": { "type": "string" },
+    "person_display_name": { "type": "string" },
     "object": { "type": "string" },
     "status": { "type": "string" },
     "transaction_ref": { "type": "string" },
