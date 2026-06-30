@@ -6,19 +6,20 @@
 
 ## 1. 仓库定位
 
-`truzhen-contracts` 是 Truzhen 五落点架构的**开源契约层 SDK**，Go module 为 `github.com/truzhen/contracts`。它定义基座、包层、client layer 之间共享的数据形状和机器 schema：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执 / 审计、注册切片、监控事件、三主线引用等。
+`truzhen-contracts` 是 Truzhen 六仓协同架构的**开源契约层 SDK**，Go module 为 `github.com/truzhen/contracts`。它定义基座、包层、cloud repo、client layer 之间共享的数据形状和机器 schema：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执 / 审计、注册切片、监控事件、三主线引用等。
 
 依赖方向只允许单向：
 
 - `truzhenos` 实现本仓契约。
 - `truzhen-packs` 面向本仓契约声明 Pack。
 - client repo vendor / codegen 消费本仓 schema。
-- 本仓不得 import 基座、packs、client 或 provider 仓。
+- cloud repo 实现本仓 cloud 契约面（治理清单先行，schema 待真实消费）。
+- 本仓不得 import 基座、packs、cloud、client 或 provider 仓。
 
 ## 2. 铁律
 
 1. **契约层只表达边界**：允许 type / const / interface / JSON Schema / schema embed / 无外部副作用的确定性校验与 ref 派生 helper；禁止 DB、网络、文件 I/O、provider、真实执行、后台并发、运行态状态。
-2. **零反向依赖**：`go list -deps ./...` 必须无 `github.com/lights314/truzhenos` 和 `github.com/truzhen/packs`。
+2. **零反向依赖**：`go list -deps ./...` 必须无 `github.com/lights314/truzhenos`、`github.com/truzhen/packs` 和 `github.com/truzhen/truzhen-cloud`。
 3. **改契约 = 改跨仓边界**：删字段、改必填、改类型、改 enum 语义、改 JSON tag 是破坏性变更，必须先回 Owner 并按 SemVer 处理。
 4. **Candidate/Formal 隔离不可破**：候选类型默认 `candidate_only=true`、`non_formal=true`；正式写入、发送、执行、记忆、回执账本实现都不属于本仓。
 5. **ReadModel 不是真相源**：本仓可以定义投影形状，但不能把投影视为权威状态。
@@ -44,7 +45,7 @@
 
 ```sh
 go build ./... && go test ./... && go vet ./...
-go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs' && echo "反向依赖!违规" || echo "零反向依赖 OK"
+go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs|truzhen/truzhen-cloud' && echo "反向依赖!违规" || echo "零反向依赖 OK"
 python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);assert fs;[json.load(open(f)) for f in fs];print('schema JSON 合法 x%d' % len(fs))"
 ```
 

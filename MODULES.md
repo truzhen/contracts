@@ -1,6 +1,6 @@
 # truzhen-contracts 模块与 schema 清单
 
-本仓是 Truzhen 五落点中的 **Pack / Candidate / Receipt / Surface / ReadModel schema** 权威源。每个子包只声明跨边界的数据形状，或提供无外部副作用的契约校验 / ref 派生 helper。
+每个子包只声明跨边界的数据形状（类型 / 接口 / 常量），或提供无外部副作用的契约校验 / ref 派生 helper。本仓是六仓协同中的 **Pack / Candidate / Receipt / Surface / ReadModel / Cloud schema** 权威源（cloud 契约面当前为治理清单，见下）。
 
 ## Go 子包
 
@@ -39,7 +39,23 @@
 | `spines/intent-to-candidate-result.schema.json` | Intent fan-out 结果 JSON 表达。 | `truzhenos` candidate routing / CI |
 | `spines/intent-receipt.schema.json` | IntentReceipt JSON 表达。 | `truzhenos` receipt candidate / CI |
 
-## client layer 契约面
+## cloud 契约面（truzhen-cloud / truzhenos / client 协同）
+
+cloud 契约只定义跨仓形状，不实现云服务。`truzhen-cloud` 是官方云端真相源，`truzhenos` 是本地 Cloud proxy / License Gate 消费端，client repo 只消费 ReadModel / DTO。七类 cloud 契约必须在本仓收敛后再被下游实现或 codegen：
+
+| 契约类 | 职责边界 |
+|---|---|
+| `Entitlement` | 用户 / 组织 / 设备对 Pack、能力、Release 或服务的授权权益形状；不保存支付流水实现。 |
+| `License` | License 状态、有效期、席位、激活与撤销形状；真实核验服务归 `truzhen-cloud`，本地只消费裁定结果。 |
+| `Payment` | 支付订单、支付结果、退款 / 取消、webhook 事件形状；支付网关实现与密钥不进本仓。 |
+| `PackListing` | 云市场商品、版本、价格、作者、分发状态与审核状态形状；Pack manifest 不是商品真相源。 |
+| `Session` | 云端登录态、Session ID、续期、退出、设备绑定相关形状；raw token / password 不进本仓。 |
+| `Release` | 云端版本、下载、灰度、校验、回滚与客户端升级提示形状；二进制产物不进本仓。 |
+| `WebSurface` | 官网、市场页、作者后台、运营后台、支付结果页等官方云端网页的路由、状态与展示 DTO 形状；页面实现归 `truzhen-cloud`。 |
+
+> 当前本节是治理契约清单。新增具体 schema / Go 包时必须单独列兼容策略、SemVer 影响、下游旧路径迁移清单和反向依赖检查。
+
+## client layer 契约面（前端面向收敛）
 
 client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨边界 DTO，前端不手写后端稳定形状。
 

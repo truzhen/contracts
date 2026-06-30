@@ -4,10 +4,10 @@
 
 ## 0. AI 维护速查（6 要素）
 
-1. **本仓职责** — Truzhen 契约层 SDK（`github.com/truzhen/contracts`，开源 Apache-2.0），定义五落点之间跨边界的数据形状：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执 / 审计、注册切片、监控事件、三主线引用，以及机器可校验的 `*.schema.json`。当前公开消费版本为 `v0.2.0`，基座通过 `go.mod require github.com/truzhen/contracts v0.2.0` 消费。
-2. **本仓不是什么** — 不是基座 `truzhenos`，不拥有 Base Gate / Receipt Ledger / Gateway / provider / runtime 实现；不是 `truzhen-packs`，不保存行业 Pack 数据、安装脚本或 Pack 内容；不是 client repo，不实现 React/Tauri UI；不是 `truzhen-software`，不记录本机外部软件安装事实或 sidecar 运行态。
+1. **本仓职责** — Truzhen 契约层 SDK（`github.com/truzhen/contracts`，开源 Apache-2.0），定义六仓之间跨边界的数据形状：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执 / 审计、注册切片、监控事件、三主线引用，以及机器可校验的 `*.schema.json`（cloud Entitlement / License / Payment / PackListing / Session / Release / WebSurface 契约面为治理清单，见 `MODULES.md`，具体 schema 待真实消费方出现再落）。当前公开消费版本为 `v0.3.0`，基座通过 `go.mod require github.com/truzhen/contracts v0.3.0` 消费。
+2. **本仓不是什么** — 不是基座 `truzhenos`，不拥有 Base Gate / Receipt Ledger / Gateway / provider / runtime 实现；不是 `truzhen-packs`，不保存行业 Pack 数据、安装脚本或 Pack 内容；不是 client repo，不实现 React/Tauri UI；不是 `truzhen-software`，不记录本机外部软件安装事实或 sidecar 运行态；不是 `truzhen-cloud`，不实现云端 server、支付 webhook 或 License / Entitlement 服务。
 3. **允许内容** — Go 类型、接口、常量、枚举、JSON tag、JSON Schema、schema embed、无外部副作用的确定性校验 / ref 派生 / helper。helper 只能表达契约边界，不得访问 DB、网络、文件系统、provider、真实执行环境或用户资产。
-4. **禁止内容** — 不引入 DB / 网络 / 文件 I/O / 并发运行时 / provider 调用 / 真实执行；不 import `github.com/lights314/truzhenos` 或 `github.com/truzhen/packs`；不把 Pack 数据、前端源码、安装脚本、provider registry、raw secret、token、terminal_sn、激活码放进本仓；不无意识删字段、改必填、改语义。
+4. **禁止内容** — 不引入 DB / 网络 / 文件 I/O / 并发运行时 / provider 调用 / 真实执行；不 import `github.com/lights314/truzhenos`、`github.com/truzhen/packs`、`github.com/truzhen/truzhen-cloud` 或 client / provider 实现仓；不把 Pack 数据、前端源码、安装脚本、provider registry、raw secret、token、terminal_sn、激活码放进本仓；不无意识删字段、改必填、改语义。
 5. **验证入口** — `go build ./... && go test ./... && go vet ./...`；反向依赖检查；全部 schema JSON 解析检查。修改 schema / embed 时必须同时检查 `embed.go` 覆盖关系。
 6. **必须回 Owner** — 任何破坏性契约变更、SemVer 版本策略变化、新增 / 删除子包、新增 / 删除 schema、schema 必填字段变化、跨仓边界或依赖方向调整、`git push` / tag / release。
 
@@ -93,7 +93,7 @@ Schema 是跨仓机器契约。新增或修改 schema 时必须说明：
 
 本仓版本有两个真相源，必须始终一致：
 
-1. **git tag**（`v0.1.0` / `v0.2.0` / `v0.3.0` …）：发布事实，由 Owner 授权后打。
+1. **git tag**（`v0.1.0` / `v0.3.0` / `v0.3.0` …）：发布事实，由 Owner 授权后打。
 2. **仓根 `VERSION` 文件**（内容如 `0.3.0`，不带 `v` 前缀）：显式版本真相源，供 CI、codegen、下游 vendor 读取，无需解析 git 历史即可知道当前版本。
 
 **双真相必须一致**：`VERSION` 文件的值必须等于最新语义化 tag 去掉 `v` 前缀后的值（发版瞬间对齐）；一旦在最新 tag 之后修改了任何 `*.schema.json`，就必须先 bump `VERSION`，发布时再打对应的 `v*` tag。

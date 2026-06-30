@@ -2,9 +2,7 @@
 
 > Truzhen 主权事务操作层的**契约 SDK**：Go 类型、接口、常量、JSON Schema、schema embed，以及少量无外部副作用的契约校验 / ref 派生 helper。
 
-`github.com/truzhen/contracts` 是 Truzhen 五落点架构的**契约层**，定义基座、包层和 client layer 之间一切跨边界的数据形状：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执、注册切片、监控事件、三主线引用等。
-
-本仓只拥有“形状事实”。它不实现 Base Gate、Receipt Ledger、Gateway、provider、runtime、前端 UI、Pack 安装器或外部软件 registry。
+`github.com/truzhen/contracts` 是 Truzhen 六仓协同架构的**契约层**，定义基座、包层、cloud repo 和 client layer 之间一切跨边界的数据形状（Pack / Candidate / Receipt / Surface / ReadModel schema、cloud 契约面（Entitlement / License / Payment / PackListing / Session / Release / WebSurface，当前为治理清单、具体 schema 待真实消费方）、候选信封、门控决议、回执、注册切片、监控事件、三主线引用等）以及机器可校验的 JSON Schema。它**只声明形状，不含任何实现**（无 DB、无网络、无副作用），因此谁都可以安全依赖它，而它谁都不依赖。
 
 ## 依赖方向（单向不可逆）
 
@@ -13,10 +11,11 @@ truzhenos (私有基座)  implements  truzhen-contracts  faces  truzhen-packs
 实现契约 / 持主权                  契约形状权威源              面向契约声明包
 ```
 
-- **基座**（`github.com/lights314/truzhenos`，私有）实现这些契约。
-- **包**（`github.com/truzhen/packs`，开放）面向这些契约编写。
-- **客户端**（`github.com/truzhen/truzhen-client-web-desktop`，私有）通过 vendor / codegen 消费 schema。
-- **契约本身零反向依赖**：不得 import 基座、packs、client 或 provider 仓。可用 `go list -deps ./...` 验证。
+- **基座**（`github.com/lights314/truzhenos`，私有）**实现**这些契约。
+- **包**（`github.com/truzhen/packs`，开放）**面向**这些契约编写，物理上 import 不到基座内部。
+- **云仓**（`github.com/truzhen/truzhen-cloud`，私有）**实现**官方云端服务、WebSurface、支付、License / Entitlement、Pack listing / 分发和 Release / Session 相关契约。
+- **客户端**（`github.com/truzhen/truzhen-client-web-desktop`，私有）通过 vendor / codegen 消费 schema，不私造稳定 DTO。
+- **契约本身零反向依赖**：只依赖 Go 标准库，不依赖基座、包、云仓、client 或 provider 实现。可用 `go list -deps ./...` 验证。
 
 ## 作为 SDK 使用
 
@@ -32,11 +31,11 @@ import (
 go get github.com/truzhen/contracts@latest
 ```
 
-当前基座消费版本：`github.com/truzhen/contracts v0.2.0`。破坏性变更不得落到 patch 里假装兼容；跨仓边界变化必须同步评估 `truzhenos`、`truzhen-packs` 和 client repo。
+当前基座消费版本：`github.com/truzhen/contracts v0.3.0`。破坏性变更不得落到 `v0.x` patch 假装兼容；跨仓边界变化必须同步更新 `truzhenos`、`truzhen-packs`、`truzhen-cloud`、`truzhen-software` 和 client repo 的治理说明。
 
 ## 子包总览
 
-完整清单见 [MODULES.md](MODULES.md)。
+完整清单见 [MODULES.md](MODULES.md)。核心：`base/`（主权门控核心类型）、`candidates/`（AI 候选域）、`gates/`（门控裁定）、`receipts/`（回执/审计）、`spines/`（事务/意图/证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（secret **引用**契约，不含真凭据）、`events/`、`modules/`。cloud 契约组按 `Entitlement`、`License`、`Payment`、`PackListing`、`Session`、`Release`、`WebSurface` 七类收敛，落地为具体 schema / Go 包前不得宣称下游已接线。
 
 - `base/`：Base 主权核心契约、Gate / ReceiptCandidate / FormalizationGrant、授权、委托、Artifact 留痕与过闸边界。
 - `candidates/`：AI / Pack / 模块候选域类型。
