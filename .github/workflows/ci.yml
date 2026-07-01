@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 版本漂移 gate 需要全部历史与 tag（lastTag 靠 git tag 解析），
+          # 否则 actions/checkout 默认只取单个 commit、无 tag。
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -29,6 +33,8 @@ jobs:
           echo "零反向依赖 OK"
       - name: schema-json-valid（schema JSON 合法性）
         run: python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json')];print('schema JSON 合法')"
+      - name: version-drift-gate（版本漂移把守：改 schema 必须 bump VERSION）
+        run: bash scripts/check-version-drift.sh
 
   secret-scan:
     runs-on: ubuntu-latest

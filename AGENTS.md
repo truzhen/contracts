@@ -89,6 +89,41 @@ Schema 是跨仓机器契约。新增或修改 schema 时必须说明：
 - client layer schema 改动必须说明 vendor / codegen 是否需要更新。
 - 基座消费版本是事实约束：不能把破坏性变更伪装成 patch。
 
+### VERSION 文件 + tag 双真相与版本漂移 gate
+
+本仓版本有两个真相源，必须始终一致：
+
+1. **git tag**（`v0.1.0` / `v0.2.0` / `v0.3.0` …）：发布事实，由 Owner 授权后打。
+2. **仓根 `VERSION` 文件**（内容如 `0.3.0`，不带 `v` 前缀）：显式版本真相源，供 CI、codegen、下游 vendor 读取，无需解析 git 历史即可知道当前版本。
+
+**双真相必须一致**：`VERSION` 文件的值必须等于最新语义化 tag 去掉 `v` 前缀后的值（发版瞬间对齐）；一旦在最新 tag 之后修改了任何 `*.schema.json`，就必须先 bump `VERSION`，发布时再打对应的 `v*` tag。
+
+**为什么需要制度化 gate**：契约仓最危险的回潮是"改了 schema 却没发版"——下游按旧版本号消费到了不兼容的形状，且没有任何信号。历史上正是"改 schema 不 bump"导致跨仓漂移。因此本仓用 `scripts/check-version-drift.sh` 作为 CI 强制 gate，把这条纪律从"靠自觉"变成"改了 schema 不 bump 就红"。
+
+**SemVer bump 规则（判定改了 schema 后 `VERSION` 该怎么 bump）**：
+
+| schema 变更类型 | bump 档位 | 示例（自 0.3.0 起） |
+| --- | --- | --- |
+| 新增可选字段、新增可选 enum 值、新增只读投影字段 | **minor** | `0.4.0` |
+| 改必填（`required` 增项）、删字段、改字段类型、改 enum 语义、改 JSON tag、改默认语义 | **major** | `1.0.0` |
+| 仅改注释 / description / 文档（不改结构与语义） | **不 bump**（patch 可选，无结构变化不触发 gate） | 保持 `0.3.0` |
+
+**版本漂移 gate 判定逻辑**（`scripts/check-version-drift.sh`）：
+
+- 取最新 tag `lastTag`（`git tag -l 'v*' --sort=-version:refname | head -1`），`lastVer` = 去 `v`。
+- 取 `curVer` = `cat VERSION`。
+- 若 `git diff --name-only <lastTag>..HEAD -- '*.schema.json'` 非空（自上次发版起改了 schema）**且** `curVer == lastVer`（没 bump）→ **FAIL(exit 1)**，打印哪些 schema 变了、要求 bump `VERSION`。
+- 否则 **PASS(exit 0)**（没改 schema，或已 bump）。
+- best-effort 附加：schema diff 中出现删属性行或 `required` 新增 → 打印 `WARN` 提示疑似破坏性变更需 major bump（仅提示，不额外阻断）。
+
+本地自查：
+
+```sh
+bash scripts/check-version-drift.sh
+```
+
+CI 已在 `.github/workflows/ci.yml` 的 JSON 校验之后接入本 gate（`checkout` 用 `fetch-depth: 0` 取全部 tag，否则拿不到 `lastTag`）。发版流程：改 schema → 按上表 bump `VERSION` → gate 转绿 → Owner 授权后打对应 `v*` tag（tag 值 = `v` + `VERSION`）。
+
 ## 5. 允许的 helper 边界
 
 本仓以契约为主，但允许少量 helper 来表达契约边界：
