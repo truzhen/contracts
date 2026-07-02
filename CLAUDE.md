@@ -37,7 +37,7 @@
 - `readmodels/`：ReadModelEnvelope。
 - `monitoring/`：监控、诊断、故障、支持包上传候选等契约。
 - `secrets/`：secret 引用形状。
-- `events/`、`modules/`：模块事件与模块生命周期接口。
+- `market/`：市场表面契约（会话头 / Login DTO / 表面路径 / admin 转发硬 allowlist；服务端真相唯一在 truzhen-cloud）。
 - 顶层：`embed.go` 暴露 schema bytes；`pack_knowledge_mount.go` 定义 Pack 知识挂载契约。
 
 完整清单见 `MODULES.md`。
