@@ -59,8 +59,6 @@
 | `readmodels/` | ReadModelEnvelope。 | ReadModel 只用于展示投影，永不是真相源。 |
 | `monitoring/` | MonitoringRun/Event、CollectorSnapshot、RedactionFinding、FaultIncident、SupportDiagnosticBundle、SupportUploadCandidate、BuildSymbolManifest 等统一诊断契约。 | 只定义诊断数据形状；不实现日志采集、上传或符号化服务。 |
 | `secrets/` | SecretRef、SensitivePayload 等 secret 引用形状。 | 永不包含明文凭据。 |
-| `events/` | ModuleEvent 与 IntentEvent alias。 | 只做事件信封，不实现事件总线。 |
-| `modules/` | ModuleContract 生命周期接口。 | 不定义具体模块实现。 |
 | 顶层包 | `embed.go`、`pack_knowledge_mount.go`。 | embed 只暴露 canonical schema bytes；知识挂载只定义声明和 ReadModel。 |
 
 ### JSON Schema
