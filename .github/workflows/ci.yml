@@ -26,7 +26,7 @@ jobs:
         run: go test ./...
       - name: no-reverse-deps（零反向依赖把守）
         run: |
-          if go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs'; then
+          if go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs|truzhen/truzhen-cloud'; then
             echo "::error::契约出现反向依赖（import 了基座或包），违反零反向依赖原则"
             exit 1
           fi

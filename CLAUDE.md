@@ -24,6 +24,7 @@
 4. **Candidate/Formal 隔离不可破**：候选类型默认 `candidate_only=true`、`non_formal=true`；正式写入、发送、执行、记忆、回执账本实现都不属于本仓。
 5. **ReadModel 不是真相源**：本仓可以定义投影形状，但不能把投影视为权威状态。
 6. **secret 只放引用形状**：`secrets/` 只能定义 `SecretRef` / `SensitivePayload` 等引用，不得出现明文凭据。
+7. **版本漂移即红**：最新 tag 后改任何 `*.schema.json` 必先 bump 仓根 `VERSION`，CI `check-version-drift.sh` 强制。
 
 ## 3. 模块导航
 

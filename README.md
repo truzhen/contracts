@@ -70,7 +70,7 @@ go get github.com/truzhen/contracts@latest
 
 ```sh
 go build ./... && go test ./... && go vet ./...
-go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs' && echo "违规:反向依赖" || echo "OK:零反向依赖"
+go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs|truzhen/truzhen-cloud' && echo "违规:反向依赖" || echo "OK:零反向依赖"
 python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json') + glob.glob('spines/*.schema.json')];print('schema JSON 合法')"
 ```
 

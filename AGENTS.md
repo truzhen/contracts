@@ -29,17 +29,20 @@
 - 改 scene-pack / scene-runtime / scene-studio schema：同时只读参考基座设计文档 `/Users/li/Documents/truzhenos/docs/design/scene-pack-vertical-profession-workbench-upgrade-20260626.md`（若存在），不得修改基座仓，除非 Owner 另行授权。
 - 改 client layer schema：同时只读核对 `/Users/li/Documents/truzhen-client-web-desktop/src/contracts/CONTRACTS_VENDOR.md`（若存在）和 client vendor / codegen 消费方式；不得修改 client repo，除非 Owner 另行授权。
 
-## 2. 五落点身份边界
+## 2. 六仓身份边界
 
 | 落点 | 权威位置 | 负责 | 不负责 |
 | --- | --- | --- | --- |
 | 主权、闸门、回执、网关、运行时、装载器 | `/Users/li/Documents/truzhenos` / `github.com/lights314/truzhenos` | 实现 contracts，持有 Base / Gateway / Receipt / runtime | 不把 contracts 当内部包私改 |
 | Pack / Candidate / Receipt / Surface / ReadModel schema | `/Users/li/Documents/truzhen-contracts` / `github.com/truzhen/contracts` | 本仓；跨仓数据形状与 schema 权威源 | 不实现运行时、不保存 Pack 数据、不执行 provider |
 | 行业工作台、流程、角色、知识、能力引用 | `/Users/li/Documents/truzhen-packs` / `github.com/truzhen/packs` | folder pack、manifest、role/knowledge/capability refs、安装脚本 | 不持 Base 主权、不实现 provider |
-| Baserow、Frappe、OCR、IM、执行 sidecar | `/Users/li/Documents/truzhen-software` | 本机外部软件 / provider / sidecar 事实 | 不是 Git 主仓、不承载契约 |
+| Baserow、Frappe、OCR、IM、执行 sidecar | `/Users/li/Documents/truzhen-software` | 独立 Git 仓（`github.com/truzhen/truzhen-software`），本机 provider/sidecar 登记册，不承载契约 | 不承载契约、不持 Base 主权 |
+| 官方云服务、网页、支付 | `/Users/li/Documents/truzhen-cloud` / `github.com/truzhen/truzhen-cloud` | 官方云服务 / 网页 / 支付 / License / Entitlement / PackListing / Session / Release 真相源 | 不持本地主权，不替代本仓契约 |
 | Web、桌面、手机、小程序 | `/Users/li/Documents/truzhen-client-web-desktop` / 后续 client repo | 前端源码、Tauri 壳、client layer DTO 消费 | 不直接写正式对象、不绕过 ReadModel / Candidate / Gateway |
 
 跨仓读取、修改、测试、提交或推送必须遵守当前用户授权范围。本仓任务默认只修改 `truzhen-contracts`；参考其它仓只能只读，且要说明原因和影响范围。
+
+**跨仓授权纪律**：凡需读取、修改、测试、提交或推送本仓之外的仓库，必须先说明目标仓、原因、影响范围，并获 Owner 重新明确授权；权限配置放开不等于跨仓授权。
 
 ## 3. 模块地图
 
@@ -93,7 +96,7 @@ Schema 是跨仓机器契约。新增或修改 schema 时必须说明：
 
 本仓版本有两个真相源，必须始终一致：
 
-1. **git tag**（`v0.1.0` / `v0.3.0` / `v0.3.0` …）：发布事实，由 Owner 授权后打。
+1. **git tag**（`v0.1.0` / `v0.2.0` / `v0.3.0` …）：发布事实，由 Owner 授权后打。
 2. **仓根 `VERSION` 文件**（内容如 `0.3.0`，不带 `v` 前缀）：显式版本真相源，供 CI、codegen、下游 vendor 读取，无需解析 git 历史即可知道当前版本。
 
 **双真相必须一致**：`VERSION` 文件的值必须等于最新语义化 tag 去掉 `v` 前缀后的值（发版瞬间对齐）；一旦在最新 tag 之后修改了任何 `*.schema.json`，就必须先 bump `VERSION`，发布时再打对应的 `v*` tag。
@@ -163,7 +166,7 @@ go build ./... && go test ./... && go vet ./...
 反向依赖：
 
 ```sh
-go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs' && echo "违规:反向依赖" || echo "OK:零反向依赖"
+go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs|truzhen/truzhen-cloud' && echo "违规:反向依赖" || echo "OK:零反向依赖"
 ```
 
 schema JSON 合法性：
@@ -216,5 +219,5 @@ PY
 - 修改 Candidate/Formal 隔离、Gate/Receipt/Formalization、ReadModel 真相源边界。
 - 引入任何非标准库依赖。
 - 调整 module path、版本策略、开源许可、发布流程。
-- 跨仓边界、依赖方向、五落点归属相关调整。
+- 跨仓边界、依赖方向、六仓归属相关调整。
 - `git push`、打 tag、发版、改远端设置。

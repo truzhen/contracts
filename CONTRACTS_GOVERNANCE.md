@@ -19,14 +19,16 @@
 
 ## 2. 架构位置
 
-Truzhen 当前按五落点协同：
+Truzhen 当前按六仓协同：
 
 ```text
 truzhenos          implements      truzhen-contracts       faces       truzhen-packs
 私有基座 / 实现  ─────────────▶  开源契约 / 形状权威源  ◀────────  开放包层 / 面向契约
 ```
 
-client repo 通过 vendor / codegen 消费 JSON Schema。外部 provider / sidecar 事实归 `truzhen-software`。本仓位于五落点中央，但只拥有“形状事实”，不拥有运行事实。
+client repo 通过 vendor / codegen 消费 JSON Schema。外部 provider / sidecar 事实归 `truzhen-software`。本仓位于六仓中央，但只拥有“形状事实”，不拥有运行事实。
+
+另有两落点：`truzhen-cloud` 实现本仓 cloud 契约面，是官方云服务 / 网页 / 支付 / License / Entitlement / PackListing / Session / Release 事实的真相源；client repo（`truzhen-client-web-desktop`）只通过 vendor / codegen 消费本仓 schema，永不定义契约、永不充当真相源。
 
 ## 3. 真相源原则
 
@@ -43,6 +45,7 @@ client repo 通过 vendor / codegen 消费 JSON Schema。外部 provider / sidec
 - 回执账本事实：`truzhenos` Receipt Ledger。
 - Pack 内容事实：`truzhen-packs`。
 - Provider / sidecar / runtime 资源事实：`truzhen-software` 或基座 registry。
+- 云端 Entitlement / License / Payment / PackListing / Session / Release 事实：`truzhen-cloud`。
 - 前端展示状态：client repo ReadModel 消费；ReadModel 不是真相源。
 - 跨仓数据形状：本仓。
 
@@ -150,6 +153,8 @@ Schema 文件分三类：
 
 `v0.x` 不得被用来掩盖破坏性变更。破坏性变更必须列影响面、迁移策略、下游同步顺序和回滚方案。
 
+改 `*.schema.json` 必先 bump 仓根 `VERSION`，CI 以 `scripts/check-version-drift.sh` 强制（版本漂移即红）。
+
 ## 7. 依赖纪律
 
 允许：
@@ -167,6 +172,7 @@ Schema 文件分三类：
 
 - import `github.com/lights314/truzhenos`。
 - import `github.com/truzhen/packs`。
+- import `github.com/truzhen/truzhen-cloud`。
 - import client repo。
 - 依赖 provider / sidecar / external software package。
 
