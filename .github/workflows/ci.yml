@@ -31,8 +31,8 @@ jobs:
             exit 1
           fi
           echo "零反向依赖 OK"
-      - name: schema-json-valid（schema JSON 合法性）
-        run: python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json')];print('schema JSON 合法')"
+      - name: schema-json-valid（schema JSON 合法性，递归覆盖 spines/ 等子目录）
+        run: python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);assert fs,'no schema files found';[json.load(open(f)) for f in fs];print('schema JSON 合法 x%d' % len(fs))"
       - name: version-drift-gate（版本漂移把守：改 schema 必须 bump VERSION）
         run: bash scripts/check-version-drift.sh
 

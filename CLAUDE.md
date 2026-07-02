@@ -45,7 +45,7 @@
 ```sh
 go build ./... && go test ./... && go vet ./...
 go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs' && echo "反向依赖!违规" || echo "零反向依赖 OK"
-python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json') + glob.glob('spines/*.schema.json')];print('schema JSON 合法')"
+python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);assert fs;[json.load(open(f)) for f in fs];print('schema JSON 合法 x%d' % len(fs))"
 ```
 
 改 schema 或 `embed.go` 时，再跑 `AGENTS.md` 中的 embed 覆盖检查。
