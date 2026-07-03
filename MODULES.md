@@ -2,6 +2,29 @@
 
 每个子包只声明跨边界的数据形状（类型 / 接口 / 常量），或提供无外部副作用的契约校验 / ref 派生 helper。本仓是六仓协同中的 **Pack / Candidate / Receipt / Surface / ReadModel / Cloud schema** 权威源（cloud 契约面当前为治理清单，见下）。
 
+## Truzhen 底层逻辑指向
+
+权威总纲：`/Users/li/Documents/truzhen-contracts/TRUZHEN_PHILOSOPHY.md`（远端 `github.com/truzhen/contracts` 根目录同名文件）。本仓负责把总纲中的主权链、候选 / 正式隔离、回执、跨仓依赖方向和数据形状固化为可消费契约；其它仓应引用本文件和总纲，不另造一套哲学真相源。
+
+### 本仓映射表
+
+| 总纲原则 | 本仓落点 | 边界 |
+| --- | --- | --- |
+| AI 是工具智能，只能生成可治理候选 | `candidates/`、`base.GateCandidateEnvelope`、候选类 schema | 只声明 Candidate 形状，不产 Formal Record。 |
+| Owner 才能做 Decision；Decision 可即时确认，也可来自预授权策略 | `base.OwnerDecision`、`OwnerDelegationGrant`、授权模式、GateDecision 相关类型 | 只定义决定与授权的形状，不实现弹窗、策略引擎或自动放行逻辑。 |
+| 正式动作必须过闸并留下可回放回执 | `base/`、`gates/`、`receipts/`、`receipt-envelope.schema.json` | 只定义 Gate / Receipt 契约，不实现 ledger、执行、发送或存储。 |
+| 六仓依赖方向单向、不可逆 | 本仓只用标准库；下游通过 Go SDK / JSON Schema 消费 | 不 import `truzhenos`、`truzhen-packs`、`truzhen-cloud`、client 或 provider 实现。 |
+| Pack 是行业经验给 AI 装上的边界 | `scene-pack-spec.schema.json`、`scene-flow-spec.schema.json`、ProviderRequirement 相关字段 | schema 表达边界，不替真实客户证据设计投机 Pack。 |
+| ReadModel / Surface 只是展示投影 | `readmodels/`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json` | 不把投影、页面或 DTO 写成事实源。 |
+
+### 禁止误读清单
+
+- 不得把总纲理解成“可以随意新增 schema / Go 类型”；新增契约仍必须有真实消费方、SemVer 影响清单和 Owner 裁定。
+- 不得把 `OwnerDecision` 理解成“所有动作都必须即时弹窗”；预授权策略也是 Owner 的决定，只是拍板时点提前。
+- 不得把本仓当运行时真相源；本仓不持有 Base Gate、Receipt Ledger、Provider readiness、Pack enabled state、License state 或前端状态。
+- 不得让 AI 未经 Owner 确认就使自己起草的治理规则、风险分级或 Pack manifest 生效。
+- 不得把 Provider 示例、OS Agent 示例或云端例子读成近期集成承诺；本仓只收敛跨边界形状。
+
 ## Go 子包
 
 | 子包 | 职责 | 不负责 |
