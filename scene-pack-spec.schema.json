@@ -163,7 +163,8 @@
         "responsibility": { "type": "string", "minLength": 1 },
         "default_role_pack_ref": { "type": "string", "minLength": 1 },
         "slice_scope_policy": { "type": "string", "minLength": 1 },
-        "required_role": { "type": "string" }
+        "required_role": { "type": "string" },
+        "node_type": { "type": "string", "description": "槽位在流程图中的节点类型（advice / challenge / compare…），供前端权威判定角色候选类型；additive、可选。" }
       }
     },
     "receipt_rule": {
