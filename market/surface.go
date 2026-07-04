@@ -32,6 +32,66 @@ type LoginResponse struct {
 	PhoneMasked string `json:"phone_masked"`
 }
 
+// SessionStatus 是云市场会话投射状态的封闭字符串集合。
+type SessionStatus string
+
+const (
+	SessionStatusLoggedIn              SessionStatus = "logged_in"
+	SessionStatusLoggedOut             SessionStatus = "logged_out"
+	SessionStatusAuthSessionRequired   SessionStatus = "auth_session_required"
+	SessionStatusRequiresMarketRelogin SessionStatus = "requires_market_relogin"
+	SessionStatusCloudSessionInvalid   SessionStatus = "cloud_session_invalid"
+	SessionStatusNotReady              SessionStatus = "not_ready"
+	SessionStatusBlocked               SessionStatus = "blocked"
+)
+
+// PayableStatus 表达当前会话对云市场下单 / 授权的可支付性。
+type PayableStatus string
+
+const (
+	PayableStatusUnknown                PayableStatus = "unknown"
+	PayableStatusPayable                PayableStatus = "payable"
+	PayableStatusNotPayable             PayableStatus = "not_payable"
+	PayableStatusRequiresMarketRelogin  PayableStatus = "requires_market_relogin"
+	PayableStatusPaymentProviderMissing PayableStatus = "payment_provider_missing"
+	PayableStatusPaymentBlocked         PayableStatus = "payment_blocked"
+)
+
+// Role 是市场表面可投射的账户角色枚举；服务端仍是真相源。
+type Role string
+
+const (
+	RoleBuyer    Role = "buyer"
+	RoleAuthor   Role = "author"
+	RoleAdmin    Role = "admin"
+	RoleOperator Role = "operator"
+)
+
+// SessionProjection 是本地网关 / client 消费的云市场会话投射形状。
+// requires_market_relogin 是商业动作硬信号；旧 requires_relogin 字段可由消费方
+// 兼容保留，但新契约统一读 requires_market_relogin。
+type SessionProjection struct {
+	LoggedIn               bool          `json:"logged_in"`
+	SessionID              string        `json:"session_id,omitempty"`
+	SessionStatus          SessionStatus `json:"session_status,omitempty"`
+	RefreshStatus          SessionStatus `json:"refresh_status,omitempty"`
+	SessionRefStatus       SessionStatus `json:"session_ref_status,omitempty"`
+	RequiresMarketRelogin  bool          `json:"requires_market_relogin,omitempty"`
+	Payable                PayableStatus `json:"payable,omitempty"`
+	Role                   Role          `json:"role,omitempty"`
+	DisplayName            string        `json:"display_name,omitempty"`
+	PhoneMasked            string        `json:"phone_masked,omitempty"`
+	CloudMarketAuthStatus  SessionStatus `json:"cloud_market_authorization_status,omitempty"`
+	CloudMarketAuthMessage string        `json:"cloud_market_authorization_message,omitempty"`
+	GatewayProxyRequired   bool          `json:"gateway_proxy_required,omitempty"`
+	NoRawPasswordSaved     bool          `json:"no_raw_password_saved,omitempty"`
+	NoRawTokenReturned     bool          `json:"no_raw_token_returned,omitempty"`
+	NoRawCookieReturned    bool          `json:"no_raw_cookie_returned,omitempty"`
+	AuthIntentEvidenceRef  string        `json:"auth_intent_evidence_ref,omitempty"`
+	ReceiptRef             string        `json:"receipt_ref,omitempty"`
+	OwnerActionRef         string        `json:"owner_action_ref,omitempty"`
+}
+
 // 会话建立与目录同步表面。
 const (
 	PathAuthLogin          = "/auth/login"
@@ -46,6 +106,7 @@ const (
 	PathAuthorCertificationRegister = "/v3/market/author/certification/register"
 	PathAuthorWithdrawals           = "/v3/market/author/withdrawals"
 	PathAuthorUploads               = "/v3/market/author/uploads"
+	PathAuthorProducts              = "/v3/market/author/products"
 	PathPackUpload                  = "/v3/market/packs/upload"
 	PathLicenseProducts             = "/v3/market/license/products"
 	PathLicenseCheckout             = "/v3/market/license/checkout"
@@ -63,6 +124,21 @@ func LicenseOrderPath(orderID string) string {
 // WithdrawalCancelPath 返回提现撤销路径；提现 ID 作路径段转义。
 func WithdrawalCancelPath(withdrawalID string) string {
 	return "/v3/market/author/withdrawals/" + url.PathEscape(withdrawalID) + "/cancel"
+}
+
+// AuthorProductPricingPath 返回作者商品改价路径；商品 ID 作路径段转义。
+func AuthorProductPricingPath(productID string) string {
+	return PathAuthorProducts + "/" + url.PathEscape(productID) + "/pricing"
+}
+
+// AuthorProductDelistPath 返回作者商品下架路径；商品 ID 作路径段转义。
+func AuthorProductDelistPath(productID string) string {
+	return PathAuthorProducts + "/" + url.PathEscape(productID) + "/delist"
+}
+
+// AuthorProductRelistPath 返回作者商品重新提交上架路径；商品 ID 作路径段转义。
+func AuthorProductRelistPath(productID string) string {
+	return PathAuthorProducts + "/" + url.PathEscape(productID) + "/relist"
 }
 
 // PackDownloadPath 返回包下载路径；商品 ID 作路径段转义。

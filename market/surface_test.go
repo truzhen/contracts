@@ -45,6 +45,60 @@ func TestLoginResponseJSONShape(t *testing.T) {
 	}
 }
 
+func TestSessionPayableAndRoleEnumsGolden(t *testing.T) {
+	cases := []struct {
+		got  string
+		want string
+	}{
+		{string(market.SessionStatusLoggedIn), "logged_in"},
+		{string(market.SessionStatusLoggedOut), "logged_out"},
+		{string(market.SessionStatusRequiresMarketRelogin), "requires_market_relogin"},
+		{string(market.SessionStatusCloudSessionInvalid), "cloud_session_invalid"},
+		{string(market.SessionStatusAuthSessionRequired), "auth_session_required"},
+		{string(market.PayableStatusPayable), "payable"},
+		{string(market.PayableStatusRequiresMarketRelogin), "requires_market_relogin"},
+		{string(market.PayableStatusPaymentProviderMissing), "payment_provider_missing"},
+		{string(market.RoleBuyer), "buyer"},
+		{string(market.RoleAuthor), "author"},
+		{string(market.RoleAdmin), "admin"},
+	}
+	for _, tc := range cases {
+		if tc.got != tc.want {
+			t.Fatalf("枚举值漂移：got %q want %q", tc.got, tc.want)
+		}
+	}
+}
+
+func TestMarketSessionProjectionJSONShape(t *testing.T) {
+	projection := market.SessionProjection{
+		LoggedIn:               false,
+		SessionID:              "session_ref:authsync:expired",
+		SessionStatus:          market.SessionStatusRequiresMarketRelogin,
+		RefreshStatus:          market.SessionStatusRequiresMarketRelogin,
+		SessionRefStatus:       market.SessionStatusCloudSessionInvalid,
+		RequiresMarketRelogin:  true,
+		Payable:                market.PayableStatusRequiresMarketRelogin,
+		Role:                   market.RoleBuyer,
+		CloudMarketAuthMessage: "云端会话已失效，请重新登录云市场。",
+	}
+	raw, err := json.Marshal(projection)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(raw, &m); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	for _, key := range []string{"logged_in", "session_id", "session_status", "refresh_status", "session_ref_status", "requires_market_relogin", "payable", "role", "cloud_market_authorization_message"} {
+		if _, ok := m[key]; !ok {
+			t.Fatalf("SessionProjection 缺 JSON 字段 %q：%s", key, raw)
+		}
+	}
+	if m["requires_market_relogin"] != true || m["payable"] != string(market.PayableStatusRequiresMarketRelogin) {
+		t.Fatalf("SessionProjection 重登/payable 映射漂移：%s", raw)
+	}
+}
+
 func TestSurfacePathsGolden(t *testing.T) {
 	cases := map[string]string{
 		market.PathAuthLogin:                   "/auth/login",
@@ -55,6 +109,7 @@ func TestSurfacePathsGolden(t *testing.T) {
 		market.PathAuthorCertificationRegister: "/v3/market/author/certification/register",
 		market.PathAuthorWithdrawals:           "/v3/market/author/withdrawals",
 		market.PathAuthorUploads:               "/v3/market/author/uploads",
+		market.PathAuthorProducts:              "/v3/market/author/products",
 		market.PathPackUpload:                  "/v3/market/packs/upload",
 		market.PathLicenseProducts:             "/v3/market/license/products",
 		market.PathLicenseCheckout:             "/v3/market/license/checkout",
@@ -76,6 +131,15 @@ func TestPathBuilersEscapeSegments(t *testing.T) {
 	}
 	if got := market.WithdrawalCancelPath("wd-1"); got != "/v3/market/author/withdrawals/wd-1/cancel" {
 		t.Fatalf("WithdrawalCancelPath: %q", got)
+	}
+	if got := market.AuthorProductPricingPath("pack a/b"); !strings.Contains(got, "pack%20a%2Fb") || !strings.HasSuffix(got, "/pricing") {
+		t.Fatalf("AuthorProductPricingPath 必须转义路径段：%q", got)
+	}
+	if got := market.AuthorProductDelistPath("../admin"); strings.Contains(got, "../") || !strings.HasSuffix(got, "/delist") {
+		t.Fatalf("AuthorProductDelistPath 必须转义防路径穿越：%q", got)
+	}
+	if got := market.AuthorProductRelistPath("pack-1"); got != "/v3/market/author/products/pack-1/relist" {
+		t.Fatalf("AuthorProductRelistPath: %q", got)
 	}
 	if got := market.PackDownloadPath("pack a/b"); !strings.Contains(got, "pack%20a%2Fb") {
 		t.Fatalf("PackDownloadPath 必须转义路径段：%q", got)
