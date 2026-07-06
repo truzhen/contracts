@@ -6,6 +6,8 @@
 
 想创作 Pack？从 [truzhen/packs](https://github.com/truzhen/packs) 出发 · 本仓回答的是：这套生意为什么做得成
 
+简体中文 · [繁體中文](docs/i18n.md#zh-tw) · [English](docs/i18n.md#en) · [日本語](docs/i18n.md#ja) · [Русский](docs/i18n.md#ru) · [Deutsch](docs/i18n.md#de) · [Français](docs/i18n.md#fr) · [Español](docs/i18n.md#es)
+
 </div>
 
 ---
