@@ -1,36 +1,41 @@
-# 徒真（truzhen）Contracts
+<div align="center">
 
-> 让社区作者的 Pack 能被企业安全安装的公开契约。
+# 徒真 Contracts
 
-徒真（truzhen）希望让开源作者、工具开发者和行业专家，把自己的软件、工具链和行业经验做成企业可以安装、试用、购买和回放的 Pack。企业愿意安装陌生作者的能力，前提是边界清楚：Pack 能声明什么、能请求什么、哪些动作必须确认、执行后留下什么回执。
+**信任不靠口头承诺，靠白纸黑字的公开契约。**
 
-`github.com/truzhen/contracts` 就是这套公开边界。它提供 Go 类型、JSON Schema、候选信封、门控和回执形状，让 Pack 作者面向稳定规则创作，而不是依赖徒真私有基座内部实现。
+想创作 Pack？从 [truzhen/packs](https://github.com/truzhen/packs) 出发 · 本仓回答的是：这套生意为什么做得成
 
-如果你想创作能力包、角色包或场景包，请从 [`github.com/truzhen/packs`](https://github.com/truzhen/packs) 开始。本仓回答的是：你的 Pack 为什么不能越权、平台如何识别候选、企业如何知道动作留下了什么证据。
+</div>
 
-## 为什么 Pack 作者需要 contracts
+---
 
-contracts 让作者和企业对同一件事有共同理解：
+## 一个市场最难的问题
 
-- Pack 可以声明能力、角色、场景、候选、证据和回执要求。
-- Pack 不能直接绕过主人确认。
-- Pack 不能直接写正式数据。
-- Pack 不能直接读取 secret、token、cookie、private key 或用户凭据。
-- Pack 不能跳过 Gateway 和 Receipt 自行完成真实发送或真实执行。
-- ReadModel 和 Surface 只用于展示，不是真相源。
+徒真（truzhen）让开源作者和行业专家把能力做成 Pack，卖给中国的中小企业。这里有个绕不开的问题：**企业凭什么敢安装一个陌生人做的东西？**
 
-这意味着作者可以把能力开放给企业使用，同时不用把自己变成企业权限系统、支付系统、审计系统或桌面客户端的维护者。
+答案不是「相信作者人品」，而是一套公开、稳定、机器可校验的规则：Pack 能声明什么、必须经过谁的确认、做完之后留下什么凭证——全部写在这个仓库里，作者看得见，企业也看得见。
+
+`github.com/truzhen/contracts` 就是这套规则的权威源。它只有 Go 类型和 JSON Schema，零实现、零副作用：谁都可以放心依赖它，它不依赖任何人。
+
+## 三句话说清这套规则
+
+1. **AI 和 Pack 只能提建议**——所有产出先是「候选」，不直接变成正式结果。
+2. **要紧的动作必须过门**——发送、执行、写正式数据，都要经过老板确认和平台裁定。
+3. **做过的事必须留回执**——企业随时可以回放核对发生了什么。
+
+这三条对作者是保护而不是束缚：你的 Pack 不用碰权限、支付和审计，出了问题记录说话，责任分得清。
 
 ## 这里有什么
 
-| 内容 | 给作者的意义 |
+| 契约 | 它保证的事 |
 | --- | --- |
-| Candidate / 候选形状 | AI、角色和 Pack 先提出建议或草稿，不直接变成正式结果。 |
-| Gate / 门控形状 | 高风险动作必须回到主人确认和平台裁定。 |
-| Receipt / 回执形状 | 重要动作要留下可回放证据，企业可以复核发生过什么。 |
-| Registry / Provider 引用 | Pack 只声明需要什么外部能力，不把 provider 实现塞进 Pack。 |
-| ReadModel / Surface schema | 前端展示有统一形状，但展示不等于事实。 |
-| Market 契约面 | 支付、授权、下载和商品信息有边界；真实云端状态不在 Pack 里伪造。 |
+| Candidate（候选） | AI 的建议和草稿有统一形状，永远和正式结果隔离 |
+| Gate（门控） | 高风险动作必须回到主人确认和平台裁定 |
+| Receipt（回执） | 重要动作留下可回放的凭证 |
+| Registry / Provider 引用 | Pack 只声明需要什么外部能力，不夹带实现 |
+| ReadModel / Surface | 界面展示有统一形状，但展示不等于事实 |
+| Market 契约面 | 支付、授权、下载各归其位，云端状态无法在 Pack 里伪造 |
 
 ## 作为 SDK 使用
 
@@ -46,22 +51,20 @@ import (
 go get github.com/truzhen/contracts@latest
 ```
 
-当前公开消费版本以仓根 `VERSION` 和已发布 tag 为准。破坏性变更必须按 SemVer 处理，不能把删除字段、改必填、改语义伪装成兼容更新。
+依赖方向是单向的：徒真基座**实现**这些契约，Pack **面向**这些契约声明，本仓不依赖任何实现仓（只依赖 Go 标准库，可用 `go list -deps ./...` 验证）。
 
-## 对作者的安全承诺
+当前版本以仓根 `VERSION` 和已发布 tag 为准。破坏性变更按 SemVer 处理，不把删字段、改必填、改语义伪装成兼容更新。
 
-- contracts 只定义可声明、可请求、可校验的形状，不给 Pack 执行权。
-- contracts 不实现 Base Gate、Receipt Ledger、Gateway、provider、云端支付或前端运行时。
-- 候选成为正式任务、正式记忆、真实发送或真实执行前，必须回到徒真受控链路完成确认、调用和回执。
-- Secret 只在本仓表现为引用形状；明文凭据永不进入 contracts。
-- 本仓只依赖 Go 标准库，不反向依赖基座、packs、cloud、client 或 provider 实现。
+## 子包速览
 
-## 贡献前自查
+核心：`base/`（主权门控核心类型）、`candidates/`（候选域）、`gates/`（门控裁定）、`receipts/`（回执 / 审计）、`spines/`（事务 / 意图 / 证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（只有 secret 的**引用**形状，永无明文凭据）、`market/`。完整清单见 [MODULES.md](MODULES.md)。
 
-1. 这个字段或 schema 是给真实消费方用的吗？
-2. 它只是声明形状，还是把运行实现搬进 contracts 了？
-3. 是否影响 Pack 作者、平台基座、云端市场或客户端展示？
-4. 是否是破坏性契约变更，是否需要版本升级和迁移说明？
+## 我们的承诺
+
+- contracts 只定义形状，不给任何 Pack 执行权。
+- 明文凭据永不进入本仓。
+- 契约稳定可依赖：破坏性变更必须升版本、给迁移说明，不搞突然袭击。
+- 本仓零反向依赖，你引用它不会被拖进私有实现。
 
 ## 验证
 
@@ -71,13 +74,14 @@ go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs|truzhen/truzhen
 python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json') + glob.glob('spines/*.schema.json')];print('schema JSON 合法')"
 ```
 
-## 治理入口
+## 想改契约？
 
-- Agent 开工纪律：[AGENTS.md](AGENTS.md)
-- 契约治理总纲：[CONTRACTS_GOVERNANCE.md](CONTRACTS_GOVERNANCE.md)
-- 子包和 schema 清单：[MODULES.md](MODULES.md)
+先想清四个问题：给谁用、是不是只声明形状、影响哪些消费方、算不算破坏性变更。然后读：
+
 - 贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
+- 契约治理总纲：[CONTRACTS_GOVERNANCE.md](CONTRACTS_GOVERNANCE.md)
+- Agent 开工纪律：[AGENTS.md](AGENTS.md)
 
 ## License
 
-[Apache-2.0](LICENSE)。
+[Apache-2.0](LICENSE)。徒真（truzhen）是对外品牌与商标。
