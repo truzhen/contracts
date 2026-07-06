@@ -1,21 +1,36 @@
-# Truzhen Contracts
+# 徒真（truzhen）Contracts
 
-> Truzhen 主权事务操作层的**契约 SDK**：Go 类型、接口、常量、JSON Schema、schema embed，以及少量无外部副作用的契约校验 / ref 派生 helper。
+> 让社区作者的 Pack 能被企业安全安装的公开契约。
 
-`github.com/truzhen/contracts` 是 Truzhen 六仓协同架构的**契约层**，定义基座、包层、cloud repo 和 client layer 之间一切跨边界的数据形状（Pack / Candidate / Receipt / Surface / ReadModel schema、cloud 契约面（Entitlement / License / Payment / PackListing / Session / Release / WebSurface，当前为治理清单、具体 schema 待真实消费方）、候选信封、门控决议、回执、注册切片、监控事件、三主线引用等）以及机器可校验的 JSON Schema。它**只声明形状，不含任何实现**（无 DB、无网络、无副作用），因此谁都可以安全依赖它，而它谁都不依赖。
+徒真（truzhen）希望让开源作者、工具开发者和行业专家，把自己的软件、工具链和行业经验做成企业可以安装、试用、购买和回放的 Pack。企业愿意安装陌生作者的能力，前提是边界清楚：Pack 能声明什么、能请求什么、哪些动作必须确认、执行后留下什么回执。
 
-## 依赖方向（单向不可逆）
+`github.com/truzhen/contracts` 就是这套公开边界。它提供 Go 类型、JSON Schema、候选信封、门控和回执形状，让 Pack 作者面向稳定规则创作，而不是依赖徒真私有基座内部实现。
 
-```text
-truzhenos (私有基座)  implements  truzhen-contracts  faces  truzhen-packs
-实现契约 / 持主权                  契约形状权威源              面向契约声明包
-```
+如果你想创作能力包、角色包或场景包，请从 [`github.com/truzhen/packs`](https://github.com/truzhen/packs) 开始。本仓回答的是：你的 Pack 为什么不能越权、平台如何识别候选、企业如何知道动作留下了什么证据。
 
-- **基座**（`github.com/lights314/truzhenos`，私有）**实现**这些契约。
-- **包**（`github.com/truzhen/packs`，开放）**面向**这些契约编写，物理上 import 不到基座内部。
-- **云仓**（`github.com/truzhen/truzhen-cloud`，私有）**实现**官方云端服务、WebSurface、支付、License / Entitlement、Pack listing / 分发和 Release / Session 相关契约。
-- **客户端**（`github.com/truzhen/truzhen-client-web-desktop`，私有）通过 vendor / codegen 消费 schema，不私造稳定 DTO。
-- **契约本身零反向依赖**：只依赖 Go 标准库，不依赖基座、包、云仓、client 或 provider 实现。可用 `go list -deps ./...` 验证。
+## 为什么 Pack 作者需要 contracts
+
+contracts 让作者和企业对同一件事有共同理解：
+
+- Pack 可以声明能力、角色、场景、候选、证据和回执要求。
+- Pack 不能直接绕过主人确认。
+- Pack 不能直接写正式数据。
+- Pack 不能直接读取 secret、token、cookie、private key 或用户凭据。
+- Pack 不能跳过 Gateway 和 Receipt 自行完成真实发送或真实执行。
+- ReadModel 和 Surface 只用于展示，不是真相源。
+
+这意味着作者可以把能力开放给企业使用，同时不用把自己变成企业权限系统、支付系统、审计系统或桌面客户端的维护者。
+
+## 这里有什么
+
+| 内容 | 给作者的意义 |
+| --- | --- |
+| Candidate / 候选形状 | AI、角色和 Pack 先提出建议或草稿，不直接变成正式结果。 |
+| Gate / 门控形状 | 高风险动作必须回到主人确认和平台裁定。 |
+| Receipt / 回执形状 | 重要动作要留下可回放证据，企业可以复核发生过什么。 |
+| Registry / Provider 引用 | Pack 只声明需要什么外部能力，不把 provider 实现塞进 Pack。 |
+| ReadModel / Surface schema | 前端展示有统一形状，但展示不等于事实。 |
+| Market 契约面 | 支付、授权、下载和商品信息有边界；真实云端状态不在 Pack 里伪造。 |
 
 ## 作为 SDK 使用
 
@@ -31,40 +46,22 @@ import (
 go get github.com/truzhen/contracts@latest
 ```
 
-当前基座消费版本：`github.com/truzhen/contracts v0.3.0`。破坏性变更不得落到 `v0.x` patch 假装兼容；跨仓边界变化必须同步更新 `truzhenos`、`truzhen-packs`、`truzhen-cloud`、`truzhen-software` 和 client repo 的治理说明。
+当前公开消费版本以仓根 `VERSION` 和已发布 tag 为准。破坏性变更必须按 SemVer 处理，不能把删除字段、改必填、改语义伪装成兼容更新。
 
-## 子包总览
+## 对作者的安全承诺
 
-完整清单见 [MODULES.md](MODULES.md)。核心：`base/`（主权门控核心类型）、`candidates/`（AI 候选域）、`gates/`（门控裁定）、`receipts/`（回执/审计）、`spines/`（事务/意图/证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（secret **引用**契约，不含真凭据）、`events/`、`modules/`。cloud 契约组按 `Entitlement`、`License`、`Payment`、`PackListing`、`Session`、`Release`、`WebSurface` 七类收敛，落地为具体 schema / Go 包前不得宣称下游已接线。
+- contracts 只定义可声明、可请求、可校验的形状，不给 Pack 执行权。
+- contracts 不实现 Base Gate、Receipt Ledger、Gateway、provider、云端支付或前端运行时。
+- 候选成为正式任务、正式记忆、真实发送或真实执行前，必须回到徒真受控链路完成确认、调用和回执。
+- Secret 只在本仓表现为引用形状；明文凭据永不进入 contracts。
+- 本仓只依赖 Go 标准库，不反向依赖基座、packs、cloud、client 或 provider 实现。
 
-- `base/`：Base 主权核心契约、Gate / ReceiptCandidate / FormalizationGrant、授权、委托、Artifact 留痕与过闸边界。
-- `candidates/`：AI / Pack / 模块候选域类型。
-- `spines/`：Transaction / Intent / Evidence 三主线引用与 Intent Spine 五件套。
-- `receipts/`：回执与审计信封。
-- `gates/`：轻量 AccessDecision / OwnerVerdict。
-- `registry/`：注册引用和 RegistrySlice。
-- `readmodels/`：前端只读投影信封。
-- `monitoring/`：统一监控、诊断、故障和支持包契约。
-- `secrets/`：secret 引用形状，不含明文凭据。
-- `events/`、`modules/`：模块事件和生命周期接口。
-- 顶层：schema embed 与 Pack 知识挂载契约。
+## 贡献前自查
 
-## 设计原则
-
-1. **形状权威源**：跨仓 DTO、schema、ref、信封、枚举在本仓收敛。
-2. **零反向依赖**：本仓不得依赖任何实现仓。
-3. **Candidate/Formal 隔离**：候选默认 `candidate_only=true`、`non_formal=true`；正式化必须在基座完成。
-4. **ReadModel 不是真相源**：前端投影只能展示，不能决定事实。
-5. **机器可校验**：JSON Schema 与 `embed.go` 为 Go 服务、client codegen 和 CI 提供统一契约入口。
-6. **helper 克制**：只允许无外部副作用的契约校验和确定性 ref 派生；不写运行时实现。
-
-## 治理入口
-
-- Agent 开工纪律：[AGENTS.md](AGENTS.md)
-- 契约治理总纲：[CONTRACTS_GOVERNANCE.md](CONTRACTS_GOVERNANCE.md)
-- 子包和 schema 清单：[MODULES.md](MODULES.md)
-- 快速加载说明：[CLAUDE.md](CLAUDE.md)
-- 贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
+1. 这个字段或 schema 是给真实消费方用的吗？
+2. 它只是声明形状，还是把运行实现搬进 contracts 了？
+3. 是否影响 Pack 作者、平台基座、云端市场或客户端展示？
+4. 是否是破坏性契约变更，是否需要版本升级和迁移说明？
 
 ## 验证
 
@@ -73,6 +70,13 @@ go build ./... && go test ./... && go vet ./...
 go list -deps ./... | grep -E 'lights314/truzhenos|truzhen/packs|truzhen/truzhen-cloud' && echo "违规:反向依赖" || echo "OK:零反向依赖"
 python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('*.schema.json') + glob.glob('spines/*.schema.json')];print('schema JSON 合法')"
 ```
+
+## 治理入口
+
+- Agent 开工纪律：[AGENTS.md](AGENTS.md)
+- 契约治理总纲：[CONTRACTS_GOVERNANCE.md](CONTRACTS_GOVERNANCE.md)
+- 子包和 schema 清单：[MODULES.md](MODULES.md)
+- 贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
