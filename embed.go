@@ -75,3 +75,13 @@ var IntentToCandidateResultSchemaJSON []byte
 //
 //go:embed spines/intent-receipt.schema.json
 var IntentReceiptSchemaJSON []byte
+
+// MonitoringEventSchemaJSON is contracts/monitoring/monitoring-event.schema.json.
+//
+//go:embed monitoring/monitoring-event.schema.json
+var MonitoringEventSchemaJSON []byte
+
+// FaultIncidentSchemaJSON is contracts/monitoring/fault-incident.schema.json.
+//
+//go:embed monitoring/fault-incident.schema.json
+var FaultIncidentSchemaJSON []byte

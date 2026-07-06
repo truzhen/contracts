@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/monitoring/fault-incident.schema.json",
+  "title": "FaultIncident",
+  "description": "由监控事件聚类得到的故障事件；signature.error_code 是跨日志、监控和源码定位的稳定键。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["incident_id", "run_id", "signature", "started_at", "user_visible_message", "recommended_action", "event_refs"],
+  "properties": {
+    "incident_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signature_id", "component_ref", "fault_kind", "error_code", "message_hash", "status", "severity", "first_event_ref", "last_event_ref", "occurrence_count", "redaction_version"],
+      "properties": {
+        "signature_id": { "type": "string", "minLength": 1 },
+        "component_ref": { "type": "string" },
+        "gateway_ref": { "type": "string" },
+        "provider_ref": { "type": "string" },
+        "fault_kind": { "type": "string", "minLength": 1 },
+        "error_code": { "type": "string", "pattern": "^TZ-[A-Z]{2,8}-[A-Z0-9]{2,10}-\\d{3}$" },
+        "stack_hash": { "type": "string" },
+        "message_hash": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["info", "warning", "error", "security"] },
+        "first_event_ref": { "type": "string", "minLength": 1 },
+        "last_event_ref": { "type": "string", "minLength": 1 },
+        "occurrence_count": { "type": "integer", "minimum": 1 },
+        "redaction_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "started_at": { "type": "string" },
+    "ended_at": { "type": "string" },
+    "affected_page_id": { "type": "string" },
+    "affected_action_ref": { "type": "string" },
+    "user_visible_message": { "type": "string" },
+    "recommended_action": { "type": "string" },
+    "event_refs": { "type": "array", "items": { "type": "string" } },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "receipt_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -24,21 +24,24 @@ type MonitoringRun struct {
 }
 
 type MonitoringEvent struct {
-	EventID             string    `json:"event_id"`
-	RunID               string    `json:"run_id"`
-	Sequence            int64     `json:"sequence"`
-	PreviousHash        string    `json:"previous_hash"`
-	EventHash           string    `json:"event_hash"`
-	SourceKind          string    `json:"source_kind"`
-	SourceRef           string    `json:"source_ref,omitempty"`
-	ComponentRef        string    `json:"component_ref,omitempty"`
-	GatewayRef          string    `json:"gateway_ref,omitempty"`
-	ProviderRef         string    `json:"provider_ref,omitempty"`
-	TransactionRef      string    `json:"transaction_ref,omitempty"`
-	CandidateRef        string    `json:"candidate_ref,omitempty"`
-	DecisionRef         string    `json:"decision_ref,omitempty"`
-	Severity            Severity  `json:"severity"`
-	Status              string    `json:"status"`
+	EventID        string   `json:"event_id"`
+	RunID          string   `json:"run_id"`
+	Sequence       int64    `json:"sequence"`
+	PreviousHash   string   `json:"previous_hash"`
+	EventHash      string   `json:"event_hash"`
+	SourceKind     string   `json:"source_kind"`
+	SourceRef      string   `json:"source_ref,omitempty"`
+	ComponentRef   string   `json:"component_ref,omitempty"`
+	GatewayRef     string   `json:"gateway_ref,omitempty"`
+	ProviderRef    string   `json:"provider_ref,omitempty"`
+	TransactionRef string   `json:"transaction_ref,omitempty"`
+	CandidateRef   string   `json:"candidate_ref,omitempty"`
+	DecisionRef    string   `json:"decision_ref,omitempty"`
+	Severity       Severity `json:"severity"`
+	Status         string   `json:"status"`
+	// ErrorCode 是稳定错误码（格式 TZ-<仓>-<域>-<NNN>）。字符串常量不受
+	// 构建混淆影响，是打包后日志定位问题的第一线索。可为空（旧事件兼容）。
+	ErrorCode           string    `json:"error_code,omitempty"`
 	Message             string    `json:"message"`
 	RedactedPayloadJSON string    `json:"redacted_payload_json,omitempty"`
 	PayloadHash         string    `json:"payload_hash,omitempty"`
