@@ -60,3 +60,9 @@ python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);ass
 - 若 `git worktree list --porcelain` 显示某仓 `refs/heads/main` 检出在旁路 worktree，或固定主仓不在 `main` / 落后 `origin/main`，先停工记录，不得从旧 feature worktree 继续派生。Owner 确认合并后，必须逐仓把 `origin/main` 和固定主仓同步到同一提交。
 - 修改治理、schema 或契约字段前，先判断真相源、消费方、兼容性和 SemVer。
 - 不自动 push / tag / release / merge。
+
+## 6. P6 防回潮纪律
+
+- 本仓只保存公开契约、schema、类型、版本与兼容说明；内部执行计划、客户压力记录、生产核对清单和 Owner-gated 操作材料不得放回本仓正文目录。
+- 新增或修改契约后必须跑版本漂移与 schema 验证；不得以未提交草稿、手写消费方 DTO 或本地 replace 冒充已发布契约。
+- 提交前必须确认没有 `node_modules`、`dist`、`build`、`.vite`、日志、数据库、密钥、真实凭据、运行态文件或本地临时产物进入 Git。
