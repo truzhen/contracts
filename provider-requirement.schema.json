@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/provider-requirement.schema.json",
+  "title": "ProviderRequirement",
+  "description": "Pack 声明需要的 provider 能力形状。真实 provider 选择、readiness 和授权由 truzhenos 裁定。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requirement_id", "provider_family", "gateway_class", "risk_class", "fallback_policy"],
+  "properties": {
+    "requirement_id": { "type": "string", "minLength": 1 },
+    "provider_family": { "type": "string", "minLength": 1 },
+    "gateway_class": { "type": "string", "enum": ["execution", "communication", "model", "memory"] },
+    "required_capabilities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "risk_class": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "fallback_policy": { "type": "string", "enum": ["blocked", "provider_missing", "manual_handoff", "not_ready"] },
+    "optional": { "type": "boolean" }
+  }
+}

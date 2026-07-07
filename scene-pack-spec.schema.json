@@ -35,7 +35,16 @@
     "business_object_schema_refs": { "type": "array", "items": { "type": "string" } },
     "capability_requirements": { "type": "array", "items": { "$ref": "#/$defs/capability_requirement" } },
     "role_slots": { "type": "array", "items": { "$ref": "#/$defs/role_slot" } },
-    "external_software_refs": { "type": "array", "items": { "type": "string" } },
+    "external_software_refs": {
+      "type": "array",
+      "deprecated": true,
+      "description": "Deprecated: use software_requirements with version_range and resolver policy.",
+      "items": { "type": "string" }
+    },
+    "software_requirements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/software_requirement" }
+    },
     "permission_requirements": { "type": "array", "items": { "type": "string" } },
     "receipt_rules": { "type": "array", "items": { "$ref": "#/$defs/receipt_rule" } },
     "knowledge_scopes": {
@@ -152,6 +161,39 @@
         "capability_ref": { "type": "string", "minLength": 1 },
         "scope": { "type": "string", "minLength": 1 },
         "required_gate": { "type": "string", "minLength": 1 }
+      }
+    },
+    "software_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "software_family",
+        "version_range",
+        "isolation_policy",
+        "fallback_policy",
+        "gateway_class",
+        "risk_class"
+      ],
+      "properties": {
+        "requirement_id": { "type": "string", "minLength": 1 },
+        "software_family": { "type": "string", "minLength": 1 },
+        "provider_family": { "type": "string" },
+        "version_range": { "type": "string", "minLength": 1 },
+        "adapter_range": { "type": "string" },
+        "required_capabilities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "license_policy": { "type": "string", "enum": ["any_osi", "copyleft_excluded", "review_required"] },
+        "isolation_policy": {
+          "type": "string",
+          "enum": ["reuse_preferred", "isolated_install", "coexist_multi_version", "blocked"]
+        },
+        "fallback_policy": {
+          "type": "string",
+          "enum": ["blocked", "provider_missing", "manual_handoff", "not_ready"]
+        },
+        "optional": { "type": "boolean" },
+        "gateway_class": { "type": "string", "enum": ["execution", "communication", "model", "memory"] },
+        "risk_class": { "type": "string", "enum": ["low", "medium", "high", "critical"] }
       }
     },
     "role_slot": {

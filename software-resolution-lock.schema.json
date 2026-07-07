@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/software-resolution-lock.schema.json",
+  "title": "SoftwareResolutionLock",
+  "description": "truzhenos resolver 产出的本机软件依赖解析锁。Pack、cloud、client 只能消费，不能自铸。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lock_id", "pack_ref", "requirement_id", "software_family", "resolution", "resolved_at"],
+  "properties": {
+    "lock_id": { "type": "string", "minLength": 1 },
+    "pack_ref": { "type": "string", "minLength": 1 },
+    "requirement_id": { "type": "string", "minLength": 1 },
+    "software_family": { "type": "string", "minLength": 1 },
+    "resolved_software_ref": { "type": "string" },
+    "resolved_version": { "type": "string" },
+    "adapter_version": { "type": "string" },
+    "provider_resource_ref": { "type": "string" },
+    "resolution": {
+      "type": "string",
+      "enum": ["reused", "bound", "installed_isolated", "coexist", "blocked", "not_ready", "provider_missing"]
+    },
+    "conflict_note": { "type": "string" },
+    "decision_ref": {
+      "type": "string",
+      "description": "后端签发的 Base/Gate 裁定引用；blocked/not_ready 可为空，正式安装/隔离动作必须填写。"
+    },
+    "receipt_ref": {
+      "type": "string",
+      "description": "03 Receipt Ledger 可反查引用；不得由 Pack、cloud 或 client 自铸。"
+    },
+    "resolved_at": { "type": "string", "format": "date-time" },
+    "source_registry_ref": { "type": "string" },
+    "source_lock_file_ref": { "type": "string" },
+    "resolver_version": { "type": "string" },
+    "idempotency_key": { "type": "string" },
+    "transaction_ref": { "type": "string" },
+    "pack_version_ref": { "type": "string" }
+  }
+}

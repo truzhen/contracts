@@ -49,6 +49,21 @@ var CandidateEnvelopeSchemaJSON []byte
 //go:embed receipt-envelope.schema.json
 var ReceiptEnvelopeSchemaJSON []byte
 
+// PackManifestSchemaJSON is contracts/pack-manifest.schema.json.
+//
+//go:embed pack-manifest.schema.json
+var PackManifestSchemaJSON []byte
+
+// ProviderRequirementSchemaJSON is contracts/provider-requirement.schema.json.
+//
+//go:embed provider-requirement.schema.json
+var ProviderRequirementSchemaJSON []byte
+
+// SoftwareResolutionLockSchemaJSON is contracts/software-resolution-lock.schema.json.
+//
+//go:embed software-resolution-lock.schema.json
+var SoftwareResolutionLockSchemaJSON []byte
+
 // Intent Spine 五件套（T12 阶段3：契约收敛进 contracts/spines/）。
 
 // IntentEventSchemaJSON is contracts/spines/intent-event.schema.json.

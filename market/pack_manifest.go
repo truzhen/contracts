@@ -1,0 +1,138 @@
+package market
+
+// GatewayClass declares which Truzhen gateway owns a provider-backed
+// capability. It is a contract value only; it does not grant execution rights.
+type GatewayClass string
+
+const (
+	GatewayClassExecution     GatewayClass = "execution"
+	GatewayClassCommunication GatewayClass = "communication"
+	GatewayClassModel         GatewayClass = "model"
+	GatewayClassMemory        GatewayClass = "memory"
+)
+
+// RiskClass mirrors the product governance risk colors in a stable JSON value.
+type RiskClass string
+
+const (
+	RiskClassLow      RiskClass = "low"
+	RiskClassMedium   RiskClass = "medium"
+	RiskClassHigh     RiskClass = "high"
+	RiskClassCritical RiskClass = "critical"
+)
+
+// SoftwareFallbackPolicy is the fail-closed behavior when a declared software
+// dependency cannot be resolved.
+type SoftwareFallbackPolicy string
+
+const (
+	SoftwareFallbackBlocked         SoftwareFallbackPolicy = "blocked"
+	SoftwareFallbackProviderMissing SoftwareFallbackPolicy = "provider_missing"
+	SoftwareFallbackManualHandoff   SoftwareFallbackPolicy = "manual_handoff"
+	SoftwareFallbackNotReady        SoftwareFallbackPolicy = "not_ready"
+)
+
+// SoftwareIsolationPolicy declares what a resolver may do when versions
+// conflict. This is a declaration, not permission to install or execute.
+type SoftwareIsolationPolicy string
+
+const (
+	SoftwareIsolationReusePreferred      SoftwareIsolationPolicy = "reuse_preferred"
+	SoftwareIsolationIsolatedInstall     SoftwareIsolationPolicy = "isolated_install"
+	SoftwareIsolationCoexistMultiVersion SoftwareIsolationPolicy = "coexist_multi_version"
+	SoftwareIsolationBlocked             SoftwareIsolationPolicy = "blocked"
+)
+
+// LicensePolicy is a pack author declaration used by review and resolver UI.
+type LicensePolicy string
+
+const (
+	LicensePolicyAnyOSI           LicensePolicy = "any_osi"
+	LicensePolicyCopyleftExcluded LicensePolicy = "copyleft_excluded"
+	LicensePolicyReviewRequired   LicensePolicy = "review_required"
+)
+
+// SoftwareResolution is the resolver outcome written into a lock.
+type SoftwareResolution string
+
+const (
+	SoftwareResolutionReused            SoftwareResolution = "reused"
+	SoftwareResolutionBound             SoftwareResolution = "bound"
+	SoftwareResolutionInstalledIsolated SoftwareResolution = "installed_isolated"
+	SoftwareResolutionCoexist           SoftwareResolution = "coexist"
+	SoftwareResolutionBlocked           SoftwareResolution = "blocked"
+	SoftwareResolutionNotReady          SoftwareResolution = "not_ready"
+	SoftwareResolutionProviderMissing   SoftwareResolution = "provider_missing"
+)
+
+// PackSoftwareRequirement is the canonical software dependency declaration for
+// scene/capability/role packs. It names the needed software family and version
+// range without binding to a user's local provider instance.
+type PackSoftwareRequirement struct {
+	RequirementID        string                  `json:"requirement_id"`
+	SoftwareFamily       string                  `json:"software_family"`
+	ProviderFamily       string                  `json:"provider_family,omitempty"`
+	VersionRange         string                  `json:"version_range"`
+	AdapterRange         string                  `json:"adapter_range,omitempty"`
+	RequiredCapabilities []string                `json:"required_capabilities,omitempty"`
+	LicensePolicy        LicensePolicy           `json:"license_policy,omitempty"`
+	IsolationPolicy      SoftwareIsolationPolicy `json:"isolation_policy"`
+	FallbackPolicy       SoftwareFallbackPolicy  `json:"fallback_policy"`
+	Optional             bool                    `json:"optional,omitempty"`
+	GatewayClass         GatewayClass            `json:"gateway_class"`
+	RiskClass            RiskClass               `json:"risk_class"`
+}
+
+// ProviderRequirement is the canonical pack-side provider capability shape.
+// Runtime readiness and final provider choice remain owned by truzhenos.
+type ProviderRequirement struct {
+	RequirementID        string                 `json:"requirement_id"`
+	ProviderFamily       string                 `json:"provider_family"`
+	GatewayClass         GatewayClass           `json:"gateway_class"`
+	RequiredCapabilities []string               `json:"required_capabilities,omitempty"`
+	RiskClass            RiskClass              `json:"risk_class"`
+	FallbackPolicy       SoftwareFallbackPolicy `json:"fallback_policy"`
+	Optional             bool                   `json:"optional,omitempty"`
+}
+
+// PackManifest is the canonical cloud-facing manifest shape. It intentionally
+// stays descriptive: pack runtime state, local provider resolution and product
+// listing state live in their owning repositories.
+type PackManifest struct {
+	PackID               string                    `json:"pack_id"`
+	Name                 string                    `json:"name"`
+	Version              string                    `json:"version"`
+	Kind                 ProductKind               `json:"kind"`
+	MinTruzhenVersion    string                    `json:"min_truzhen_version"`
+	Description          string                    `json:"description,omitempty"`
+	RegionCode           string                    `json:"region_code,omitempty"`
+	ArchTags             []string                  `json:"arch_tags,omitempty"`
+	SoftwareRequirements []PackSoftwareRequirement `json:"software_requirements,omitempty"`
+	ProviderRequirements []ProviderRequirement     `json:"provider_requirements,omitempty"`
+	ExternalSoftwareRefs []string                  `json:"external_software_refs,omitempty"`
+}
+
+// SoftwareResolutionLock is produced by truzhenos after resolving a pack
+// requirement against the local software registry. It is not authored by packs
+// or clients.
+type SoftwareResolutionLock struct {
+	LockID              string             `json:"lock_id"`
+	PackRef             string             `json:"pack_ref"`
+	RequirementID       string             `json:"requirement_id"`
+	SoftwareFamily      string             `json:"software_family"`
+	ResolvedSoftwareRef string             `json:"resolved_software_ref,omitempty"`
+	ResolvedVersion     string             `json:"resolved_version,omitempty"`
+	AdapterVersion      string             `json:"adapter_version,omitempty"`
+	ProviderResourceRef string             `json:"provider_resource_ref,omitempty"`
+	Resolution          SoftwareResolution `json:"resolution"`
+	ConflictNote        string             `json:"conflict_note,omitempty"`
+	DecisionRef         string             `json:"decision_ref,omitempty"`
+	ReceiptRef          string             `json:"receipt_ref,omitempty"`
+	ResolvedAt          string             `json:"resolved_at"`
+	SourceRegistryRef   string             `json:"source_registry_ref,omitempty"`
+	SourceLockFileRef   string             `json:"source_lock_file_ref,omitempty"`
+	ResolverVersion     string             `json:"resolver_version,omitempty"`
+	IdempotencyKey      string             `json:"idempotency_key,omitempty"`
+	TransactionRef      string             `json:"transaction_ref,omitempty"`
+	PackVersionRef      string             `json:"pack_version_ref,omitempty"`
+}
