@@ -146,6 +146,10 @@ helper 禁止：
 
 - 修改任何文件前先运行 `git status --short --branch`。
 - 新任务默认独立分支 + 独立 worktree；不要在主仓 `main` 直接开发。
+- 六仓固定主仓目录为 `/Users/li/Documents/truzhen-client-web-desktop`、`/Users/li/Documents/truzhen-cloud`、`/Users/li/Documents/truzhen-software`、`/Users/li/Documents/truzhen-contracts`、`/Users/li/Documents/truzhenos`、`/Users/li/Documents/truzhen-packs`，均视为各仓 `main` 的本机主线工作区。
+- `main` 不得长期检出在 `/Users/li/Documents/truzhenv3worktree/`、`~/.config/superpowers/worktrees/` 或其它旁路 worktree。若 `git worktree list --porcelain` 显示 `refs/heads/main` 不在对应固定主仓目录，先停工，记录偏离情况并请 Owner 裁定迁回或清理。
+- 拉新任务分支前，必须在对应固定主仓目录执行 `git status --short --branch`、`git fetch origin`，确认本地 `main` 与 `origin/main` 对齐；若领先、落后或分叉，必须先记录并等 Owner 裁定，不得从旧 feature worktree、历史 merge worktree 或旁路 worktree 派生新分支。
+- 功能经 Owner 确认合并后，必须逐仓确保 `origin/main` 与上述固定主仓目录同步到同一提交；不得只合到旁路 worktree、只推远端、或让固定主仓停留在旧分支，避免出现“主线已完成但本机主目录看不到”的假故障。
 - 不覆盖、不回滚、不删除他人 WIP。
 - 不自动 merge、push、tag、release。
 - 所有项目文档默认中文；英文只用于专有名词、命令、路径、代码标识、协议名、API 字段、错误原文。

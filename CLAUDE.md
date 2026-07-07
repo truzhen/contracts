@@ -56,5 +56,7 @@ python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);ass
 
 - 先运行 `git status --short --branch`。
 - 新任务默认独立分支 + 独立 worktree。
+- 六仓固定主仓目录为 `/Users/li/Documents/truzhen-client-web-desktop`、`/Users/li/Documents/truzhen-cloud`、`/Users/li/Documents/truzhen-software`、`/Users/li/Documents/truzhen-contracts`、`/Users/li/Documents/truzhenos`、`/Users/li/Documents/truzhen-packs`。拉新分支、合并后同步和主线核查都以这些目录为准。
+- 若 `git worktree list --porcelain` 显示某仓 `refs/heads/main` 检出在旁路 worktree，或固定主仓不在 `main` / 落后 `origin/main`，先停工记录，不得从旧 feature worktree 继续派生。Owner 确认合并后，必须逐仓把 `origin/main` 和固定主仓同步到同一提交。
 - 修改治理、schema 或契约字段前，先判断真相源、消费方、兼容性和 SemVer。
 - 不自动 push / tag / release / merge。
