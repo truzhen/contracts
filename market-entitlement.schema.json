@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/market-entitlement.schema.json",
+  "title": "MarketEntitlement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entitlement_id", "product_id", "product_kind", "license_type", "valid_from", "valid_to", "status", "source_order_id", "device_limit"],
+  "properties": {
+    "entitlement_id": { "type": "string", "minLength": 1 },
+    "entitlement_ref": { "type": "string" },
+    "order_ref": { "type": "string" },
+    "product_id": { "type": "string", "minLength": 1 },
+    "product_kind": { "type": "string" },
+    "license_type": { "type": "string" },
+    "is_perpetual": { "type": "boolean" },
+    "valid_from": { "type": "string" },
+    "valid_to": { "type": "string" },
+    "status": { "type": "string" },
+    "source_order_id": { "type": "string" },
+    "device_limit": { "type": "integer" },
+    "receipt_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}

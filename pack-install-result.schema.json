@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/pack-install-result.schema.json",
+  "title": "PackInstallResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["install_status"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "product_id": { "type": "string" },
+    "pack_ref": { "type": "string" },
+    "version": { "type": "string" },
+    "install_status": { "type": "string" },
+    "receipt_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "error": { "type": "string" },
+    "detail": { "type": "string" }
+  }
+}

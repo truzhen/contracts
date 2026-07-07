@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/market-catalog-product.schema.json",
+  "title": "MarketCatalogProduct",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["product_id", "name", "product_kind", "version", "seller_user_id", "author_id", "status", "price_weekly_minor", "price_monthly_minor", "price_yearly_minor", "currency", "is_free", "region_code", "region_display_name"],
+  "properties": {
+    "product_id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "product_kind": { "type": "string" },
+    "version": { "type": "string", "minLength": 1 },
+    "seller_user_id": { "type": "string" },
+    "author_id": { "type": "string" },
+    "status": { "type": "string" },
+    "price_weekly_minor": { "type": "integer" },
+    "price_monthly_minor": { "type": "integer" },
+    "price_yearly_minor": { "type": "integer" },
+    "price_lifetime_minor": { "type": "integer" },
+    "currency": { "type": "string" },
+    "is_free": { "type": "boolean" },
+    "region_code": { "type": "string" },
+    "region_display_name": { "type": "string" },
+    "arch_tags": { "type": "array", "items": { "type": "string" } },
+    "author_share_ratio_bps": { "type": "integer" },
+    "source": { "type": "string" },
+    "has_commerce": { "type": "boolean" },
+    "has_forgejo": { "type": "boolean" },
+    "download_path": { "type": "string" },
+    "pack_type": { "type": "string" },
+    "owner": { "type": "string" },
+    "created_at": { "type": "string" },
+    "provider_readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string" },
+        "pack_registry": { "type": "string" },
+        "commerce": { "type": "string" },
+        "payment": { "type": "string" },
+        "license": { "type": "string" }
+      }
+    }
+  }
+}

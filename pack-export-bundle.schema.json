@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/pack-export-bundle.schema.json",
+  "title": "PackExportBundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "bundle_zip_url", "sha256"],
+  "properties": {
+    "status": { "type": "string" },
+    "pack_ref": { "type": "string" },
+    "version": { "type": "string" },
+    "bundle_id": { "type": "string" },
+    "bundle_zip_url": { "type": "string" },
+    "sha256": { "type": "string" },
+    "size_bytes": { "type": "integer" },
+    "upload_prefill": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pack_id": { "type": "string" },
+        "pack_ref": { "type": "string" },
+        "version": { "type": "string" },
+        "kind": { "type": "string" },
+        "bundle_zip_url": { "type": "string" }
+      }
+    }
+  }
+}

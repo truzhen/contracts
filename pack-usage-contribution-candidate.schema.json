@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/pack-usage-contribution-candidate.schema.json",
+  "title": "PackUsageContributionCandidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate_id",
+    "source_transaction_ref",
+    "source_pack_ref",
+    "source_pack_version_ref",
+    "sanitization_receipt_ref",
+    "owner_decision_ref",
+    "summary_redacted",
+    "status",
+    "candidate_only",
+    "non_formal",
+    "created_at"
+  ],
+  "properties": {
+    "candidate_id": { "type": "string", "minLength": 1 },
+    "source_transaction_ref": { "type": "string", "minLength": 1 },
+    "source_pack_ref": { "type": "string", "minLength": 1 },
+    "source_pack_version_ref": { "type": "string", "minLength": 1 },
+    "sanitization_receipt_ref": { "type": "string", "minLength": 1 },
+    "owner_decision_ref": { "type": "string", "minLength": 1 },
+    "summary_redacted": { "type": "string" },
+    "status": { "type": "string", "enum": ["proposed", "owner_approved", "submitted", "author_adopted", "rejected"] },
+    "candidate_only": { "type": "boolean", "const": true },
+    "non_formal": { "type": "boolean", "const": true },
+    "created_at": { "type": "string", "minLength": 1 }
+  }
+}

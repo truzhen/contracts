@@ -64,6 +64,56 @@ var ProviderRequirementSchemaJSON []byte
 //go:embed software-resolution-lock.schema.json
 var SoftwareResolutionLockSchemaJSON []byte
 
+// PackUsageContributionCandidateSchemaJSON is contracts/pack-usage-contribution-candidate.schema.json.
+//
+//go:embed pack-usage-contribution-candidate.schema.json
+var PackUsageContributionCandidateSchemaJSON []byte
+
+// PackVersionMigrationCandidateSchemaJSON is contracts/pack-version-migration-candidate.schema.json.
+//
+//go:embed pack-version-migration-candidate.schema.json
+var PackVersionMigrationCandidateSchemaJSON []byte
+
+// ContributionReceiptSchemaJSON is contracts/contribution-receipt.schema.json.
+//
+//go:embed contribution-receipt.schema.json
+var ContributionReceiptSchemaJSON []byte
+
+// MarketCatalogProductSchemaJSON is contracts/market-catalog-product.schema.json.
+//
+//go:embed market-catalog-product.schema.json
+var MarketCatalogProductSchemaJSON []byte
+
+// MarketEntitlementSchemaJSON is contracts/market-entitlement.schema.json.
+//
+//go:embed market-entitlement.schema.json
+var MarketEntitlementSchemaJSON []byte
+
+// MarketCheckoutResultSchemaJSON is contracts/market-checkout-result.schema.json.
+//
+//go:embed market-checkout-result.schema.json
+var MarketCheckoutResultSchemaJSON []byte
+
+// MarketOrderStatusSchemaJSON is contracts/market-order-status.schema.json.
+//
+//go:embed market-order-status.schema.json
+var MarketOrderStatusSchemaJSON []byte
+
+// MarketLocalGateCheckResultSchemaJSON is contracts/market-local-gate-check-result.schema.json.
+//
+//go:embed market-local-gate-check-result.schema.json
+var MarketLocalGateCheckResultSchemaJSON []byte
+
+// PackInstallResultSchemaJSON is contracts/pack-install-result.schema.json.
+//
+//go:embed pack-install-result.schema.json
+var PackInstallResultSchemaJSON []byte
+
+// PackExportBundleSchemaJSON is contracts/pack-export-bundle.schema.json.
+//
+//go:embed pack-export-bundle.schema.json
+var PackExportBundleSchemaJSON []byte
+
 // Intent Spine 五件套（T12 阶段3：契约收敛进 contracts/spines/）。
 
 // IntentEventSchemaJSON is contracts/spines/intent-event.schema.json.

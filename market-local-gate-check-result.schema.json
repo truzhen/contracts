@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/market-local-gate-check-result.schema.json",
+  "title": "MarketLocalGateCheckResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status"],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "subject": { "type": "string" },
+    "buyer_id": { "type": "string" },
+    "product_id": { "type": "string" },
+    "status": { "type": "string" },
+    "allowed": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "entitlement_id": { "type": "string" },
+    "valid_until": { "type": "string" },
+    "read_only_allowed": { "type": "boolean" },
+    "receipt_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "checked_at": { "type": "string" }
+  }
+}

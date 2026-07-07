@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/contribution-receipt.schema.json",
+  "title": "ContributionReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["receipt_ref", "kind", "contribution_candidate_ref", "source_pack_version_ref", "created_at"],
+  "properties": {
+    "receipt_ref": { "type": "string", "minLength": 1 },
+    "kind": { "type": "string", "enum": ["owner_authorization", "sanitization", "submission", "author_adoption"] },
+    "contribution_candidate_ref": { "type": "string", "minLength": 1 },
+    "source_pack_version_ref": { "type": "string", "minLength": 1 },
+    "result_pack_version_ref": { "type": "string" },
+    "created_at": { "type": "string", "minLength": 1 }
+  }
+}

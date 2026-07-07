@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/market-checkout-result.schema.json",
+  "title": "MarketCheckoutResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["order_id", "code_url", "payment_mode"],
+  "properties": {
+    "order_id": { "type": "string", "minLength": 1 },
+    "order_ref": { "type": "string" },
+    "payment_ref": { "type": "string" },
+    "entitlement_ref": { "type": "string" },
+    "amount_minor": { "type": "integer" },
+    "currency": { "type": "string" },
+    "channel": { "type": "string" },
+    "code_url": { "type": "string" },
+    "payment_mode": { "type": "string" },
+    "no_real_payment": { "type": "boolean" },
+    "transaction_ref": { "type": "string" },
+    "detail": { "type": "string" },
+    "price_snapshot": { "type": "object", "additionalProperties": true },
+    "order_candidate": { "type": "object", "additionalProperties": true },
+    "payment_candidate": { "type": "object", "additionalProperties": true },
+    "entitlement_candidate": { "type": "object", "additionalProperties": true },
+    "receipt_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}

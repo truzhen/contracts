@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/market-order-status.schema.json",
+  "title": "MarketOrderStatus",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["order_id", "status"],
+  "properties": {
+    "order_id": { "type": "string", "minLength": 1 },
+    "order_ref": { "type": "string" },
+    "payment_ref": { "type": "string" },
+    "entitlement_ref": { "type": "string" },
+    "status": { "type": "string" },
+    "amount_minor": { "type": "integer" },
+    "currency": { "type": "string" },
+    "entitlement_id": { "type": "string" },
+    "paid_at": { "type": "string" },
+    "receipt_ref": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}
