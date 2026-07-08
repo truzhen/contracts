@@ -143,6 +143,8 @@ Schema 文件分三类：
 - 判断是否应通过 `embed.go` 暴露。
 - 若 schema 供 client codegen，说明 vendor / generated 类型是否需要更新。
 
+软件依赖相关 schema 的附加边界：`pack-manifest.schema.json` 只允许 Pack 声明底层软件需求；`software-resolution-lock.schema.json` 只允许表达 `truzhenos` resolver 产出的用户侧 lock。schema 中不得加入 raw local path、raw endpoint、credential、DB、模型权重、镜像、端口或 runtime state 字段；这些事实分别归 `truzhen-software` registry 与 `truzhenos` 用户侧状态。
+
 ## 6. 版本与兼容
 
 本仓遵守 SemVer。契约层没有“内部小改”豁免；一旦下游依赖，字段就是跨仓边界。

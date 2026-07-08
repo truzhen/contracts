@@ -74,3 +74,32 @@ func TestSoftwareResolutionLockGoldenValues(t *testing.T) {
 		}
 	}
 }
+
+func TestSoftwareResolutionLockSupportsResolverMVPOutcomes(t *testing.T) {
+	outcomes := []market.SoftwareResolution{
+		market.SoftwareResolutionReused,
+		market.SoftwareResolutionInstallRequired,
+		market.SoftwareResolutionVersionConflict,
+		market.SoftwareResolutionIsolationRequired,
+		market.SoftwareResolutionBlocked,
+		market.SoftwareResolutionNotReady,
+		market.SoftwareResolutionProviderMissing,
+	}
+	for _, outcome := range outcomes {
+		lock := market.SoftwareResolutionLock{
+			LockID:         "software_lock://baserow-runtime",
+			PackRef:        "scene_pack://baserow-pack-b@1.0.0",
+			RequirementID:  "baserow-runtime",
+			SoftwareFamily: "baserow-family",
+			Resolution:     outcome,
+			ResolvedAt:     "2026-07-08T00:00:00Z",
+		}
+		b, err := json.Marshal(lock)
+		if err != nil {
+			t.Fatalf("marshal %s: %v", outcome, err)
+		}
+		if !strings.Contains(string(b), `"resolution":"`+string(outcome)+`"`) {
+			t.Fatalf("missing resolution %s in %s", outcome, string(b))
+		}
+	}
+}

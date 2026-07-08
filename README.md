@@ -65,6 +65,8 @@ go get github.com/truzhen/contracts@latest
 
 当前版本以仓根 `VERSION` 和已发布 tag 为准。破坏性变更按 SemVer 处理，不把删字段、改必填、改语义伪装成兼容更新。
 
+`market.PackSoftwareRequirement` 用于声明 Baserow / OCR 等底层软件需求；`market.SoftwareResolutionLock` 用于消费 `truzhenos` resolver 产出的复用、需安装、版本冲突、需隔离、blocked、not_ready 等结果。contracts 不解析用户本机环境，不保存本机软件事实。
+
 ## 子包速览
 
 核心：`base/`（主权门控核心类型）、`candidates/`（候选域）、`gates/`（门控裁定）、`receipts/`（回执 / 审计）、`spines/`（事务 / 意图 / 证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（只有 secret 的**引用**形状，永无明文凭据）、`market/`。完整清单见 [MODULES.md](MODULES.md)。

@@ -17,7 +17,7 @@
     "provider_resource_ref": { "type": "string" },
     "resolution": {
       "type": "string",
-      "enum": ["reused", "bound", "installed_isolated", "coexist", "blocked", "not_ready", "provider_missing"]
+      "enum": ["reused", "bound", "installed_isolated", "coexist", "install_required", "version_conflict", "isolation_required", "blocked", "not_ready", "provider_missing"]
     },
     "conflict_note": { "type": "string" },
     "decision_ref": {
