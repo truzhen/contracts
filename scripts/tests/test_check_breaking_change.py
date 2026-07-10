@@ -41,7 +41,7 @@ class BreakingChangeTest(unittest.TestCase):
     def test_changed_type_fails(self):
         self.assert_case("change-type", 1, "properties/amount/type")
 
-    def test_widened_type_passes(self):
+    def test_widened_type_blocked(self):
         with tempfile.TemporaryDirectory() as directory:
             old_dir = os.path.join(directory, "old")
             new_dir = os.path.join(directory, "new")
@@ -52,7 +52,8 @@ class BreakingChangeTest(unittest.TestCase):
             with open(os.path.join(new_dir, "x.json"), "w", encoding="utf-8") as handle:
                 json.dump({"type": "object", "properties": {"value": {"type": ["string", "null"]}}}, handle)
             result = run_dirs(old_dir, new_dir)
-            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
+            self.assertIn("properties/value/type", result.stdout + result.stderr)
 
     def test_major_migration_requires_explicit_owner_approval(self):
         with tempfile.TemporaryDirectory() as root:

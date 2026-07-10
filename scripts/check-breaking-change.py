@@ -121,8 +121,10 @@ def compare(old, new, old_root, new_root, filename, pointer, findings, depth=0):
     old_types = json_type_set(old, filename, pointer, findings)
     new_types = json_type_set(new, filename, pointer, findings)
     if old_types is not False and new_types is not False and old_types != new_types:
+        # Owner R-a 裁定（2026-07-10）：契约仓对 type 宁严勿宽——任何 type 变更（收窄、
+        # 放宽、移除、新增限制）一律判 breaking，放宽也必须走版本与人审，不静默放行。
         if new_types is None:
-            findings.add("notes", filename, pointer_join(pointer, "type"), "type 移除（放宽）")
+            findings.add("breaking", filename, pointer_join(pointer, "type"), "type 移除（放宽亦判 breaking）")
         elif old_types is None:
             findings.add("breaking", filename, pointer_join(pointer, "type"), "新增 type 限制: %r" % sorted(new_types))
         else:
@@ -130,7 +132,7 @@ def compare(old, new, old_root, new_root, filename, pointer, findings, depth=0):
             if removed_types:
                 findings.add("breaking", filename, pointer_join(pointer, "type"), "type 删值（收紧）: %s" % sorted(removed_types))
             else:
-                findings.add("notes", filename, pointer_join(pointer, "type"), "type 加值（兼容）")
+                findings.add("breaking", filename, pointer_join(pointer, "type"), "type 加值（放宽亦判 breaking）")
 
     old_enum, new_enum = old.get("enum"), new.get("enum")
     if old_enum != new_enum:
