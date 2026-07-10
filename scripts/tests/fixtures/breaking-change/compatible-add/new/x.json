@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "status": {"type": "string", "enum": ["draft", "sent", "paid", "overdue"]},
+    "amount": {"type": "integer"},
+    "note": {"type": "string"}
+  },
+  "required": ["id"],
+  "additionalProperties": true
+}

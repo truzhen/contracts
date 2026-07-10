@@ -35,6 +35,8 @@ jobs:
         run: python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);assert fs,'no schema files found';[json.load(open(f)) for f in fs];print('schema JSON 合法 x%d' % len(fs))"
       - name: version-drift-gate（版本漂移把守：改 schema 必须 bump VERSION）
         run: bash scripts/check-version-drift.sh
+      - name: contracts-drift-gates（破坏性变更与 Go↔Schema 对照）
+        run: bash scripts/contracts-check.sh --skip-version-drift
 
   secret-scan:
     runs-on: ubuntu-latest

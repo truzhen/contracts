@@ -1,0 +1,8 @@
+{
+  "pairs": [
+    {"go_dir": "candidates", "go_type": "CandidateEnvelope", "schema": "candidate-envelope.schema.json"},
+    {"go_dir": "receipts", "go_type": "ReceiptEnvelope", "schema": "receipt-envelope.schema.json"},
+    {"go_dir": "market", "go_type": "ProviderRequirement", "schema": "provider-requirement.schema.json"},
+    {"go_dir": "market", "go_type": "SoftwareResolutionLock", "schema": "software-resolution-lock.schema.json"}
+  ]
+}

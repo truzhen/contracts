@@ -98,6 +98,23 @@ type ProviderRequirement struct {
 	Optional             bool                   `json:"optional,omitempty"`
 }
 
+// PackLifecycleStatus is the unified eight-tier pack lifecycle declaration.
+// Values follow the governance dictionary verbatim (Chinese tokens are the
+// established convention, see truzhen-packs candidate-set usage); this is an
+// author-side declaration only — acceptance/release verdicts stay with Owner.
+type PackLifecycleStatus string
+
+const (
+	PackLifecycleIdea          PackLifecycleStatus = "想法"
+	PackLifecycleDesigning     PackLifecycleStatus = "设计中"
+	PackLifecycleContractFixed PackLifecycleStatus = "契约已定"
+	PackLifecycleImplemented   PackLifecycleStatus = "已实现"
+	PackLifecycleWired         PackLifecycleStatus = "已接线"
+	PackLifecycleAccepted      PackLifecycleStatus = "已验收"
+	PackLifecycleReleased      PackLifecycleStatus = "已发布"
+	PackLifecycleDeprecated    PackLifecycleStatus = "已弃用"
+)
+
 // PackManifest is the canonical cloud-facing manifest shape. It intentionally
 // stays descriptive: pack runtime state, local provider resolution and product
 // listing state live in their owning repositories.
@@ -108,6 +125,7 @@ type PackManifest struct {
 	Kind                 ProductKind               `json:"kind"`
 	MinTruzhenVersion    string                    `json:"min_truzhen_version"`
 	Description          string                    `json:"description,omitempty"`
+	LifecycleStatus      PackLifecycleStatus       `json:"lifecycle_status,omitempty"`
 	RegionCode           string                    `json:"region_code,omitempty"`
 	ArchTags             []string                  `json:"arch_tags,omitempty"`
 	SoftwareRequirements []PackSoftwareRequirement `json:"software_requirements,omitempty"`
