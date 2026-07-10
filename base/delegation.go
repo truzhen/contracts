@@ -141,8 +141,12 @@ type DelegationSubject struct {
 }
 
 // DelegationExecutionSubject is the server-derived cumulative execution fact
-// for the run currently being evaluated. It must not be accepted from the
-// delegate agent as a self-asserted claim.
+// after atomically reserving the run currently being evaluated. ConsumedRuns
+// and ConsumedDurationSeconds therefore include the proposed run and must be
+// positive. Concurrent consumers must use OCC or an equivalent atomic
+// compare-and-reserve operation before constructing this subject; check-then-
+// increment is not sufficient. It must not be accepted from the delegate agent
+// as a self-asserted claim.
 type DelegationExecutionSubject struct {
 	CapabilityRef           string                 `json:"capability_ref"`
 	WorkrootRef             string                 `json:"workroot_ref"`
@@ -244,15 +248,88 @@ func ValidateDelegationExecutionSubject(subject *DelegationExecutionSubject) err
 	if subject.ConsumedRuns < 1 {
 		return errors.New("delegation execution subject consumed_runs must be >= 1")
 	}
-	if subject.ConsumedDurationSeconds < 0 {
-		return errors.New("delegation execution subject consumed_duration_seconds must not be negative")
+	if subject.ConsumedDurationSeconds < 1 {
+		return errors.New("delegation execution subject consumed_duration_seconds must be >= 1")
 	}
 	return nil
 }
 
+// ValidateDelegationSubject validates the server-derived parent facts before
+// any grant boundary comparison.
+func ValidateDelegationSubject(subject *DelegationSubject) error {
+	if subject == nil {
+		return errors.New("delegation subject is required")
+	}
+	if subject.CandidateRef == "" {
+		return errors.New("delegation subject candidate_ref is required")
+	}
+	if subject.TransactionRef == "" {
+		return errors.New("delegation subject transaction_ref is required")
+	}
+	if subject.TaskType == "" {
+		return errors.New("delegation subject task_type is required")
+	}
+	if !DelegationRiskWithinHardFloor(subject.RiskLevel) {
+		return fmt.Errorf("delegation subject risk_level %q violates the Base hard floor: only low or medium may be delegated", subject.RiskLevel)
+	}
+	if subject.AmountCents < 0 {
+		return errors.New("delegation subject amount_cents must not be negative")
+	}
+	return nil
+}
+
+// DelegationWithinScope checks all non-execution dimensions of a server-
+// derived subject against a delegation scope. The Base risk hard floor is
+// evaluated independently of the configurable risk ceiling.
+func DelegationWithinScope(scope *DelegationScope, subject *DelegationSubject) error {
+	if err := ValidateDelegationScope(scope); err != nil {
+		return err
+	}
+	if err := ValidateDelegationSubject(subject); err != nil {
+		return err
+	}
+	if !stringInSet(subject.TaskType, scope.TaskTypes) {
+		return fmt.Errorf("delegation subject task_type %q is outside scope", subject.TaskType)
+	}
+	if !delegationRiskWithinCeiling(scope.RiskCeiling, subject.RiskLevel) {
+		return fmt.Errorf("delegation subject risk_level %q exceeds ceiling %q", subject.RiskLevel, scope.RiskCeiling)
+	}
+	if len(scope.TransactionRefs) > 0 && !stringInSet(subject.TransactionRef, scope.TransactionRefs) {
+		return fmt.Errorf("delegation subject transaction_ref %q is outside scope", subject.TransactionRef)
+	}
+	if len(scope.PackRefs) > 0 && !stringInSet(subject.PackRef, scope.PackRefs) {
+		return fmt.Errorf("delegation subject pack_ref %q is outside scope", subject.PackRef)
+	}
+	if subject.AmountCents > scope.AmountLimitCents {
+		return fmt.Errorf("delegation subject amount_cents %d exceeds amount_limit_cents %d", subject.AmountCents, scope.AmountLimitCents)
+	}
+	return nil
+}
+
+// DelegationGrantWithinScope is the complete authorization-boundary helper for
+// an OwnerDelegationGrant and a server-derived DelegationSubject. It always
+// checks the full grant and parent scope, including the Base hard floor, before
+// checking the optional execution boundary. Callers must use this entry point
+// for execution authorization rather than treating the lower-level execution
+// helper as a complete grant decision.
+func DelegationGrantWithinScope(grant *OwnerDelegationGrant, subject *DelegationSubject) error {
+	if err := ValidateOwnerDelegationGrant(grant); err != nil {
+		return err
+	}
+	if err := DelegationWithinScope(&grant.Scope, subject); err != nil {
+		return err
+	}
+	if subject.Execution == nil {
+		return nil
+	}
+	return DelegationExecutionWithinScope(&grant.Scope, subject.Execution)
+}
+
 // DelegationExecutionWithinScope checks a server-derived execution subject
 // against an Owner grant boundary. It compares refs as opaque strings and never
-// parses local paths or provider-specific identifiers.
+// parses local paths or provider-specific identifiers. This is a lower-level
+// dimensional check; use DelegationGrantWithinScope for an authorization
+// decision so parent scope and hard-floor checks cannot be skipped.
 func DelegationExecutionWithinScope(scope *DelegationScope, subject *DelegationExecutionSubject) error {
 	if scope == nil {
 		return errors.New("delegation scope is required")
@@ -374,8 +451,26 @@ func stringInSet(value string, allowed []string) bool {
 	return false
 }
 
+func delegationRiskWithinCeiling(ceiling, risk RiskClass) bool {
+	switch ceiling {
+	case RiskLow:
+		return risk == RiskLow
+	case RiskMedium:
+		return risk == RiskLow || risk == RiskMedium
+	default:
+		return false
+	}
+}
+
 func executionNetworkPolicyWithinCeiling(ceiling, policy ExecutionNetworkPolicy) bool {
-	return ceiling == policy
+	switch ceiling {
+	case ExecutionNetworkPolicyNone:
+		return policy == ExecutionNetworkPolicyNone
+	case ExecutionNetworkPolicyEgressModelOnly:
+		return policy == ExecutionNetworkPolicyNone || policy == ExecutionNetworkPolicyEgressModelOnly
+	default:
+		return false
+	}
 }
 
 // DelegationGrantCandidateRef is the public candidate-ref formula for grant

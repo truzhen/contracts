@@ -21,7 +21,7 @@
 - `max_runs`
 - `max_duration_seconds`
 
-`DelegationExecutionSubject` 是服务器派生的拟执行 run 后累计事实：
+`DelegationExecutionSubject` 是服务器派生的、已经原子预留待执行本次 run 后的累计事实。为保持 JSON 向后兼容，字段名不变：
 
 - `capability_ref`
 - `workroot_ref`
@@ -31,7 +31,17 @@
 - `consumed_runs`
 - `consumed_duration_seconds`
 
-比较规则由 `DelegationExecutionWithinScope` 表达：scope 为空时拒绝 execution subject；subject 为空时也不能授权 execution scope；ref 字段按不透明字符串比较，不解析本机路径。
+`consumed_runs` 和 `consumed_duration_seconds` 都必须大于 0，且分别不得超过 `max_runs` 和 `max_duration_seconds`。并发消费方必须先用 OCC（例如版本号 compare-and-swap）或等价的原子 compare-and-reserve 操作预留本次 run，再构造 subject 并校验；禁止先读、校验通过后再普通递增，否则并发 run 可能共同越过预算。
+
+## 组合校验入口
+
+授权裁定必须使用 `DelegationGrantWithinScope(grant, subject)`。该入口按固定顺序执行：
+
+1. 校验完整 `OwnerDelegationGrant`。
+2. 调用 `DelegationWithinScope` 校验 task、risk hard floor / ceiling、transaction、Pack 和 amount。
+3. 仅当 `DelegationSubject.execution` 非空时，再调用 `DelegationExecutionWithinScope` 校验执行维度。
+
+因此 high / critical、父级 scope 越界和旧 grant 缺少 `execution_scope` 都不能被 execution helper 绕过。`DelegationExecutionWithinScope` 仍保留为执行维度的低层兼容 helper，但不能单独作为完整授权裁定入口。ref 字段按不透明字符串比较，不解析本机路径。
 
 ## 网络策略
 
@@ -41,7 +51,11 @@
 - `egress_model_only`
 - `gated_bridge`
 
-`gated_bridge` 可以作为服务器派生 subject 的事实值出现，但 grant 的 `network_policy_ceiling` 只允许 `none` / `egress_model_only`。因此 subject 为 `gated_bridge` 时不会被本次委托授权放行。
+授权顺序为 `none < egress_model_only`：
+
+- ceiling 为 `none` 时，只接受 subject `none`。
+- ceiling 为 `egress_model_only` 时，接受 subject `none` 或 `egress_model_only`。
+- `gated_bridge` 可以作为服务器派生 subject 的事实值出现，但 grant ceiling 不允许该值，任何合法 execution scope 都不会授权它。
 
 ## SemVer 与下游影响
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestOwnerDelegationGrantLegacyJSONRoundTripDoesNotDefaultExecution(t *testing.T) {
@@ -116,7 +117,9 @@ func TestDelegationExecutionScopeRejectsInvalidShape(t *testing.T) {
 		{name: "empty sandbox", mutate: func(s *DelegationExecutionScope) { s.SandboxProfileRef = "" }},
 		{name: "gated bridge ceiling", mutate: func(s *DelegationExecutionScope) { s.NetworkPolicyCeiling = ExecutionNetworkPolicyGatedBridge }},
 		{name: "zero max runs", mutate: func(s *DelegationExecutionScope) { s.MaxRuns = 0 }},
+		{name: "negative max runs", mutate: func(s *DelegationExecutionScope) { s.MaxRuns = -1 }},
 		{name: "zero max duration", mutate: func(s *DelegationExecutionScope) { s.MaxDurationSeconds = 0 }},
+		{name: "negative max duration", mutate: func(s *DelegationExecutionScope) { s.MaxDurationSeconds = -1 }},
 	}
 
 	for _, tt := range tests {
@@ -144,11 +147,25 @@ func TestDelegationExecutionSubjectShapeAndLegacyGrantAuthorization(t *testing.T
 		}
 	})
 
-	t.Run("empty subject fields are rejected", func(t *testing.T) {
-		subject := validDelegationExecutionSubject()
-		subject.ProviderRef = ""
-		if err := ValidateDelegationExecutionSubject(subject); err == nil {
-			t.Fatal("expected empty subject provider_ref rejection")
+	t.Run("invalid subject fields are rejected", func(t *testing.T) {
+		tests := []struct {
+			name   string
+			mutate func(*DelegationExecutionSubject)
+		}{
+			{name: "empty capability", mutate: func(s *DelegationExecutionSubject) { s.CapabilityRef = "" }},
+			{name: "empty workroot", mutate: func(s *DelegationExecutionSubject) { s.WorkrootRef = "" }},
+			{name: "empty provider", mutate: func(s *DelegationExecutionSubject) { s.ProviderRef = "" }},
+			{name: "empty sandbox", mutate: func(s *DelegationExecutionSubject) { s.SandboxProfileRef = "" }},
+			{name: "unknown network policy", mutate: func(s *DelegationExecutionSubject) { s.NetworkPolicy = ExecutionNetworkPolicy("unknown") }},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				subject := validDelegationExecutionSubject()
+				tt.mutate(subject)
+				if err := ValidateDelegationExecutionSubject(subject); err == nil {
+					t.Fatalf("expected invalid execution subject rejection for %s", tt.name)
+				}
+			})
 		}
 	})
 
@@ -170,11 +187,164 @@ func TestDelegationExecutionSubjectShapeAndLegacyGrantAuthorization(t *testing.T
 	})
 }
 
+func TestDelegationGrantWithinScopeChecksParentBeforeExecution(t *testing.T) {
+	t.Run("valid complete grant and subject", func(t *testing.T) {
+		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), validDelegationSubjectWithExecution()); err != nil {
+			t.Fatalf("DelegationGrantWithinScope: %v", err)
+		}
+	})
+
+	t.Run("parent rejection is evaluated before execution", func(t *testing.T) {
+		subject := validDelegationSubjectWithExecution()
+		subject.TaskType = "other"
+		subject.Execution.CapabilityRef = "capability:other"
+		err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject)
+		if err == nil || !strings.Contains(err.Error(), "task_type") {
+			t.Fatalf("expected parent task_type rejection before execution rejection, got %v", err)
+		}
+	})
+
+	tests := []struct {
+		name   string
+		mutate func(*OwnerDelegationGrant, *DelegationSubject)
+	}{
+		{name: "task type", mutate: func(_ *OwnerDelegationGrant, s *DelegationSubject) { s.TaskType = "other" }},
+		{name: "risk ceiling", mutate: func(g *OwnerDelegationGrant, s *DelegationSubject) {
+			g.Scope.RiskCeiling = RiskLow
+			s.RiskLevel = RiskMedium
+		}},
+		{name: "transaction", mutate: func(_ *OwnerDelegationGrant, s *DelegationSubject) { s.TransactionRef = "transaction:other" }},
+		{name: "pack", mutate: func(_ *OwnerDelegationGrant, s *DelegationSubject) { s.PackRef = "pack:other" }},
+		{name: "amount", mutate: func(_ *OwnerDelegationGrant, s *DelegationSubject) { s.AmountCents = 1001 }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grant := validOwnerDelegationGrantWithExecution()
+			subject := validDelegationSubjectWithExecution()
+			tt.mutate(grant, subject)
+			if err := DelegationGrantWithinScope(grant, subject); err == nil {
+				t.Fatalf("expected parent %s boundary rejection", tt.name)
+			}
+		})
+	}
+}
+
+func TestDelegationGrantWithinScopePreservesRiskHardFloor(t *testing.T) {
+	for _, risk := range []RiskClass{RiskHigh, RiskCritical} {
+		t.Run(string(risk)+" subject", func(t *testing.T) {
+			grant := validOwnerDelegationGrantWithExecution()
+			subject := validDelegationSubjectWithExecution()
+			subject.RiskLevel = risk
+			if err := DelegationGrantWithinScope(grant, subject); err == nil {
+				t.Fatalf("expected %s subject hard-floor rejection", risk)
+			}
+		})
+
+		t.Run(string(risk)+" grant ceiling", func(t *testing.T) {
+			grant := validOwnerDelegationGrantWithExecution()
+			grant.Scope.RiskCeiling = risk
+			if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution()); err == nil {
+				t.Fatalf("expected %s grant ceiling hard-floor rejection", risk)
+			}
+		})
+	}
+}
+
+func TestDelegationGrantWithinScopeRejectsInvalidParentSubject(t *testing.T) {
+	tests := []struct {
+		name   string
+		mutate func(*DelegationSubject)
+	}{
+		{name: "empty candidate ref", mutate: func(s *DelegationSubject) { s.CandidateRef = "" }},
+		{name: "empty transaction ref", mutate: func(s *DelegationSubject) { s.TransactionRef = "" }},
+		{name: "empty task type", mutate: func(s *DelegationSubject) { s.TaskType = "" }},
+		{name: "unknown risk", mutate: func(s *DelegationSubject) { s.RiskLevel = RiskClass("unknown") }},
+		{name: "negative amount", mutate: func(s *DelegationSubject) { s.AmountCents = -1 }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			subject := validDelegationSubjectWithExecution()
+			tt.mutate(subject)
+			if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject); err == nil {
+				t.Fatalf("expected invalid parent subject rejection for %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestDelegationExecutionNetworkPolicyUsesPermissionOrdering(t *testing.T) {
+	tests := []struct {
+		name    string
+		ceiling ExecutionNetworkPolicy
+		policy  ExecutionNetworkPolicy
+		wantErr bool
+	}{
+		{name: "none accepts none", ceiling: ExecutionNetworkPolicyNone, policy: ExecutionNetworkPolicyNone},
+		{name: "none rejects model egress", ceiling: ExecutionNetworkPolicyNone, policy: ExecutionNetworkPolicyEgressModelOnly, wantErr: true},
+		{name: "model egress accepts none", ceiling: ExecutionNetworkPolicyEgressModelOnly, policy: ExecutionNetworkPolicyNone},
+		{name: "model egress accepts model egress", ceiling: ExecutionNetworkPolicyEgressModelOnly, policy: ExecutionNetworkPolicyEgressModelOnly},
+		{name: "model egress rejects gated bridge", ceiling: ExecutionNetworkPolicyEgressModelOnly, policy: ExecutionNetworkPolicyGatedBridge, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			scope := validDelegationScopeWithExecution()
+			scope.ExecutionScope.NetworkPolicyCeiling = tt.ceiling
+			subject := validDelegationExecutionSubject()
+			subject.NetworkPolicy = tt.policy
+			err := DelegationExecutionWithinScope(scope, subject)
+			if tt.wantErr && err == nil {
+				t.Fatal("expected network policy rejection")
+			}
+			if !tt.wantErr && err != nil {
+				t.Fatalf("expected network policy authorization: %v", err)
+			}
+		})
+	}
+}
+
+func TestDelegationExecutionSubjectRequiresPositiveReservedCumulativeBudget(t *testing.T) {
+	tests := []struct {
+		name   string
+		mutate func(*DelegationExecutionSubject)
+	}{
+		{name: "zero runs", mutate: func(s *DelegationExecutionSubject) { s.ConsumedRuns = 0 }},
+		{name: "negative runs", mutate: func(s *DelegationExecutionSubject) { s.ConsumedRuns = -1 }},
+		{name: "runs over scope", mutate: func(s *DelegationExecutionSubject) { s.ConsumedRuns = 3 }},
+		{name: "zero duration", mutate: func(s *DelegationExecutionSubject) { s.ConsumedDurationSeconds = 0 }},
+		{name: "negative duration", mutate: func(s *DelegationExecutionSubject) { s.ConsumedDurationSeconds = -1 }},
+		{name: "duration over scope", mutate: func(s *DelegationExecutionSubject) { s.ConsumedDurationSeconds = 301 }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			subject := validDelegationExecutionSubject()
+			tt.mutate(subject)
+			if err := DelegationExecutionWithinScope(validDelegationScopeWithExecution(), subject); err == nil {
+				t.Fatalf("expected reserved cumulative budget rejection for %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestDelegationGrantWithinScopeLegacyGrantCannotAuthorizeExecution(t *testing.T) {
+	grant := validOwnerDelegationGrantWithExecution()
+	grant.Scope.ExecutionScope = nil
+	if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution()); err == nil {
+		t.Fatal("expected legacy grant to reject complete execution subject")
+	}
+}
+
 func validDelegationScopeWithExecution() *DelegationScope {
 	return &DelegationScope{
-		TaskTypes:   []string{"stage"},
-		RiskCeiling: RiskMedium,
-		Quota:       DelegationQuota{PerDay: 3},
+		TaskTypes:        []string{"stage"},
+		RiskCeiling:      RiskMedium,
+		TransactionRefs:  []string{"transaction:001"},
+		PackRefs:         []string{"pack:001"},
+		Quota:            DelegationQuota{PerDay: 3},
+		AmountLimitCents: 1000,
 		ExecutionScope: &DelegationExecutionScope{
 			CapabilityRefs:       []string{"capability:writer", "capability:test"},
 			WorkrootRef:          "workroot:repo-001",
@@ -196,5 +366,29 @@ func validDelegationExecutionSubject() *DelegationExecutionSubject {
 		NetworkPolicy:           ExecutionNetworkPolicyEgressModelOnly,
 		ConsumedRuns:            2,
 		ConsumedDurationSeconds: 300,
+	}
+}
+
+func validOwnerDelegationGrantWithExecution() *OwnerDelegationGrant {
+	return &OwnerDelegationGrant{
+		GrantID:          "grant:execution-001",
+		OwnerDecisionRef: "owner_decision:001",
+		DelegateRef:      "agent://secretary_chief",
+		Scope:            *validDelegationScopeWithExecution(),
+		ExpiresAt:        time.Date(2026, 7, 11, 0, 0, 0, 0, time.UTC),
+		Revocable:        true,
+		Status:           DelegationGrantActive,
+	}
+}
+
+func validDelegationSubjectWithExecution() *DelegationSubject {
+	return &DelegationSubject{
+		CandidateRef:   "candidate:001",
+		TransactionRef: "transaction:001",
+		TaskType:       "stage",
+		RiskLevel:      RiskLow,
+		PackRef:        "pack:001",
+		AmountCents:    1000,
+		Execution:      validDelegationExecutionSubject(),
 	}
 }
