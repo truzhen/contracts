@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "candidate_ref": {"type": "string"},
+    "transaction_ref": {"type": "string"},
+    "source_event_id": {"type": "string"},
+    "receipt_ref": {"type": "string"},
+    "candidate_only": {"type": "boolean"},
+    "non_formal": {"type": "boolean"},
+    "payload": {},
+    "bogus_field": {"type": "string"}
+  },
+  "required": ["candidate_only", "non_formal", "payload"]
+}

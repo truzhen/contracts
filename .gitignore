@@ -9,6 +9,8 @@ truzhen.work.sum
 *.out
 *.prof
 coverage.txt
+__pycache__/
+*.pyc
 
 # 系统
 .DS_Store

@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "status": {"anyOf": [{"type": "string"}]},
+    "amount": {"type": "integer"}
+  },
+  "required": ["id"],
+  "additionalProperties": true
+}

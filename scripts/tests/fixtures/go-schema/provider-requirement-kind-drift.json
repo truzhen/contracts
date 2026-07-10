@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "requirement_id": {"type": "string"},
+    "provider_family": {"type": "string"},
+    "gateway_class": {"type": "integer"},
+    "required_capabilities": {"type": "array"},
+    "risk_class": {"type": "string"},
+    "fallback_policy": {"type": "string"},
+    "optional": {"type": "boolean"}
+  },
+  "required": ["requirement_id", "provider_family", "gateway_class", "risk_class", "fallback_policy"]
+}
