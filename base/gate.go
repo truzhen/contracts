@@ -61,6 +61,13 @@ type GateCandidateEnvelope struct {
 	FormalWrite          *FormalWriteRequest            `json:"formal_write,omitempty"`
 	ReceiptLink          *spines.ReceiptLink            `json:"receipt_link,omitempty"`
 	IdempotencyKey       IdempotencyKey                 `json:"idempotency_key,omitempty"`
+
+	// DeclaredImpacts is the Proposer-side pre-execution impact declaration
+	// (evidence for gate evaluation and preview, never an authorization).
+	// Conservative tier: absence changes no existing gate behavior; a
+	// declared delete raises the risk floor (owner_gate path) — enforcement
+	// lives in the Base orchestrator, not here.
+	DeclaredImpacts []spines.DeclaredImpact `json:"declared_impacts,omitempty"`
 }
 
 // GateRequest represents an evaluation request sent to the Gate Orchestrator

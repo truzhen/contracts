@@ -391,6 +391,11 @@ func goShape(expression ast.Expr, named map[string]ast.Expr, resolving map[strin
 			return shape{}, false
 		}
 		return shape{Kind: "array", Elem: &element}, true
+	case *ast.SelectorExpr:
+		// 跨包命名类型（如 spines.ActualEdit）：v1 不解析外部包 AST，按
+		// object 保守映射——跨包类型以 struct 为绝对主流；若未来出现跨包
+		// 标量别名，会以 kind-differs 响亮报错（fail-loud），不会静默放行。
+		return shape{Kind: "object"}, true
 	case *ast.MapType:
 		return shape{Kind: "object"}, true
 	case *ast.InterfaceType:

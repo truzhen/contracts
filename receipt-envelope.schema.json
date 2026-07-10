@@ -12,6 +12,21 @@
     "candidate_ref": { "type": "string" },
     "decision_ref": { "type": "string" },
     "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "actual_edits": {
+      "type": "array",
+      "description": "执行后事实：实际编辑的对象清单（声明不构成授权，Receipt 只写事实）。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["object_type", "operation", "object_ref"],
+        "properties": {
+          "object_type": { "type": "string", "minLength": 1 },
+          "operation": { "type": "string", "enum": ["create", "modify", "delete"] },
+          "object_ref": { "type": "string", "minLength": 1 },
+          "affected_fields": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
     "sequence": { "type": "integer" },
     "previous_hash": { "type": "string" },
     "payload_hash": { "type": "string" },
