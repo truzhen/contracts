@@ -54,7 +54,7 @@
 | `visual-unit-spec.schema.json` | client layer 七类主权视觉单元（pod/object/capsule/candidate/execution/receipt/setting）封顶规格。 | client repo vendor / codegen / consistency test |
 | `transaction-object-projection.schema.json` | 事务对象前端只读投影 DTO。 | client repo codegen / transaction object UI |
 | `candidate-envelope.schema.json` | `candidates.CandidateEnvelope` 的 JSON 表达。 | client candidate card、CI |
-| `receipt-envelope.schema.json` | `receipts.ReceiptEnvelope` 的 JSON 表达。 | client receipt card、CI |
+| `receipt-envelope.schema.json` | `receipts.ReceiptEnvelope` 的 JSON 表达。 含可选 `actual_edits`（执行后事实，v0.10.0 additive，Owner O-1~O-4 裁定 2026-07-10）。 | client receipt card、CI |
 | `pack-manifest.schema.json` | 云端上传与 Pack 分发可校验的 canonical manifest，含 `software_requirements` 与可选 `lifecycle_status`（八档中文枚举，v0.9.0 additive，Owner 2026-07-10 裁定）。 | `truzhen-cloud` 上传校验、`truzhen-packs` CI、`truzhenos` Pack loader |
 | `provider-requirement.schema.json` | Pack 声明 provider 能力需求的 canonical 形状。 | `truzhen-packs`、`truzhenos` readiness / resolver |
 | `software-resolution-lock.schema.json` | `truzhenos` resolver 产出的本机软件依赖解析锁。 | `truzhenos`、client 软件目录、cloud 只读投影 |
