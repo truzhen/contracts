@@ -38,6 +38,41 @@ type DelegationQuota struct {
 	PerDay int `json:"per_day"`
 }
 
+// ExecutionNetworkPolicy declares the strongest network surface an execution
+// delegation may use. gated_bridge may appear on server-derived subjects, but
+// grant ceilings deliberately allow only none or egress_model_only.
+type ExecutionNetworkPolicy string
+
+const (
+	ExecutionNetworkPolicyNone            ExecutionNetworkPolicy = "none"
+	ExecutionNetworkPolicyEgressModelOnly ExecutionNetworkPolicy = "egress_model_only"
+	ExecutionNetworkPolicyGatedBridge     ExecutionNetworkPolicy = "gated_bridge"
+)
+
+func ValidExecutionNetworkPolicy(policy ExecutionNetworkPolicy) bool {
+	switch policy {
+	case ExecutionNetworkPolicyNone, ExecutionNetworkPolicyEgressModelOnly, ExecutionNetworkPolicyGatedBridge:
+		return true
+	}
+	return false
+}
+
+func DelegationExecutionScopeNetworkCeilingAllowed(policy ExecutionNetworkPolicy) bool {
+	return policy == ExecutionNetworkPolicyNone || policy == ExecutionNetworkPolicyEgressModelOnly
+}
+
+// DelegationExecutionScope is the code-execution boundary of an
+// OwnerDelegationGrant. It is optional and never implied for legacy grants.
+type DelegationExecutionScope struct {
+	CapabilityRefs       []string               `json:"capability_refs"`
+	WorkrootRef          string                 `json:"workroot_ref"`
+	ProviderRefs         []string               `json:"provider_refs"`
+	SandboxProfileRef    string                 `json:"sandbox_profile_ref"`
+	NetworkPolicyCeiling ExecutionNetworkPolicy `json:"network_policy_ceiling"`
+	MaxRuns              int                    `json:"max_runs"`
+	MaxDurationSeconds   int                    `json:"max_duration_seconds"`
+}
+
 // DelegationScope is the boundary of an OwnerDelegationGrant. Every dimension
 // is validated by Base on every single agent decision (fail-closed).
 type DelegationScope struct {
@@ -58,6 +93,9 @@ type DelegationScope struct {
 	// AmountLimitCents caps money-related actions. 0 means the grant covers
 	// no money actions at all: a candidate carrying any amount is denied.
 	AmountLimitCents int64 `json:"amount_limit_cents,omitempty"`
+	// ExecutionScope optionally whitelists bounded code execution. Absence
+	// means the grant carries no execution authority.
+	ExecutionScope *DelegationExecutionScope `json:"execution_scope,omitempty"`
 }
 
 // OwnerDelegationGrant is the Owner-issued, bounded, expiring, revocable
@@ -93,12 +131,26 @@ type AgentDecision struct {
 // AgentDecision targets. It must be built from stored governance state by the
 // module that owns the candidate (07), never from agent-supplied claims.
 type DelegationSubject struct {
-	CandidateRef   string    `json:"candidate_ref"`
-	TransactionRef string    `json:"transaction_ref"`
-	TaskType       string    `json:"task_type"`
-	RiskLevel      RiskClass `json:"risk_level"`
-	PackRef        string    `json:"pack_ref,omitempty"`
-	AmountCents    int64     `json:"amount_cents,omitempty"`
+	CandidateRef   string                      `json:"candidate_ref"`
+	TransactionRef string                      `json:"transaction_ref"`
+	TaskType       string                      `json:"task_type"`
+	RiskLevel      RiskClass                   `json:"risk_level"`
+	PackRef        string                      `json:"pack_ref,omitempty"`
+	AmountCents    int64                       `json:"amount_cents,omitempty"`
+	Execution      *DelegationExecutionSubject `json:"execution,omitempty"`
+}
+
+// DelegationExecutionSubject is the server-derived cumulative execution fact
+// for the run currently being evaluated. It must not be accepted from the
+// delegate agent as a self-asserted claim.
+type DelegationExecutionSubject struct {
+	CapabilityRef           string                 `json:"capability_ref"`
+	WorkrootRef             string                 `json:"workroot_ref"`
+	ProviderRef             string                 `json:"provider_ref"`
+	SandboxProfileRef       string                 `json:"sandbox_profile_ref"`
+	NetworkPolicy           ExecutionNetworkPolicy `json:"network_policy"`
+	ConsumedRuns            int                    `json:"consumed_runs"`
+	ConsumedDurationSeconds int                    `json:"consumed_duration_seconds"`
 }
 
 // DelegationRiskWithinHardFloor is the Base policy hard floor: only low and
@@ -129,6 +181,116 @@ func ValidateDelegationScope(scope *DelegationScope) error {
 	}
 	if scope.AmountLimitCents < 0 {
 		return errors.New("delegation scope amount_limit_cents must not be negative")
+	}
+	if scope.ExecutionScope != nil {
+		if err := ValidateDelegationExecutionScope(scope.ExecutionScope); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ValidateDelegationExecutionScope enforces the optional code-execution grant
+// boundary. Legacy grants omit this object and therefore grant no execution.
+func ValidateDelegationExecutionScope(scope *DelegationExecutionScope) error {
+	if scope == nil {
+		return errors.New("delegation execution_scope is required")
+	}
+	if err := validateNonEmptyUniqueRefs("delegation execution_scope capability_refs", scope.CapabilityRefs); err != nil {
+		return err
+	}
+	if scope.WorkrootRef == "" {
+		return errors.New("delegation execution_scope workroot_ref is required")
+	}
+	if err := validateNonEmptyUniqueRefs("delegation execution_scope provider_refs", scope.ProviderRefs); err != nil {
+		return err
+	}
+	if scope.SandboxProfileRef == "" {
+		return errors.New("delegation execution_scope sandbox_profile_ref is required")
+	}
+	if !DelegationExecutionScopeNetworkCeilingAllowed(scope.NetworkPolicyCeiling) {
+		return fmt.Errorf("delegation execution_scope network_policy_ceiling %q is invalid: only none or egress_model_only may be delegated", scope.NetworkPolicyCeiling)
+	}
+	if scope.MaxRuns < 1 {
+		return errors.New("delegation execution_scope max_runs must be >= 1")
+	}
+	if scope.MaxDurationSeconds < 1 {
+		return errors.New("delegation execution_scope max_duration_seconds must be >= 1")
+	}
+	return nil
+}
+
+// ValidateDelegationExecutionSubject validates server-derived execution facts
+// before comparing them with an OwnerDelegationGrant scope.
+func ValidateDelegationExecutionSubject(subject *DelegationExecutionSubject) error {
+	if subject == nil {
+		return errors.New("delegation execution subject is required")
+	}
+	if subject.CapabilityRef == "" {
+		return errors.New("delegation execution subject capability_ref is required")
+	}
+	if subject.WorkrootRef == "" {
+		return errors.New("delegation execution subject workroot_ref is required")
+	}
+	if subject.ProviderRef == "" {
+		return errors.New("delegation execution subject provider_ref is required")
+	}
+	if subject.SandboxProfileRef == "" {
+		return errors.New("delegation execution subject sandbox_profile_ref is required")
+	}
+	if !ValidExecutionNetworkPolicy(subject.NetworkPolicy) {
+		return fmt.Errorf("delegation execution subject network_policy %q is invalid", subject.NetworkPolicy)
+	}
+	if subject.ConsumedRuns < 1 {
+		return errors.New("delegation execution subject consumed_runs must be >= 1")
+	}
+	if subject.ConsumedDurationSeconds < 0 {
+		return errors.New("delegation execution subject consumed_duration_seconds must not be negative")
+	}
+	return nil
+}
+
+// DelegationExecutionWithinScope checks a server-derived execution subject
+// against an Owner grant boundary. It compares refs as opaque strings and never
+// parses local paths or provider-specific identifiers.
+func DelegationExecutionWithinScope(scope *DelegationScope, subject *DelegationExecutionSubject) error {
+	if scope == nil {
+		return errors.New("delegation scope is required")
+	}
+	if subject == nil {
+		return errors.New("delegation execution subject is required")
+	}
+	if scope.ExecutionScope == nil {
+		return errors.New("delegation scope has no execution_scope: legacy grants do not authorize code execution")
+	}
+	if err := ValidateDelegationScope(scope); err != nil {
+		return err
+	}
+	if err := ValidateDelegationExecutionSubject(subject); err != nil {
+		return err
+	}
+
+	execScope := scope.ExecutionScope
+	if !stringInSet(subject.CapabilityRef, execScope.CapabilityRefs) {
+		return fmt.Errorf("delegation execution subject capability_ref %q is outside scope", subject.CapabilityRef)
+	}
+	if subject.WorkrootRef != execScope.WorkrootRef {
+		return fmt.Errorf("delegation execution subject workroot_ref %q is outside scope", subject.WorkrootRef)
+	}
+	if !stringInSet(subject.ProviderRef, execScope.ProviderRefs) {
+		return fmt.Errorf("delegation execution subject provider_ref %q is outside scope", subject.ProviderRef)
+	}
+	if subject.SandboxProfileRef != execScope.SandboxProfileRef {
+		return fmt.Errorf("delegation execution subject sandbox_profile_ref %q is outside scope", subject.SandboxProfileRef)
+	}
+	if !executionNetworkPolicyWithinCeiling(execScope.NetworkPolicyCeiling, subject.NetworkPolicy) {
+		return fmt.Errorf("delegation execution subject network_policy %q exceeds ceiling %q", subject.NetworkPolicy, execScope.NetworkPolicyCeiling)
+	}
+	if subject.ConsumedRuns > execScope.MaxRuns {
+		return fmt.Errorf("delegation execution subject consumed_runs %d exceeds max_runs %d", subject.ConsumedRuns, execScope.MaxRuns)
+	}
+	if subject.ConsumedDurationSeconds > execScope.MaxDurationSeconds {
+		return fmt.Errorf("delegation execution subject consumed_duration_seconds %d exceeds max_duration_seconds %d", subject.ConsumedDurationSeconds, execScope.MaxDurationSeconds)
 	}
 	return nil
 }
@@ -184,6 +346,36 @@ func ValidateAgentDecisionForCandidate(dec *AgentDecision, candidateRef string) 
 		return errors.New("agent decision decided_at is required")
 	}
 	return nil
+}
+
+func validateNonEmptyUniqueRefs(field string, refs []string) error {
+	if len(refs) == 0 {
+		return fmt.Errorf("%s are required", field)
+	}
+	seen := make(map[string]struct{}, len(refs))
+	for _, ref := range refs {
+		if ref == "" {
+			return fmt.Errorf("%s must not contain empty entries", field)
+		}
+		if _, ok := seen[ref]; ok {
+			return fmt.Errorf("%s must not contain duplicate entries: %q", field, ref)
+		}
+		seen[ref] = struct{}{}
+	}
+	return nil
+}
+
+func stringInSet(value string, allowed []string) bool {
+	for _, candidate := range allowed {
+		if value == candidate {
+			return true
+		}
+	}
+	return false
+}
+
+func executionNetworkPolicyWithinCeiling(ceiling, policy ExecutionNetworkPolicy) bool {
+	return ceiling == policy
 }
 
 // DelegationGrantCandidateRef is the public candidate-ref formula for grant
