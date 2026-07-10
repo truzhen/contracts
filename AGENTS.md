@@ -30,6 +30,8 @@
 - 改 scene-pack / scene-runtime / scene-studio schema：同时只读参考基座设计文档 `/Users/li/Documents/truzhenos/docs/design/scene-pack-vertical-profession-workbench-upgrade-20260626.md`（若存在），不得修改基座仓，除非 Owner 另行授权。
 - 改 client layer schema：同时只读核对 `/Users/li/Documents/truzhen-client-web-desktop/src/contracts/CONTRACTS_VENDOR.md`（若存在）和 client vendor / codegen 消费方式；不得修改 client repo，除非 Owner 另行授权。
 
+**节奏闸门（2026-07-10 起）**：任何新功能/新方向请求，先对照 `docs/governance/development-pacing-20260710.md` 的阶段闸门与派活模板；当前阶段不允许或触发条件未到的，登记 backlog 并回 Owner，不施工。
+
 ## 2. 六仓身份边界
 
 | 落点 | 权威位置 | 负责 | 不负责 |
