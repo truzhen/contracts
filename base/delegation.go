@@ -307,14 +307,24 @@ func DelegationWithinScope(scope *DelegationScope, subject *DelegationSubject) e
 }
 
 // DelegationGrantWithinScope is the complete authorization-boundary helper for
-// an OwnerDelegationGrant and a server-derived DelegationSubject. It always
-// checks the full grant and parent scope, including the Base hard floor, before
-// checking the optional execution boundary. Callers must use this entry point
-// for execution authorization rather than treating the lower-level execution
-// helper as a complete grant decision.
-func DelegationGrantWithinScope(grant *OwnerDelegationGrant, subject *DelegationSubject) error {
+// an OwnerDelegationGrant and a server-derived DelegationSubject at an explicit
+// evaluation time. It requires an active, unexpired grant, then checks the full
+// parent scope, including the Base hard floor, before checking the optional
+// execution boundary. Callers must use this entry point for execution
+// authorization rather than treating the lower-level execution helper as a
+// complete grant decision.
+func DelegationGrantWithinScope(grant *OwnerDelegationGrant, subject *DelegationSubject, evaluationTime time.Time) error {
 	if err := ValidateOwnerDelegationGrant(grant); err != nil {
 		return err
+	}
+	if evaluationTime.IsZero() {
+		return errors.New("delegation evaluation time is required")
+	}
+	if grant.Status != DelegationGrantActive {
+		return fmt.Errorf("delegation grant status %q is not active", grant.Status)
+	}
+	if !grant.ExpiresAt.After(evaluationTime) {
+		return fmt.Errorf("delegation grant expired at %s before or at evaluation time %s", grant.ExpiresAt.Format(time.RFC3339Nano), evaluationTime.Format(time.RFC3339Nano))
 	}
 	if err := DelegationWithinScope(&grant.Scope, subject); err != nil {
 		return err

@@ -35,13 +35,14 @@
 
 ## 组合校验入口
 
-授权裁定必须使用 `DelegationGrantWithinScope(grant, subject)`。该入口按固定顺序执行：
+代码执行授权裁定只能使用 `DelegationGrantWithinScope(grant, subject, evaluationTime)`。`evaluationTime` 必须由调用方显式传入；helper 不调用 `time.Now()`，避免隐式时钟导致不可复现或不可测的到期判断。该入口按固定顺序执行：
 
-1. 校验完整 `OwnerDelegationGrant`。
-2. 调用 `DelegationWithinScope` 校验 task、risk hard floor / ceiling、transaction、Pack 和 amount。
-3. 仅当 `DelegationSubject.execution` 非空时，再调用 `DelegationExecutionWithinScope` 校验执行维度。
+1. 复用 `ValidateOwnerDelegationGrant` 校验 `grant_id`、`owner_decision_ref`、`delegate_ref`、scope、`expires_at` 和 status 枚举等完整 grant 必要字段。
+2. 要求 `evaluationTime` 非零、grant status 必须为 `active`，且 `expires_at` 必须严格晚于 evaluation time；`revoked`、`expired`、`suspended_by_emergency_stop` 均拒绝，恰好在 evaluation time 到期也拒绝。
+3. 调用 `DelegationWithinScope` 校验 task、risk hard floor / ceiling、transaction、Pack 和 amount。
+4. 仅当 `DelegationSubject.execution` 非空时，再调用 `DelegationExecutionWithinScope` 校验执行维度。
 
-因此 high / critical、父级 scope 越界和旧 grant 缺少 `execution_scope` 都不能被 execution helper 绕过。`DelegationExecutionWithinScope` 仍保留为执行维度的低层兼容 helper，但不能单独作为完整授权裁定入口。ref 字段按不透明字符串比较，不解析本机路径。
+因此 inactive / expired grant、high / critical、父级 scope 越界和旧 grant 缺少 `execution_scope` 都不能被 execution helper 绕过。`DelegationExecutionWithinScope` 仍保留为执行维度的低层兼容 helper，但它不校验 grant 生命周期或完整父级 subject，不能单独授权代码执行。ref 字段按不透明字符串比较，不解析本机路径。
 
 ## 网络策略
 
@@ -67,4 +68,4 @@
 - 不改变 high / critical 不可委托硬地板。
 - 不改变旧 `OwnerDelegationGrant` 的授权语义。
 
-下游接入顺序建议：先升级 contracts，再由 `truzhenos` Base / Execution Gateway 使用服务器派生 subject 调用 `DelegationExecutionWithinScope`。前端、Pack、Provider 不应自铸 execution subject。
+下游接入顺序建议：先升级 contracts，再由 `truzhenos` Base / Execution Gateway 使用完整 grant、服务器派生 subject 和显式 evaluation time 调用 `DelegationGrantWithinScope`。前端、Pack、Provider 不应自铸 execution subject，也不得用低层 `DelegationExecutionWithinScope` 单独作授权裁定。

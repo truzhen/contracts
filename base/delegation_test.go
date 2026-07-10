@@ -189,7 +189,7 @@ func TestDelegationExecutionSubjectShapeAndLegacyGrantAuthorization(t *testing.T
 
 func TestDelegationGrantWithinScopeChecksParentBeforeExecution(t *testing.T) {
 	t.Run("valid complete grant and subject", func(t *testing.T) {
-		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), validDelegationSubjectWithExecution()); err != nil {
+		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), validDelegationSubjectWithExecution(), delegationEvaluationTime()); err != nil {
 			t.Fatalf("DelegationGrantWithinScope: %v", err)
 		}
 	})
@@ -198,7 +198,7 @@ func TestDelegationGrantWithinScopeChecksParentBeforeExecution(t *testing.T) {
 		subject := validDelegationSubjectWithExecution()
 		subject.TaskType = "other"
 		subject.Execution.CapabilityRef = "capability:other"
-		err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject)
+		err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime())
 		if err == nil || !strings.Contains(err.Error(), "task_type") {
 			t.Fatalf("expected parent task_type rejection before execution rejection, got %v", err)
 		}
@@ -223,7 +223,7 @@ func TestDelegationGrantWithinScopeChecksParentBeforeExecution(t *testing.T) {
 			grant := validOwnerDelegationGrantWithExecution()
 			subject := validDelegationSubjectWithExecution()
 			tt.mutate(grant, subject)
-			if err := DelegationGrantWithinScope(grant, subject); err == nil {
+			if err := DelegationGrantWithinScope(grant, subject, delegationEvaluationTime()); err == nil {
 				t.Fatalf("expected parent %s boundary rejection", tt.name)
 			}
 		})
@@ -236,7 +236,7 @@ func TestDelegationGrantWithinScopePreservesRiskHardFloor(t *testing.T) {
 			grant := validOwnerDelegationGrantWithExecution()
 			subject := validDelegationSubjectWithExecution()
 			subject.RiskLevel = risk
-			if err := DelegationGrantWithinScope(grant, subject); err == nil {
+			if err := DelegationGrantWithinScope(grant, subject, delegationEvaluationTime()); err == nil {
 				t.Fatalf("expected %s subject hard-floor rejection", risk)
 			}
 		})
@@ -244,7 +244,7 @@ func TestDelegationGrantWithinScopePreservesRiskHardFloor(t *testing.T) {
 		t.Run(string(risk)+" grant ceiling", func(t *testing.T) {
 			grant := validOwnerDelegationGrantWithExecution()
 			grant.Scope.RiskCeiling = risk
-			if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution()); err == nil {
+			if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
 				t.Fatalf("expected %s grant ceiling hard-floor rejection", risk)
 			}
 		})
@@ -267,7 +267,7 @@ func TestDelegationGrantWithinScopeRejectsInvalidParentSubject(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			subject := validDelegationSubjectWithExecution()
 			tt.mutate(subject)
-			if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject); err == nil {
+			if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime()); err == nil {
 				t.Fatalf("expected invalid parent subject rejection for %s", tt.name)
 			}
 		})
@@ -332,8 +332,83 @@ func TestDelegationExecutionSubjectRequiresPositiveReservedCumulativeBudget(t *t
 func TestDelegationGrantWithinScopeLegacyGrantCannotAuthorizeExecution(t *testing.T) {
 	grant := validOwnerDelegationGrantWithExecution()
 	grant.Scope.ExecutionScope = nil
-	if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution()); err == nil {
+	if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
 		t.Fatal("expected legacy grant to reject complete execution subject")
+	}
+}
+
+func TestDelegationGrantWithinScopeRequiresActiveUnexpiredGrant(t *testing.T) {
+	t.Run("active grant with future expiry passes", func(t *testing.T) {
+		grant := validOwnerDelegationGrantWithExecution()
+		grant.ExpiresAt = delegationEvaluationTime().Add(time.Second)
+		if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err != nil {
+			t.Fatalf("expected active future grant authorization: %v", err)
+		}
+	})
+
+	for _, status := range []DelegationGrantStatus{
+		DelegationGrantRevoked,
+		DelegationGrantExpired,
+		DelegationGrantSuspendedByEmergencyStop,
+	} {
+		t.Run(string(status), func(t *testing.T) {
+			grant := validOwnerDelegationGrantWithExecution()
+			grant.Status = status
+			if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
+				t.Fatalf("expected %s grant rejection", status)
+			}
+		})
+	}
+
+	for _, tc := range []struct {
+		name      string
+		expiresAt time.Time
+	}{
+		{name: "expires at evaluation time", expiresAt: delegationEvaluationTime()},
+		{name: "expires before evaluation time", expiresAt: delegationEvaluationTime().Add(-time.Nanosecond)},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			grant := validOwnerDelegationGrantWithExecution()
+			grant.ExpiresAt = tc.expiresAt
+			if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
+				t.Fatal("expected expired-at-evaluation grant rejection")
+			}
+		})
+	}
+
+	t.Run("zero evaluation time", func(t *testing.T) {
+		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), validDelegationSubjectWithExecution(), time.Time{}); err == nil {
+			t.Fatal("expected zero evaluation time rejection")
+		}
+	})
+}
+
+func TestDelegationGrantWithinScopeValidatesRequiredGrantFields(t *testing.T) {
+	t.Run("nil grant", func(t *testing.T) {
+		if err := DelegationGrantWithinScope(nil, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
+			t.Fatal("expected nil grant rejection")
+		}
+	})
+
+	tests := []struct {
+		name   string
+		mutate func(*OwnerDelegationGrant)
+	}{
+		{name: "empty grant id", mutate: func(g *OwnerDelegationGrant) { g.GrantID = "" }},
+		{name: "empty owner decision ref", mutate: func(g *OwnerDelegationGrant) { g.OwnerDecisionRef = "" }},
+		{name: "empty delegate ref", mutate: func(g *OwnerDelegationGrant) { g.DelegateRef = "" }},
+		{name: "zero expiry", mutate: func(g *OwnerDelegationGrant) { g.ExpiresAt = time.Time{} }},
+		{name: "unknown status", mutate: func(g *OwnerDelegationGrant) { g.Status = DelegationGrantStatus("unknown") }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grant := validOwnerDelegationGrantWithExecution()
+			tt.mutate(grant)
+			if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
+				t.Fatalf("expected invalid grant rejection for %s", tt.name)
+			}
+		})
 	}
 }
 
@@ -379,6 +454,10 @@ func validOwnerDelegationGrantWithExecution() *OwnerDelegationGrant {
 		Revocable:        true,
 		Status:           DelegationGrantActive,
 	}
+}
+
+func delegationEvaluationTime() time.Time {
+	return time.Date(2026, 7, 10, 12, 0, 0, 0, time.UTC)
 }
 
 func validDelegationSubjectWithExecution() *DelegationSubject {
