@@ -383,6 +383,50 @@ func TestDelegationGrantWithinScopeRequiresActiveUnexpiredGrant(t *testing.T) {
 	})
 }
 
+func TestDelegationGrantWithinScopeRejectsAuthorizationHardDenies(t *testing.T) {
+	for _, sideEffect := range AuthorizationHardDenies() {
+		t.Run(string(sideEffect), func(t *testing.T) {
+			subject := delegationSubjectWithServerFacts(t, sideEffect, 1, "2026-07-10")
+			if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime()); err == nil {
+				t.Fatalf("expected hard-denied side effect %q rejection", sideEffect)
+			}
+		})
+	}
+
+	t.Run("unknown side effect", func(t *testing.T) {
+		subject := delegationSubjectWithServerFacts(t, SideEffectClass("custom"), 1, "2026-07-10")
+		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime()); err == nil {
+			t.Fatal("expected unknown side effect rejection")
+		}
+	})
+}
+
+func TestDelegationGrantWithinScopeEnforcesDailyDecisionQuota(t *testing.T) {
+	t.Run("valid reserved decision passes", func(t *testing.T) {
+		subject := delegationSubjectWithServerFacts(t, SideEffectLocalFileWrite, 3, "2026-07-10")
+		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime()); err != nil {
+			t.Fatalf("expected decision within daily quota: %v", err)
+		}
+	})
+
+	for _, tc := range []struct {
+		name      string
+		consumed  int
+		quotaDate string
+	}{
+		{name: "missing reservation", consumed: 0, quotaDate: "2026-07-10"},
+		{name: "quota exceeded", consumed: 4, quotaDate: "2026-07-10"},
+		{name: "wrong quota date", consumed: 1, quotaDate: "2026-07-09"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			subject := delegationSubjectWithServerFacts(t, SideEffectLocalFileWrite, tc.consumed, tc.quotaDate)
+			if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime()); err == nil {
+				t.Fatalf("expected quota fact rejection: consumed=%d date=%q", tc.consumed, tc.quotaDate)
+			}
+		})
+	}
+}
+
 func TestValidateOwnerDelegationGrantPreservesLegacyRevocableFalse(t *testing.T) {
 	t.Run("revocable true", func(t *testing.T) {
 		if err := ValidateOwnerDelegationGrant(validOwnerDelegationGrantWithExecution()); err != nil {
@@ -488,12 +532,39 @@ func delegationEvaluationTime() time.Time {
 
 func validDelegationSubjectWithExecution() *DelegationSubject {
 	return &DelegationSubject{
-		CandidateRef:   "candidate:001",
-		TransactionRef: "transaction:001",
-		TaskType:       "stage",
-		RiskLevel:      RiskLow,
-		PackRef:        "pack:001",
-		AmountCents:    1000,
-		Execution:      validDelegationExecutionSubject(),
+		CandidateRef:           "candidate:001",
+		TransactionRef:         "transaction:001",
+		TaskType:               "stage",
+		RiskLevel:              RiskLow,
+		PackRef:                "pack:001",
+		AmountCents:            1000,
+		SideEffectClass:        SideEffectLocalFileWrite,
+		QuotaDate:              "2026-07-10",
+		ConsumedDecisionsToday: 1,
+		Execution:              validDelegationExecutionSubject(),
 	}
+}
+
+func delegationSubjectWithServerFacts(t *testing.T, sideEffect SideEffectClass, consumed int, quotaDate string) *DelegationSubject {
+	t.Helper()
+	raw, err := json.Marshal(validDelegationSubjectWithExecution())
+	if err != nil {
+		t.Fatalf("marshal delegation subject: %v", err)
+	}
+	var payload map[string]any
+	if err := json.Unmarshal(raw, &payload); err != nil {
+		t.Fatalf("decode delegation subject payload: %v", err)
+	}
+	payload["side_effect_class"] = sideEffect
+	payload["consumed_decisions_today"] = consumed
+	payload["quota_date"] = quotaDate
+	raw, err = json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("marshal delegation subject payload: %v", err)
+	}
+	var subject DelegationSubject
+	if err := json.Unmarshal(raw, &subject); err != nil {
+		t.Fatalf("unmarshal delegation subject with server facts: %v", err)
+	}
+	return &subject
 }

@@ -131,13 +131,16 @@ type AgentDecision struct {
 // AgentDecision targets. It must be built from stored governance state by the
 // module that owns the candidate (07), never from agent-supplied claims.
 type DelegationSubject struct {
-	CandidateRef   string                      `json:"candidate_ref"`
-	TransactionRef string                      `json:"transaction_ref"`
-	TaskType       string                      `json:"task_type"`
-	RiskLevel      RiskClass                   `json:"risk_level"`
-	PackRef        string                      `json:"pack_ref,omitempty"`
-	AmountCents    int64                       `json:"amount_cents,omitempty"`
-	Execution      *DelegationExecutionSubject `json:"execution,omitempty"`
+	CandidateRef           string                      `json:"candidate_ref"`
+	TransactionRef         string                      `json:"transaction_ref"`
+	TaskType               string                      `json:"task_type"`
+	RiskLevel              RiskClass                   `json:"risk_level"`
+	PackRef                string                      `json:"pack_ref,omitempty"`
+	AmountCents            int64                       `json:"amount_cents,omitempty"`
+	SideEffectClass        SideEffectClass             `json:"side_effect_class,omitempty"`
+	QuotaDate              string                      `json:"quota_date,omitempty"`
+	ConsumedDecisionsToday int                         `json:"consumed_decisions_today,omitempty"`
+	Execution              *DelegationExecutionSubject `json:"execution,omitempty"`
 }
 
 // DelegationExecutionSubject is the server-derived cumulative execution fact
@@ -335,10 +338,56 @@ func DelegationGrantWithinScope(grant *OwnerDelegationGrant, subject *Delegation
 	if err := DelegationWithinScope(&grant.Scope, subject); err != nil {
 		return err
 	}
+	if err := validateDelegationAuthorizationFacts(&grant.Scope, subject, evaluationTime); err != nil {
+		return err
+	}
 	if subject.Execution == nil {
 		return nil
 	}
 	return DelegationExecutionWithinScope(&grant.Scope, subject.Execution)
+}
+
+func validateDelegationAuthorizationFacts(scope *DelegationScope, subject *DelegationSubject, evaluationTime time.Time) error {
+	if !validDelegationSideEffectClass(subject.SideEffectClass) {
+		return errors.New("delegation subject side_effect_class is required and must be known")
+	}
+	for _, denied := range AuthorizationHardDenies() {
+		if subject.SideEffectClass == denied {
+			return fmt.Errorf("delegation subject side_effect_class %q is never delegable", subject.SideEffectClass)
+		}
+	}
+	if subject.SideEffectClass == SideEffectExternalSend {
+		return errors.New("delegation subject external_send is never delegable")
+	}
+	expectedQuotaDate := evaluationTime.UTC().Format("2006-01-02")
+	if subject.QuotaDate != expectedQuotaDate {
+		return fmt.Errorf("delegation subject quota_date %q does not match evaluation date %q", subject.QuotaDate, expectedQuotaDate)
+	}
+	if subject.ConsumedDecisionsToday < 1 {
+		return errors.New("delegation subject consumed_decisions_today must include the reserved decision")
+	}
+	if subject.ConsumedDecisionsToday > scope.Quota.PerDay {
+		return fmt.Errorf("delegation subject consumed_decisions_today %d exceeds quota.per_day %d", subject.ConsumedDecisionsToday, scope.Quota.PerDay)
+	}
+	return nil
+}
+
+func validDelegationSideEffectClass(sideEffect SideEffectClass) bool {
+	switch sideEffect {
+	case SideEffectReadOnly,
+		SideEffectLocalDraft,
+		SideEffectFormalWrite,
+		SideEffectExternalSend,
+		SideEffectLocalFileWrite,
+		SideEffectGuiControl,
+		SideEffectNetworkCall,
+		SideEffectPayment,
+		SideEffectDelete,
+		SideEffectCredentialAccess,
+		SideEffectRealExecution:
+		return true
+	}
+	return false
 }
 
 // DelegationExecutionWithinScope checks a server-derived execution subject
