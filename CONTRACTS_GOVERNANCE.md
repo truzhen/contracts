@@ -157,6 +157,14 @@ Schema 文件分三类：
 
 改 `*.schema.json` 必先 bump 仓根 `VERSION`，CI 以 `scripts/check-version-drift.sh` 强制（版本漂移即红）。
 
+### 6.1 语义与知识资产治理原则（2026-07-10）
+
+「领域语义与隐性业务知识」（行业概念、口径、关系、判断约束，俗称"暗知识"）的跨仓分工固定为：**contracts 只定形状，packs 声明内容，truzhenos os-09 持正式知识真相与挂载 / 裁剪，前端只投影**。
+
+- 契约层对语义只做形状声明，不做业务规则解释：`scene-pack-spec.schema.json` 的 `knowledge_scopes[]`（`knowledge_kinds` 枚举 `law_article / sop / case / glossary / checklist / index`）、`business_object_schema_refs` 与 `pack_knowledge_mount.go`（`KnowledgeScopeDeclaration` / `KnowledgeMountReadModel`）已是语义资产的既有承载，不为"语义"另立平行 schema、`semantic_model` / `ontology` 字段或独立契约域。
+- `knowledge_kinds` 枚举扩展按本节 §6 既有 SemVer 纪律走 minor bump 并通知下游 codegen，不为"语义"开豁免；新增语义相关字段必须由真实消费方驱动（无消费方 = 投机，按 v0.3.1 删零消费包先例）。
+- 语义资产是三类 Pack 的横向内容维度，不改变三类 Pack 封顶（见 `TRUZHEN_PHILOSOPHY.md` §7）；不新增第四种 Pack、中央语义层或 Semantic Runtime 契约。
+
 ## 7. 依赖纪律
 
 允许：
