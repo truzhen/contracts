@@ -31,7 +31,7 @@
 
 ### 任务 A：Impact Model 建议稿 + 影响清单（橙区，纯文档，~0.5-1 天）
 
-产出文件：`docs/plans/impact-model-proposal-20260711.md`（本仓）
+产出文件：`docs/plans/impact-model-proposal-20260710.md`（本仓）
 
 - [ ] A1 读三源设计输入并摘录字段：Palantir `modifiedEntities`/ActionLogicRule 14 变体（`/Users/li/Documents/systong/truzhen-notes/palantir-archaeology/01-schema-checkup.md`、`05-*.md`）；KWeaver `ImpactContractItem{ObjectTypeID,ExpectedOperation,AffectedFields[],Description}`；BKN impact_contracts 的 pre-conditions 阻断表 + `enabled` 默认 false（`kweaver-archaeology/K1-semantic-notes.md`）
 - [ ] A2 起草 `declared_impacts[]` 形状：`{object_type, operation(create|update|delete|send|execute), object_ref?, affected_fields?[], description?}` + 默认关闸语义（未声明影响的正式动作是否拒绝=分级开关，给保守/严格两档方案）
@@ -43,13 +43,13 @@
 
 前置：R-1/R-2 已裁。以下按 R-1=a（通用 manifest）写步骤：
 
-- [ ] B1 全仓核验既有生命周期 token：`grep -rn "lifecycle" /Users/li/Documents/truzhen-contracts /Users/li/Documents/truzhen-packs --include='*.go' --include='*.json' --include='*.md' -l`；若有既有约定，token 以其为准并回改 R-2
-- [ ] B2 **先写失败测试**：`market/pack_manifest_test.go` 增测——manifest JSON 带 `"lifecycle_status":"accepted"` 能解析入 struct 且非法值被校验 helper 拒绝（若本仓惯例无枚举校验 helper 则只测解析+常量存在）；跑 `go test ./market/` 确认 FAIL
-- [ ] B3 `market/pack_manifest.go`：`PackManifest` 增 `LifecycleStatus PackLifecycleStatus \`json:"lifecycle_status,omitempty"\``+类型与 8 常量；`pack-manifest.schema.json` `properties` 增 `lifecycle_status: {type:"string", enum:[八值]}`（**不进 required**）
-- [ ] B4 跑门禁：`go build ./... && go test ./... && go vet ./...`；`bash scripts/contracts-check.sh`（含 R-a 收紧后的 breaking-change 门：新增可选属性应 exit 0）；`VERSION` 0.8.0→0.9.0；检查 `embed.go` 覆盖
-- [ ] B5（R-4 若批）`scripts/go-schema-map.json` 增第 5 对 `market.PackManifest ↔ pack-manifest.schema.json`，复跑 `contracts-check.sh` 确认 `mapped_pairs=5 passed_pairs=5`
+- [x] B1 全仓核验既有生命周期 token【实况：packs candidate-set.json 既有 `"lifecycle_status": "设计中"` 中文约定 → R-2 回改为中文八档枚举】：`grep -rn "lifecycle" /Users/li/Documents/truzhen-contracts /Users/li/Documents/truzhen-packs --include='*.go' --include='*.json' --include='*.md' -l`；若有既有约定，token 以其为准并回改 R-2
+- [x] B2 **先写失败测试**：`market/pack_manifest_test.go` 增测——manifest JSON 带 `"lifecycle_status":"accepted"` 能解析入 struct 且非法值被校验 helper 拒绝（若本仓惯例无枚举校验 helper 则只测解析+常量存在）；跑 `go test ./market/` 确认 FAIL
+- [x] B3 `market/pack_manifest.go`：`PackManifest` 增 `LifecycleStatus PackLifecycleStatus \`json:"lifecycle_status,omitempty"\``+类型与 8 常量；`pack-manifest.schema.json` `properties` 增 `lifecycle_status: {type:"string", enum:[八值]}`（**不进 required**）
+- [x] B4 跑门禁：`go build ./... && go test ./... && go vet ./...`；`bash scripts/contracts-check.sh`（含 R-a 收紧后的 breaking-change 门：新增可选属性应 exit 0）；`VERSION` 0.8.0→0.9.0；检查 `embed.go` 覆盖
+- [x] B5【实况回退：checker v1 不支持 $ref 属性（software/provider_requirements）→ 第 5 对登记即 TOOL_ERROR fail-closed；不改门禁语义，改用 market 包内 embed-schema↔Go 常量同步测试 TestPackManifestLifecycleEnumMatchesSchema 承担同等守卫；待「嵌套 $ref 展开」backlog 落地后再登记第 5 对】原文：`scripts/go-schema-map.json` 增第 5 对 `market.PackManifest ↔ pack-manifest.schema.json`，复跑 `contracts-check.sh` 确认 `mapped_pairs=5 passed_pairs=5`
 - [ ] B6 packs 仓（先等 contracts 步完成）：4 个真实 pack + 1 个模板的 `manifest.json` 增 `lifecycle_status`（各 pack 现状档位由 Owner 或按 FEATURE_LEDGER 事实填，建议 env/housekeeping/smart-home=`accepted`、shuxuejia=`designing`、模板=`idea`——**填值属事实声明，开工时和 Owner 确认一遍**）；跑 packs 既有校验（`go test ./...` + pack_diagnostics）
-- [ ] B7 突变自证：临时删 schema 中 `lifecycle_status` 属性 → 若 R-4 已做，consistency 门必 FAIL（证门禁真在看这个字段）→ 恢复 → 全绿
+- [x] B7 突变自证：临时删 schema 中 `lifecycle_status` 属性 → 若 R-4 已做，consistency 门必 FAIL（证门禁真在看这个字段）→ 恢复 → 全绿
 - [ ] B8 独立验收：派子代理在干净 checkout 复跑 contracts-check + packs 校验；两仓各自登记 FEATURE_LEDGER/账本；**不 merge 不 push，报 Owner 裁 land**
 
 ## 3. 验收断言汇总（改了什么证明什么）
