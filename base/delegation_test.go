@@ -399,6 +399,13 @@ func TestDelegationGrantWithinScopeRejectsAuthorizationHardDenies(t *testing.T) 
 			t.Fatal("expected unknown side effect rejection")
 		}
 	})
+
+	t.Run("external send", func(t *testing.T) {
+		subject := delegationSubjectWithServerFacts(t, SideEffectExternalSend, 1, "2026-07-10")
+		if err := DelegationGrantWithinScope(validOwnerDelegationGrantWithExecution(), subject, delegationEvaluationTime()); err == nil {
+			t.Fatal("expected external_send rejection")
+		}
+	})
 }
 
 func TestDelegationGrantWithinScopeEnforcesDailyDecisionQuota(t *testing.T) {
