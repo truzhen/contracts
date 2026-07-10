@@ -317,6 +317,9 @@ func DelegationGrantWithinScope(grant *OwnerDelegationGrant, subject *Delegation
 	if err := ValidateOwnerDelegationGrant(grant); err != nil {
 		return err
 	}
+	if !grant.Revocable {
+		return errors.New("delegation grant revocable must be true for code execution authorization")
+	}
 	if grant.ReceiptRef == "" {
 		return errors.New("delegation grant receipt_ref is required for authorization")
 	}
@@ -398,9 +401,6 @@ func ValidateOwnerDelegationGrant(grant *OwnerDelegationGrant) error {
 	}
 	if grant.DelegateRef == "" {
 		return errors.New("grant delegate_ref is required")
-	}
-	if !grant.Revocable {
-		return errors.New("grant revocable must be true: Owner delegation cannot transfer irrevocable authority")
 	}
 	if err := ValidateDelegationScope(&grant.Scope); err != nil {
 		return err

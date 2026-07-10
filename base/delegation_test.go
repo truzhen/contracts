@@ -383,7 +383,7 @@ func TestDelegationGrantWithinScopeRequiresActiveUnexpiredGrant(t *testing.T) {
 	})
 }
 
-func TestValidateOwnerDelegationGrantRequiresRevocable(t *testing.T) {
+func TestValidateOwnerDelegationGrantPreservesLegacyRevocableFalse(t *testing.T) {
 	t.Run("revocable true", func(t *testing.T) {
 		if err := ValidateOwnerDelegationGrant(validOwnerDelegationGrantWithExecution()); err != nil {
 			t.Fatalf("expected revocable grant validation: %v", err)
@@ -393,8 +393,8 @@ func TestValidateOwnerDelegationGrantRequiresRevocable(t *testing.T) {
 	t.Run("revocable false", func(t *testing.T) {
 		grant := validOwnerDelegationGrantWithExecution()
 		grant.Revocable = false
-		if err := ValidateOwnerDelegationGrant(grant); err == nil {
-			t.Fatal("expected irrevocable grant rejection")
+		if err := ValidateOwnerDelegationGrant(grant); err != nil {
+			t.Fatalf("legacy structural validation must preserve revocable=false behavior: %v", err)
 		}
 	})
 }
