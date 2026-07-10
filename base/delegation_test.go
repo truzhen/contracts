@@ -338,7 +338,7 @@ func TestDelegationGrantWithinScopeLegacyGrantCannotAuthorizeExecution(t *testin
 }
 
 func TestDelegationGrantWithinScopeRequiresActiveUnexpiredGrant(t *testing.T) {
-	t.Run("active grant with future expiry passes", func(t *testing.T) {
+	t.Run("active revocable grant with future expiry passes", func(t *testing.T) {
 		grant := validOwnerDelegationGrantWithExecution()
 		grant.ExpiresAt = delegationEvaluationTime().Add(time.Second)
 		if err := DelegationGrantWithinScope(grant, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err != nil {
@@ -383,7 +383,23 @@ func TestDelegationGrantWithinScopeRequiresActiveUnexpiredGrant(t *testing.T) {
 	})
 }
 
-func TestDelegationGrantWithinScopeValidatesRequiredGrantFields(t *testing.T) {
+func TestValidateOwnerDelegationGrantRequiresRevocable(t *testing.T) {
+	t.Run("revocable true", func(t *testing.T) {
+		if err := ValidateOwnerDelegationGrant(validOwnerDelegationGrantWithExecution()); err != nil {
+			t.Fatalf("expected revocable grant validation: %v", err)
+		}
+	})
+
+	t.Run("revocable false", func(t *testing.T) {
+		grant := validOwnerDelegationGrantWithExecution()
+		grant.Revocable = false
+		if err := ValidateOwnerDelegationGrant(grant); err == nil {
+			t.Fatal("expected irrevocable grant rejection")
+		}
+	})
+}
+
+func TestDelegationGrantWithinScopeFailsClosedOnGrantHardInvariants(t *testing.T) {
 	t.Run("nil grant", func(t *testing.T) {
 		if err := DelegationGrantWithinScope(nil, validDelegationSubjectWithExecution(), delegationEvaluationTime()); err == nil {
 			t.Fatal("expected nil grant rejection")
@@ -397,8 +413,17 @@ func TestDelegationGrantWithinScopeValidatesRequiredGrantFields(t *testing.T) {
 		{name: "empty grant id", mutate: func(g *OwnerDelegationGrant) { g.GrantID = "" }},
 		{name: "empty owner decision ref", mutate: func(g *OwnerDelegationGrant) { g.OwnerDecisionRef = "" }},
 		{name: "empty delegate ref", mutate: func(g *OwnerDelegationGrant) { g.DelegateRef = "" }},
+		{name: "empty receipt ref", mutate: func(g *OwnerDelegationGrant) { g.ReceiptRef = "" }},
 		{name: "zero expiry", mutate: func(g *OwnerDelegationGrant) { g.ExpiresAt = time.Time{} }},
 		{name: "unknown status", mutate: func(g *OwnerDelegationGrant) { g.Status = DelegationGrantStatus("unknown") }},
+		{name: "irrevocable", mutate: func(g *OwnerDelegationGrant) { g.Revocable = false }},
+		{name: "zero daily quota", mutate: func(g *OwnerDelegationGrant) { g.Scope.Quota.PerDay = 0 }},
+		{name: "negative daily quota", mutate: func(g *OwnerDelegationGrant) { g.Scope.Quota.PerDay = -1 }},
+		{name: "negative amount limit", mutate: func(g *OwnerDelegationGrant) { g.Scope.AmountLimitCents = -1 }},
+		{name: "zero execution max runs", mutate: func(g *OwnerDelegationGrant) { g.Scope.ExecutionScope.MaxRuns = 0 }},
+		{name: "negative execution max runs", mutate: func(g *OwnerDelegationGrant) { g.Scope.ExecutionScope.MaxRuns = -1 }},
+		{name: "zero execution max duration", mutate: func(g *OwnerDelegationGrant) { g.Scope.ExecutionScope.MaxDurationSeconds = 0 }},
+		{name: "negative execution max duration", mutate: func(g *OwnerDelegationGrant) { g.Scope.ExecutionScope.MaxDurationSeconds = -1 }},
 	}
 
 	for _, tt := range tests {
@@ -453,6 +478,7 @@ func validOwnerDelegationGrantWithExecution() *OwnerDelegationGrant {
 		ExpiresAt:        time.Date(2026, 7, 11, 0, 0, 0, 0, time.UTC),
 		Revocable:        true,
 		Status:           DelegationGrantActive,
+		ReceiptRef:       "receipt:grant-001",
 	}
 }
 
