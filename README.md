@@ -42,6 +42,7 @@
 | Gate（门控） | 高风险动作必须回到企业负责人确认和平台裁定 |
 | Receipt（回执） | 重要动作留下可回放的凭证 |
 | Registry / Provider 引用 | Pack 只声明需要什么外部能力，不夹带实现 |
+| Delegation（委托） | Owner 预授权只能在明确边界内生效；代码执行委托必须额外声明 execution_scope |
 | ReadModel / Surface | 界面展示有统一形状，但展示不等于事实 |
 | Market 契约面 | 支付、授权、下载各归其位，云端状态无法在 Pack 里伪造 |
 
@@ -69,7 +70,7 @@ go get github.com/truzhen/contracts@latest
 
 ## 子包速览
 
-核心：`base/`（主权门控核心类型）、`candidates/`（候选域）、`gates/`（门控裁定）、`receipts/`（回执 / 审计）、`spines/`（事务 / 意图 / 证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（只有 secret 的**引用**形状，永无明文凭据）、`market/`。完整清单见 [MODULES.md](MODULES.md)。
+核心：`base/`（主权门控核心类型，含 `OwnerDelegationGrant` 与可选代码执行委托边界）、`candidates/`（候选域）、`gates/`（门控裁定）、`receipts/`（回执 / 审计）、`spines/`（事务 / 意图 / 证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（只有 secret 的**引用**形状，永无明文凭据）、`market/`。完整清单见 [MODULES.md](MODULES.md)。
 
 ## 我们的承诺
 
