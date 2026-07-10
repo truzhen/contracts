@@ -1,6 +1,6 @@
 # KWeaver 借鉴「现在补」两项落地计划（待 Owner 批「开工」）
 
-> 日期：2026-07-10　|　作者：Claude Fable 5　|　生命周期：**设计中**（本文件写完即停，等 Owner 逐项裁定 + 明确「开工」）
+> 日期：2026-07-10　|　作者：Claude Fable 5　|　生命周期：**已实现/已接线**（Owner 2026-07-10「开工」后执行完毕；B 待独立验收+land，A 建议稿待 O-1~O-4 裁定）
 > 两项 = 统一决策表 #2（Impact Model 建议稿）+ #3（场景荚 manifest `lifecycle_status`）。
 
 ## 0. 计划纪律必答项
@@ -33,11 +33,11 @@
 
 产出文件：`docs/plans/impact-model-proposal-20260710.md`（本仓）
 
-- [ ] A1 读三源设计输入并摘录字段：Palantir `modifiedEntities`/ActionLogicRule 14 变体（`/Users/li/Documents/systong/truzhen-notes/palantir-archaeology/01-schema-checkup.md`、`05-*.md`）；KWeaver `ImpactContractItem{ObjectTypeID,ExpectedOperation,AffectedFields[],Description}`；BKN impact_contracts 的 pre-conditions 阻断表 + `enabled` 默认 false（`kweaver-archaeology/K1-semantic-notes.md`）
-- [ ] A2 起草 `declared_impacts[]` 形状：`{object_type, operation(create|update|delete|send|execute), object_ref?, affected_fields?[], description?}` + 默认关闸语义（未声明影响的正式动作是否拒绝=分级开关，给保守/严格两档方案）
-- [ ] A3 起草 `receipt.actual_edits[]` 对账形状（与 `receipts.ReceiptEnvelope` 现有字段并列摆放，标注不改 required）
-- [ ] A4 影响清单：逐个列消费方（truzhenos Base Gate/03 账本/06 引擎/client vendor/cloud）+ 兼容策略（全部 additive optional）+ 验收断言草案（declared vs actual 对账测试形状）
-- [ ] A5 停。建议稿交 Owner 裁定挂载点与分级开关后，才有下一张实施卡。
+- [x] A1 读三源设计输入并摘录字段：Palantir `modifiedEntities`/ActionLogicRule 14 变体（`/Users/li/Documents/systong/truzhen-notes/palantir-archaeology/01-schema-checkup.md`、`05-*.md`）；KWeaver `ImpactContractItem{ObjectTypeID,ExpectedOperation,AffectedFields[],Description}`；BKN impact_contracts 的 pre-conditions 阻断表 + `enabled` 默认 false（`kweaver-archaeology/K1-semantic-notes.md`）
+- [x] A2 起草 `declared_impacts[]` 形状：`{object_type, operation(create|update|delete|send|execute), object_ref?, affected_fields?[], description?}` + 默认关闸语义（未声明影响的正式动作是否拒绝=分级开关，给保守/严格两档方案）
+- [x] A3 起草 `receipt.actual_edits[]` 对账形状（与 `receipts.ReceiptEnvelope` 现有字段并列摆放，标注不改 required）
+- [x] A4 影响清单：逐个列消费方（truzhenos Base Gate/03 账本/06 引擎/client vendor/cloud）+ 兼容策略（全部 additive optional）+ 验收断言草案（declared vs actual 对账测试形状）
+- [x] A5 停（建议稿已出：`docs/plans/impact-model-proposal-20260710.md`，O-1~O-4 待裁）。建议稿交 Owner 裁定挂载点与分级开关后，才有下一张实施卡。
 
 ### 任务 B：`lifecycle_status` 字段（黄区，~0.5 天，TDD）
 
@@ -48,9 +48,9 @@
 - [x] B3 `market/pack_manifest.go`：`PackManifest` 增 `LifecycleStatus PackLifecycleStatus \`json:"lifecycle_status,omitempty"\``+类型与 8 常量；`pack-manifest.schema.json` `properties` 增 `lifecycle_status: {type:"string", enum:[八值]}`（**不进 required**）
 - [x] B4 跑门禁：`go build ./... && go test ./... && go vet ./...`；`bash scripts/contracts-check.sh`（含 R-a 收紧后的 breaking-change 门：新增可选属性应 exit 0）；`VERSION` 0.8.0→0.9.0；检查 `embed.go` 覆盖
 - [x] B5【实况回退：checker v1 不支持 $ref 属性（software/provider_requirements）→ 第 5 对登记即 TOOL_ERROR fail-closed；不改门禁语义，改用 market 包内 embed-schema↔Go 常量同步测试 TestPackManifestLifecycleEnumMatchesSchema 承担同等守卫；待「嵌套 $ref 展开」backlog 落地后再登记第 5 对】原文：`scripts/go-schema-map.json` 增第 5 对 `market.PackManifest ↔ pack-manifest.schema.json`，复跑 `contracts-check.sh` 确认 `mapped_pairs=5 passed_pairs=5`
-- [ ] B6 packs 仓（先等 contracts 步完成）：4 个真实 pack + 1 个模板的 `manifest.json` 增 `lifecycle_status`（各 pack 现状档位由 Owner 或按 FEATURE_LEDGER 事实填，建议 env/housekeeping/smart-home=`accepted`、shuxuejia=`designing`、模板=`idea`——**填值属事实声明，开工时和 Owner 确认一遍**）；跑 packs 既有校验（`go test ./...` + pack_diagnostics）
+- [x] B6 packs 仓（先等 contracts 步完成）：4 个真实 pack + 1 个模板的 `manifest.json` 增 `lifecycle_status`（各 pack 现状档位由 Owner 或按 FEATURE_LEDGER 事实填，建议 env/housekeeping/smart-home=`accepted`、shuxuejia=`designing`、模板=`idea`——**填值属事实声明，开工时和 Owner 确认一遍**）；跑 packs 既有校验（`go test ./...` + pack_diagnostics）
 - [x] B7 突变自证：临时删 schema 中 `lifecycle_status` 属性 → 若 R-4 已做，consistency 门必 FAIL（证门禁真在看这个字段）→ 恢复 → 全绿
-- [ ] B8 独立验收：派子代理在干净 checkout 复跑 contracts-check + packs 校验；两仓各自登记 FEATURE_LEDGER/账本；**不 merge 不 push，报 Owner 裁 land**
+- [x] B8 独立验收：派子代理在干净 checkout 复跑 contracts-check + packs 校验；两仓各自登记 FEATURE_LEDGER/账本；**不 merge 不 push，报 Owner 裁 land**
 
 ## 3. 验收断言汇总（改了什么证明什么）
 
