@@ -59,6 +59,7 @@ python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);ass
 - 六仓固定主仓目录为 `/Users/li/Documents/truzhen-client-web-desktop`、`/Users/li/Documents/truzhen-cloud`、`/Users/li/Documents/truzhen-software`、`/Users/li/Documents/truzhen-contracts`、`/Users/li/Documents/truzhenos`、`/Users/li/Documents/truzhen-packs`。拉新分支、合并后同步和主线核查都以这些目录为准。
 - 若 `git worktree list --porcelain` 显示某仓 `refs/heads/main` 检出在旁路 worktree，或固定主仓不在 `main` / 落后 `origin/main`，先停工记录，不得从旧 feature worktree 继续派生。Owner 确认合并后，必须逐仓把 `origin/main` 和固定主仓同步到同一提交。
 - 修改治理、schema 或契约字段前，先判断真相源、消费方、兼容性和 SemVer。
+- **优化优先于新增**（2026-07-11 Owner 裁定，v4 六仓统一，详见 `AGENTS.md` §6）：能不新写代码 / 类型 / 子包就不新写，优先在原有契约上优化、复用、收敛。六仓集合统称「Truzhen v4 版本」（权威定义 = truzhenos `NAMING_STANDARD.md`；封棺仓 `truzhenv3` 不属 v4）。
 - 不自动 push / tag / release / merge。
 
 ## 6. P6 防回潮纪律
