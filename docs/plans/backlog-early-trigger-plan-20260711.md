@@ -66,3 +66,23 @@ packs：5 个 pack 的 knowledge-index/install.py 同构更新 + CI workflow 增
 ## 生命周期档位
 
 #10/#8/#14 目标：已实现→已接线→（Owner land 后）已验收；#9/#16：设计中；#5/#11/#15：想法→设计中（评估文档）。
+
+---
+
+# 第二阶段（Owner 2026-07-11 追加裁定：「推动全部完成」）
+
+逐项「缺什么 → 完成路径」与波次。事实底座：四路扫描（其中 05 §6 与 hands 两路误扫冻结仓 truzhenv3，其结构性结论采信、行号与现状需在 truzhenos 复核后才施工）。
+
+| # | 缺什么 | 完成路径 | 波次/量级 |
+| --- | --- | --- | --- |
+| #13 版本三态 | **几乎不缺**：lifecycle 端点（draft/promote/confirm/disable/new-version/reactivate/history/packs）、version_events 存储、前端 mergeScenePackLifecycleReceipts 投影、管理页版本展示全部已存在 | 复核后定性「已存在」，决策表收口；如有小 UI 缺口（三态视觉统一/new-version 入口）单独小补 | W1（复核收口，0-0.5 天） |
+| #6 双层裁剪 | 治理条款与两层实现（02 五步管线 / 09 KnowledgeMount 六维键）大概率已存在；冻结仓证据需 truzhenos 复核；可能残缺口=05 工作区记忆两分接缝（planned） | truzhenos 复核 → 有缺口补缺口，无缺口定性「准入已满足/已实现」收口 | W1（复核，0.5 天） |
+| #18 sandbox 双层隔离 | 缺定性归档：无本地沙箱需求（11 走 provider 模式）+ 源仓无 LICENSE（思路引用须注明出处） | 写 V4 概念档案文档（clean-room、出处、触发条件），档位=想法→设计中归档 | W1（0.5 天） |
+| #7 Receipt context | 缺的是**推翻既有裁定的确认**：原裁定不补理由=「无回放缺口证据 + generic decision_context 重复存事实」（palantir 01-schema-checkup L67-84 原文） | 建议以 **typed context 按需加** 条款收口（#14 的 knowledge_recall 已是第一个 typed context 实例=此项已以正确形态开始完成）；不做 generic 大袋子字段。条款入治理 | W1（条款化，0.5 天） |
+| #11 RiskType 五件套 | 缺 contracts additive `risk_types[]` + **Base Gate 真实消费点**（同轮接线铁律）+ 至少 1 个 pack 声明样例 + 双向突变 | 按 Impact Model 模式三仓实装：contracts 形状 → os gate 消费（声明 escalation=owner_gate 且匹配时 Allow→PendingOwner）→ packs 样例声明 | W2（1-2 天） |
+| #15 per-agent 身份 | 缺身份模型与消费者；完整 token 身份=16/03 红区且无场景 | 两段完成：①现在实装「归因收口」＝候选/回执统一带 role_pack_ref+slot_ref+task_purpose 三元组（补缺处+守卫测试）；②独立 token 身份出实施卡挂触发条件。若 Owner 坚持 token 现在做，先出 16 红区实施卡再施工 | W2.5（①0.5-1 天） |
+| #12 制作台引导 | 前置物判定推翻：三制作台（场景画布/能力四幕/角色三步+StudioShell）已上线。真缺三件=填空脚手架、@ 联想、1 必填渐进展开 | client 仓独立分支改造三台表单容器（渐进展开容器+联想组件），562 测试回归+build | W3（2-3 天，client 仓） |
+| #5 LinkType | 缺形状与施工。**双真相源风险已有解**：LinkType 注册表（05 契约对象）+ RelationEdge 增 `link_type_ref` additive（不建第二张边表；RelationType 字符串与 ref 并存=方案A 冗余向后兼容）；写路径已过 Base gate 验真三件套 | contracts schema+Go → 05 注册表存储+端点 → RelationEdge additive+校验 → 测试；实施前在 truzhenos 复核冻结仓证据 | W4（2-3 天） |
+| #17 exec resume | 缺的是**在途线程收尾，不是新施工**：codex-hands 主线正在执行（worktree w0-w1-execution + w2-delegation-session 均在跑，contracts main 今日 ac80e72 即其 land）；我方抢做=撞车重复造 | 挂到 codex-hands 线程：把 exec resume 验收点（token 幂等/门禁三证/断点恢复）交叉核对进其 W1 验收；该线收尾时本项随之完成 | 协调项（不施工） |
+
+波次执行：W1 全部（复核收口+文档+条款）→ W2 #11 → W2.5 #15① → W3 #12 → W4 #5。#17 只做协调核对。每波独立分支、独立验证、停等 land。

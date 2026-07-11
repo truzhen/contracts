@@ -165,6 +165,14 @@ Schema 文件分三类：
 - `knowledge_kinds` 枚举扩展按本节 §6 既有 SemVer 纪律走 minor bump 并通知下游 codegen，不为"语义"开豁免；新增语义相关字段必须由真实消费方驱动（无消费方 = 投机，按 v0.3.1 删零消费包先例）。
 - 语义资产是三类 Pack 的横向内容维度，不改变三类 Pack 封顶（见 `TRUZHEN_PHILOSOPHY.md` §7）；不新增第四种 Pack、中央语义层或 Semantic Runtime 契约。
 
+### 6.2 Receipt 上下文扩展走 typed 按需字段（2026-07-11）
+
+Receipt / Gate 信封需要携带新的回放上下文时，**一律以具体 typed 可选字段按需增加，禁止 generic 大袋子字段**（如 `decision_context: object`）：
+
+- 既有先例即范式：`declared_impacts[]` / `actual_edits[]`（Impact Model，v0.10.0）、`knowledge_recall`（召回预算参数化，随 advice citation receipt 落 PublicMetadata）。每个字段有明确形状、明确生产者与消费者、可被 schema 与突变测试守住。
+- 理由（Palantir 考古 01-schema-checkup 裁定原文沿用）：generic context 会重复存事实、扩大 Receipt 契约且无法验收；「现有 candidate → decision → evidence 三层链 + hash 链」已保 provenance 主线。
+- 新增 typed 字段仍须满足 §6.1 同款门槛：**由真实消费方驱动，无消费方 = 投机**；且落地遵守双落点先例（payload 进哈希封存 + PublicMetadata 承担 03 反查，IntentPayload 不落库）。
+
 ## 7. 依赖纪律
 
 允许：
