@@ -337,6 +337,17 @@ func TestDelegationGrantWithinScopeLegacyGrantCannotAuthorizeExecution(t *testin
 	}
 }
 
+func TestDelegationGrantWithinScopeRejectsMissingExecutionFacts(t *testing.T) {
+	grant := validOwnerDelegationGrantWithExecution()
+	subject := validDelegationSubjectWithExecution()
+	subject.Execution = nil
+
+	err := DelegationGrantWithinScope(grant, subject, delegationEvaluationTime())
+	if err == nil || !strings.Contains(err.Error(), "execution facts are required") {
+		t.Fatalf("expected missing execution facts rejection, got %v", err)
+	}
+}
+
 func TestDelegationGrantWithinScopeRequiresActiveUnexpiredGrant(t *testing.T) {
 	t.Run("active revocable grant with future expiry passes", func(t *testing.T) {
 		grant := validOwnerDelegationGrantWithExecution()

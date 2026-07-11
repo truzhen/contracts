@@ -342,6 +342,9 @@ func DelegationGrantWithinScope(grant *OwnerDelegationGrant, subject *Delegation
 		return err
 	}
 	if subject.Execution == nil {
+		if grant.Scope.ExecutionScope != nil {
+			return errors.New("delegation subject execution facts are required by execution_scope")
+		}
 		return nil
 	}
 	return DelegationExecutionWithinScope(&grant.Scope, subject.Execution)
