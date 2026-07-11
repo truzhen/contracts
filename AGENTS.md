@@ -4,7 +4,7 @@
 
 ## 0. AI 维护速查（6 要素）
 
-1. **本仓职责** — Truzhen 契约层 SDK（`github.com/truzhen/contracts`，开源 Apache-2.0），定义六仓之间跨边界的数据形状：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执 / 审计、注册切片、监控事件、三主线引用，以及机器可校验的 `*.schema.json`（cloud Entitlement / License / Payment / PackListing / Session / Release / WebSurface 契约面为治理清单，见 `MODULES.md`，具体 schema 待真实消费方出现再落）。当前公开消费版本为 `v0.3.0`，基座通过 `go.mod require github.com/truzhen/contracts v0.3.0` 消费。
+1. **本仓职责** — Truzhen 契约层 SDK（`github.com/truzhen/contracts`，开源 Apache-2.0），定义六仓之间跨边界的数据形状：Pack / Candidate / Receipt / Surface / ReadModel schema、候选信封、门控裁定、回执 / 审计、注册切片、监控事件、三主线引用，以及机器可校验的 `*.schema.json`（cloud Entitlement / License / Payment / PackListing / Session / Release / WebSurface 契约面为治理清单，见 `MODULES.md`，具体 schema 待真实消费方出现再落）。当前公开消费版本**以本仓 `VERSION` 与下游各仓 `go.mod` 为准**（治理文件不手抄具体版本号——手抄必漂移，2026-07-11 集中处理轮修正）。
 2. **本仓不是什么** — 不是基座 `truzhenos`，不拥有 Base Gate / Receipt Ledger / Gateway / provider / runtime 实现；不是 `truzhen-packs`，不保存行业 Pack 数据、安装脚本或 Pack 内容；不是 client repo，不实现 React/Tauri UI；不是 `truzhen-software`，不记录本机外部软件安装事实或 sidecar 运行态；不是 `truzhen-cloud`，不实现云端 server、支付 webhook 或 License / Entitlement 服务。
 3. **软件依赖契约边界** — `PackSoftwareRequirement` 只表达 Baserow / OCR 等底层软件的 family、版本范围、能力标签、复用 / 隔离 / fallback / license 策略；`SoftwareResolutionLock` 只定义 `truzhenos` resolver 产出的用户侧 lock 形状。本仓不得保存本机路径、端口、账号、DB、模型、镜像、secret 或 runtime state。
 4. **允许内容** — Go 类型、接口、常量、枚举、JSON tag、JSON Schema、schema embed、无外部副作用的确定性校验 / ref 派生 / helper。helper 只能表达契约边界，不得访问 DB、网络、文件系统、provider、真实执行环境或用户资产。
