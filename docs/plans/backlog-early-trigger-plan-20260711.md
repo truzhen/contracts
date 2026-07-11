@@ -95,3 +95,13 @@ packs：5 个 pack 的 knowledge-index/install.py 同构更新 + CI workflow 增
 - **os**（wave2 分支 claude/backlog-wave2-os-20260711）：①scenepack spec 增 risk_types（跟随 ProviderRequirements 既有类型风格）+ lifecycle draft intake additive；②base/gate 新 `risk_type_gate.go`（镜像 impact_risk_gate：declared 含 escalation=owner_gate → Allow→PendingOwner + trace "RiskTypeGate"）+ orchestrator 两处 Evaluate 调用点接 applyRiskTypeFloor（紧跟 applyImpactRiskFloor 后）；③生产者=06：buildSceneFlowGateRequest 按 pack_version_ref 查 lifecycle record → 匹配 trigger_action_types → 附 DeclaredRiskTypes（KWeaver 规格-only 反例的解药就在这一跳）；④TDD：floor 三态单测 + 06 run-start 带声明必 pending_owner 的行为测 + 突变闭环。
 - **packs**（campaign 分支）：env pack manifest 增 1 条真实 risk_types 样例 + 四 install.py draft payload 透传 risk_types（additive）。
 - 顺序：contracts 形状+守卫绿 → os replace 本地 contracts 实装（land 时按 G2a 翻 require）→ packs 样例。验收=改哪证哪 + 全量回归。
+
+## W4 实施卡：#5 LinkType 一等公民（定稿待执行，2026-07-11）
+
+设计裁定（评估文档结论落卡）：**不建第二张边表**——LinkType 注册表 + RelationEdge 增 `link_type_ref` additive；RelationType 字符串与 ref 并存（方案A 冗余向后兼容，零迁移）。
+
+- **归属**：os 05 单仓 v1（RelationEdge 是 os 内部类型非 contracts 类型，冻结仓证据 businessobject/domain/productization_types.go 已核，实施前在 truzhenos 复核行号）；contracts 暂零改动（前端经 readmodel JSON 消费，additive 字段自然透出；若 client vendor DTO 需字段再走 contracts codegen 轮）。
+- **实装面**：①05 domain `LinkTypeDefinition{link_type_ref, display_name, source_kind, target_kind, bidirectional, description}` + 模块内 SQLite 表；②RelationEdge 增 LinkTypeRef additive + 写路径校验（给了 ref 但注册表无此类型 → 拒绝，不静默吞；空 = 兼容旧边）；③graph readmodel 投影带 link_type 信息；④注册写路径过既有 owner-gated 约定（不开免闸写口）。
+- **红线**：不动 formal 提升验真三件套；不建平行关系真相源；记忆图 RelationEdge（memory/provider/graph_sqlite 同名异物）不在本卡范围。
+- **TDD**：注册/查询/边校验三态（合法 ref/未知 ref 拒/空兼容）+ readmodel 投影 + 突变闭环。
+- **状态**：卡已定稿，下一执行轮按卡开工（W1-W3+W2.5 已全部完成实装）。
