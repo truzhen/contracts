@@ -86,3 +86,12 @@ packs：5 个 pack 的 knowledge-index/install.py 同构更新 + CI workflow 增
 | #17 exec resume | 缺的是**在途线程收尾，不是新施工**：codex-hands 主线正在执行（worktree w0-w1-execution + w2-delegation-session 均在跑，contracts main 今日 ac80e72 即其 land）；我方抢做=撞车重复造 | 挂到 codex-hands 线程：把 exec resume 验收点（token 幂等/门禁三证/断点恢复）交叉核对进其 W1 验收；该线收尾时本项随之完成 | 协调项（不施工） |
 
 波次执行：W1 全部（复核收口+文档+条款）→ W2 #11 → W2.5 #15① → W3 #12 → W4 #5。#17 只做协调核对。每波独立分支、独立验证、停等 land。
+
+## W2 实施卡：#11 RiskType 五件套（侦察后定稿，2026-07-11）
+
+侦察事实（file:line 见侦察报告）：GateCandidateEnvelope 无 pack 回溯字段、DeclaredImpacts 当前**零生产者**（floor 已 live）；缺口 A=scenepack/spec.go 无 risk_types、B=confirm_flow buildGateRequest 未提取、C=sceneflowdev handlers.go:786 buildSceneFlowGateRequest 有 pack_version_ref 但未查 lifecycle record（GetRecord 接口已存在 ports.go:61）。
+
+- **contracts**（本 campaign 分支）：①`spines/risk.go` 新增 `DeclaredRiskType{RiskTypeID, TriggerActionType, EvidenceRequirement, EscalationPath("none"|"owner_gate"), Definition}`（envelope 用，避免 base→market 依赖）；②`market.PackRiskType` 五件套（risk_type_id/definition/trigger_action_types[]/evidence_requirement/escalation_path/fallback）+ PackManifest.RiskTypes additive + pack-manifest.schema.json additive + enum 同步守卫测试；③`base.GateCandidateEnvelope.DeclaredRiskTypes []spines.DeclaredRiskType` additive；④VERSION minor bump（以分支基线 ac80e72 的 VERSION 为准）。
+- **os**（wave2 分支 claude/backlog-wave2-os-20260711）：①scenepack spec 增 risk_types（跟随 ProviderRequirements 既有类型风格）+ lifecycle draft intake additive；②base/gate 新 `risk_type_gate.go`（镜像 impact_risk_gate：declared 含 escalation=owner_gate → Allow→PendingOwner + trace "RiskTypeGate"）+ orchestrator 两处 Evaluate 调用点接 applyRiskTypeFloor（紧跟 applyImpactRiskFloor 后）；③生产者=06：buildSceneFlowGateRequest 按 pack_version_ref 查 lifecycle record → 匹配 trigger_action_types → 附 DeclaredRiskTypes（KWeaver 规格-only 反例的解药就在这一跳）；④TDD：floor 三态单测 + 06 run-start 带声明必 pending_owner 的行为测 + 突变闭环。
+- **packs**（campaign 分支）：env pack manifest 增 1 条真实 risk_types 样例 + 四 install.py draft payload 透传 risk_types（additive）。
+- 顺序：contracts 形状+守卫绿 → os replace 本地 contracts 实装（land 时按 G2a 翻 require）→ packs 样例。验收=改哪证哪 + 全量回归。
