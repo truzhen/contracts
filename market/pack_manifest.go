@@ -115,6 +115,21 @@ const (
 	PackLifecycleDeprecated    PackLifecycleStatus = "已弃用"
 )
 
+// PackRiskType is the structured skeleton of one scene-pack judgment-policy
+// risk type (统一决策表 #11 五件套：定义/触发/证据要求/升级路径/回退). A
+// declaration never grants authority: escalation_path only *requests* an
+// escalation; the ruling stays with Owner + Base Gate, and packs without
+// declarations keep today's behavior unchanged (conservative tier).
+// escalation_path values mirror spines.RiskEscalationPath ("none"|"owner_gate").
+type PackRiskType struct {
+	RiskTypeID          string   `json:"risk_type_id"`
+	Definition          string   `json:"definition"`
+	TriggerActionTypes  []string `json:"trigger_action_types"`
+	EvidenceRequirement string   `json:"evidence_requirement,omitempty"`
+	EscalationPath      string   `json:"escalation_path"`
+	Fallback            string   `json:"fallback,omitempty"`
+}
+
 // PackManifest is the canonical cloud-facing manifest shape. It intentionally
 // stays descriptive: pack runtime state, local provider resolution and product
 // listing state live in their owning repositories.
@@ -130,6 +145,7 @@ type PackManifest struct {
 	ArchTags             []string                  `json:"arch_tags,omitempty"`
 	SoftwareRequirements []PackSoftwareRequirement `json:"software_requirements,omitempty"`
 	ProviderRequirements []ProviderRequirement     `json:"provider_requirements,omitempty"`
+	RiskTypes            []PackRiskType            `json:"risk_types,omitempty"`
 	ExternalSoftwareRefs []string                  `json:"external_software_refs,omitempty"`
 }
 

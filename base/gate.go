@@ -68,6 +68,13 @@ type GateCandidateEnvelope struct {
 	// declared delete raises the risk floor (owner_gate path) — enforcement
 	// lives in the Base orchestrator, not here.
 	DeclaredImpacts []spines.DeclaredImpact `json:"declared_impacts,omitempty"`
+
+	// DeclaredRiskTypes carries the pack judgment-policy risk declarations
+	// matched to this candidate's action (统一决策表 #11). Same contract as
+	// DeclaredImpacts: evidence for gate evaluation, never authorization;
+	// absence changes nothing; escalation enforcement lives in the Base
+	// orchestrator risk-type floor, not here.
+	DeclaredRiskTypes []spines.DeclaredRiskType `json:"declared_risk_types,omitempty"`
 }
 
 // GateRequest represents an evaluation request sent to the Gate Orchestrator
