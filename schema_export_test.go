@@ -36,3 +36,30 @@ func TestV071SchemasEmbeddedAndParse(t *testing.T) {
 		}
 	}
 }
+
+func TestPackInstallResultCarriesImmutableAuthorizationAndArtifactProof(t *testing.T) {
+	var doc struct {
+		Required   []string                           `json:"required"`
+		Properties map[string]map[string]interface{} `json:"properties"`
+	}
+	if err := json.Unmarshal(contracts.PackInstallResultSchemaJSON, &doc); err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"decision_ref", "run_id", "nonce", "artifact_sha256", "receipt_ref", "evidence_refs"} {
+		if doc.Properties[field] == nil {
+			t.Fatalf("pack install proof schema missing %s", field)
+		}
+	}
+	// Additive optional fields preserve existing v0.12 consumers. The OS HTTP
+	// success operation imposes the stronger required set for new installs.
+	for _, field := range []string{"decision_ref", "run_id", "nonce", "artifact_sha256"} {
+		for _, required := range doc.Required {
+			if required == field {
+				t.Fatalf("additive proof field %s must remain optional in shared DTO", field)
+			}
+		}
+	}
+	if got := doc.Properties["artifact_sha256"]["pattern"]; got != "^[a-f0-9]{64}$" {
+		t.Fatalf("artifact_sha256 must be canonical lowercase SHA-256, got %v", got)
+	}
+}

@@ -11,8 +11,15 @@
     "pack_ref": { "type": "string" },
     "version": { "type": "string" },
     "install_status": { "type": "string" },
+    "decision_ref": { "type": "string", "minLength": 1, "description": "os-01 签发并由安装端点单次消费的 Owner decision。" },
+    "run_id": { "type": "string", "minLength": 1, "description": "与 decision 绑定的服务端 run_id。" },
+    "nonce": { "type": "string", "minLength": 1, "description": "与 decision 绑定的单次 nonce；客户端不得自铸。" },
+    "artifact_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "本次经 Cloud Pack Gate 下载并实际装入的 zip 原始字节 SHA-256。" },
     "receipt_ref": { "type": "string" },
     "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "gateway_proxy_required": { "type": "boolean" },
+    "no_raw_secret": { "type": "boolean" },
+    "status": { "type": "string", "description": "受控失败或恢复状态；成功时以 install_status 为准。" },
     "error": { "type": "string" },
     "detail": { "type": "string" }
   }
