@@ -19,6 +19,9 @@ func TestV071SchemasEmbeddedAndParse(t *testing.T) {
 		"market-local-gate-check-result":      contracts.MarketLocalGateCheckResultSchemaJSON,
 		"pack-install-result":                 contracts.PackInstallResultSchemaJSON,
 		"pack-export-bundle":                  contracts.PackExportBundleSchemaJSON,
+		"mobile-pairing-bootstrap-request":   contracts.MobilePairingBootstrapRequestSchemaJSON,
+		"mobile-pairing-bootstrap-candidate": contracts.MobilePairingBootstrapCandidateSchemaJSON,
+		"mobile-session-issue-intent":        contracts.MobileSessionIssueIntentSchemaJSON,
 	}
 	for name, raw := range schemas {
 		if len(raw) == 0 {

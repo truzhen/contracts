@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/mobile-pairing-bootstrap-request.schema.json",
+  "title": "MobilePairingBootstrapRequest",
+  "description": "手机首次向 PC Host 提交的无权限配对描述。不得携带 actor、owner、binding、pairing、decision、receipt、run、nonce 或任何凭据。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["device_label", "platform", "app_instance_ref", "idempotency_key"],
+  "properties": {
+    "device_label": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "platform": { "type": "string", "enum": ["android", "ios"] },
+    "app_instance_ref": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 128 }
+  }
+}
