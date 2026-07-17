@@ -9,16 +9,19 @@ import (
 
 func TestV071SchemasEmbeddedAndParse(t *testing.T) {
 	schemas := map[string][]byte{
-		"pack-usage-contribution-candidate":   contracts.PackUsageContributionCandidateSchemaJSON,
+		"pack-usage-contribution-candidate":  contracts.PackUsageContributionCandidateSchemaJSON,
 		"pack-version-migration-candidate":   contracts.PackVersionMigrationCandidateSchemaJSON,
-		"contribution-receipt":                contracts.ContributionReceiptSchemaJSON,
-		"market-catalog-product":              contracts.MarketCatalogProductSchemaJSON,
-		"market-entitlement":                  contracts.MarketEntitlementSchemaJSON,
-		"market-checkout-result":              contracts.MarketCheckoutResultSchemaJSON,
-		"market-order-status":                 contracts.MarketOrderStatusSchemaJSON,
-		"market-local-gate-check-result":      contracts.MarketLocalGateCheckResultSchemaJSON,
-		"pack-install-result":                 contracts.PackInstallResultSchemaJSON,
-		"pack-export-bundle":                  contracts.PackExportBundleSchemaJSON,
+		"contribution-receipt":               contracts.ContributionReceiptSchemaJSON,
+		"market-catalog-product":             contracts.MarketCatalogProductSchemaJSON,
+		"market-entitlement":                 contracts.MarketEntitlementSchemaJSON,
+		"market-checkout-result":             contracts.MarketCheckoutResultSchemaJSON,
+		"market-order-status":                contracts.MarketOrderStatusSchemaJSON,
+		"market-local-gate-check-result":     contracts.MarketLocalGateCheckResultSchemaJSON,
+		"pack-install-result":                contracts.PackInstallResultSchemaJSON,
+		"pack-export-bundle":                 contracts.PackExportBundleSchemaJSON,
+		"mobile-pairing-bootstrap-request":   contracts.MobilePairingBootstrapRequestSchemaJSON,
+		"mobile-pairing-bootstrap-candidate": contracts.MobilePairingBootstrapCandidateSchemaJSON,
+		"mobile-session-issue-intent":        contracts.MobileSessionIssueIntentSchemaJSON,
 	}
 	for name, raw := range schemas {
 		if len(raw) == 0 {
@@ -39,7 +42,7 @@ func TestV071SchemasEmbeddedAndParse(t *testing.T) {
 
 func TestPackInstallResultCarriesImmutableAuthorizationAndArtifactProof(t *testing.T) {
 	var doc struct {
-		Required   []string                           `json:"required"`
+		Required   []string                          `json:"required"`
 		Properties map[string]map[string]interface{} `json:"properties"`
 	}
 	if err := json.Unmarshal(contracts.PackInstallResultSchemaJSON, &doc); err != nil {

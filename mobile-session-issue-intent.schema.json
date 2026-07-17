@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/mobile-session-issue-intent.schema.json",
+  "title": "MobileSessionIssueIntent",
+  "description": "PC 已批准后的移动会话签发意图。一次性配对 proof 必须仅位于受控 X-Truzhen-Pairing-Bootstrap 请求头，不能出现在 JSON、日志、ReadModel、Receipt 或本契约中。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_ref", "idempotency_key"],
+  "properties": {
+    "candidate_ref": { "type": "string", "minLength": 1 },
+    "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 128 }
+  }
+}

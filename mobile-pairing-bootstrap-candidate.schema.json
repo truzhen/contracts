@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/mobile-pairing-bootstrap-candidate.schema.json",
+  "title": "MobilePairingBootstrapCandidate",
+  "description": "PC Host 生成并投影的移动首配对候选。它始终是 candidate_only，既不是正式身份、device binding、host pairing，也不是 OwnerDecision、Receipt 或凭据真相；PC Owner 批准后才由 Host 内部生成这些正式事实。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "candidate_created", "duplicate", "candidate_only", "mobile_truth_source", "status", "candidate_ref", "candidate_kind", "device_label", "platform", "idempotency_key", "created_at", "produces_owner_decision", "credential_state"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "candidate_created": { "type": "boolean" },
+    "duplicate": { "type": "boolean" },
+    "candidate_only": { "type": "boolean", "const": true },
+    "mobile_truth_source": { "type": "boolean", "const": false },
+    "status": { "type": "string", "enum": ["pending_pc_approval", "pc_approved"] },
+    "candidate_ref": { "type": "string", "minLength": 1 },
+    "candidate_kind": { "type": "string", "const": "mobile_pairing_bootstrap_candidate" },
+    "device_label": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "platform": { "type": "string", "enum": ["android", "ios"] },
+    "idempotency_key": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "produces_owner_decision": { "type": "boolean", "const": false },
+    "credential_state": { "type": "string", "const": "not_exposed_to_mobile" }
+  }
+}

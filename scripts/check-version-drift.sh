@@ -109,9 +109,14 @@ echo "[version-drift] 最新 tag = ${lastTag}（版本 ${lastVer}）"
 echo "[version-drift] VERSION 文件 = ${curVer}"
 
 # ---- 计算自上次 tag 以来变化的 schema ----------------------------------------
-# git diff 会把注释 tag 解引用到其提交；'*.schema.json' pathspec 会匹配任意层级
-# （含 spines/ 子目录）。
-changedSchemas="$(git -C "$ROOT" diff --name-only "$lastTag"..HEAD -- '*.schema.json' || true)"
+# 发布 gate 既要看 tag..HEAD，也要看当前工作区：本地验收若忽略暂存、未暂存或
+# 未跟踪 schema，会错误宣称“无需 bump”。pathspec 会匹配任意层级（含 spines/）。
+changedSchemas="$({
+  git -C "$ROOT" diff --name-only "$lastTag"..HEAD -- '*.schema.json'
+  git -C "$ROOT" diff --name-only -- '*.schema.json'
+  git -C "$ROOT" diff --cached --name-only -- '*.schema.json'
+  git -C "$ROOT" ls-files --others --exclude-standard -- '*.schema.json'
+} | sed '/^$/d' | sort -u)"
 
 if [ -z "$changedSchemas" ]; then
   echo "[version-drift][PASS] 自 $lastTag 起未修改任何 *.schema.json，无需 bump。"

@@ -35,6 +35,24 @@ var VisualUnitSpecSchemaJSON []byte
 //go:embed transaction-object-projection.schema.json
 var TransactionObjectProjectionSchemaJSON []byte
 
+// MobilePairingBootstrapRequestSchemaJSON is the authority-free first-pairing
+// request shape. It intentionally excludes every authority and credential.
+//
+//go:embed mobile-pairing-bootstrap-request.schema.json
+var MobilePairingBootstrapRequestSchemaJSON []byte
+
+// MobilePairingBootstrapCandidateSchemaJSON is the Host-owned candidate
+// projection shown to phone and PC clients before a mobile session exists.
+//
+//go:embed mobile-pairing-bootstrap-candidate.schema.json
+var MobilePairingBootstrapCandidateSchemaJSON []byte
+
+// MobileSessionIssueIntentSchemaJSON is the body shape for post-approval
+// session issuance. Bootstrap proof stays header-only and is not embedded.
+//
+//go:embed mobile-session-issue-intent.schema.json
+var MobileSessionIssueIntentSchemaJSON []byte
+
 // CandidateEnvelopeSchemaJSON is contracts/candidate-envelope.schema.json
 // （candidates.CandidateEnvelope 的 JSON 表达，client layer 候选卡面向、CI 校验；
 // T12 阶段A：client layer 契约面补全）。
