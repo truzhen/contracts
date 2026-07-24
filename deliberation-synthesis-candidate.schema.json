@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.dev/contracts/deliberation-synthesis-candidate.schema.json",
+  "title": "DeliberationSynthesisCandidate",
+  "description": "模型合议结果候选。它必须保持 candidate_only/non_formal，且每项仅引用本候选可追溯材料。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_ref", "session_ref", "turn_ref", "transaction_ref", "source_event_id", "model_run_ref", "selected_lane_refs", "material_refs", "core_conclusions", "consensus", "disagreements", "strongest_objections", "unknowns", "recommended_next_steps", "missing_lanes", "single_source", "source_count", "receipt_ref", "candidate_only", "non_formal", "created_at"],
+  "properties": {
+    "candidate_ref": {"type": "string", "minLength": 1},
+    "session_ref": {"type": "string", "minLength": 1},
+    "turn_ref": {"type": "string", "minLength": 1},
+    "transaction_ref": {"type": "string", "minLength": 1},
+    "source_event_id": {"type": "string", "minLength": 1},
+    "model_run_ref": {"type": "string", "minLength": 1},
+    "selected_lane_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "material_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "core_conclusions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/item"}},
+    "consensus": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "disagreements": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "strongest_objections": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "unknowns": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "recommended_next_steps": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "missing_lanes": {"type": "array", "items": {"$ref": "#/$defs/missingLane"}},
+    "single_source": {"type": "boolean"},
+    "source_count": {"type": "integer", "minimum": 1},
+    "receipt_ref": {"type": "string", "minLength": 1, "readOnly": true},
+    "candidate_only": {"type": "boolean", "const": true},
+    "non_formal": {"type": "boolean", "const": true},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_ref", "summary", "confidence", "material_refs"],
+      "properties": {
+        "item_ref": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+        "material_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "missingLane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane_ref", "reason_code"],
+      "properties": {
+        "lane_ref": {"type": "string", "minLength": 1},
+        "reason_code": {"type": "string", "minLength": 1},
+        "receipt_ref": {"type": "string", "minLength": 1, "readOnly": true}
+      }
+    }
+  }
+}

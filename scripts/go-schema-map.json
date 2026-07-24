@@ -6,6 +6,8 @@
     {"go_dir": "market", "go_type": "SoftwareResolutionLock", "schema": "software-resolution-lock.schema.json"},
     {"go_dir": "readmodels", "go_type": "MobilePairingBootstrapRequest", "schema": "mobile-pairing-bootstrap-request.schema.json"},
     {"go_dir": "readmodels", "go_type": "MobilePairingBootstrapCandidate", "schema": "mobile-pairing-bootstrap-candidate.schema.json"},
-    {"go_dir": "readmodels", "go_type": "MobileSessionIssueIntent", "schema": "mobile-session-issue-intent.schema.json"}
+    {"go_dir": "readmodels", "go_type": "MobileSessionIssueIntent", "schema": "mobile-session-issue-intent.schema.json"},
+    {"go_dir": "readmodels", "go_type": "DeliberationProviderLaneReadModel", "schema": "deliberation-provider-lane-readmodel.schema.json"},
+    {"go_dir": "readmodels", "go_type": "DeliberationAutomationGrantReadModel", "schema": "deliberation-automation-grant-readmodel.schema.json"}
   ]
 }

@@ -168,3 +168,33 @@ var MonitoringEventSchemaJSON []byte
 //
 //go:embed monitoring/fault-incident.schema.json
 var FaultIncidentSchemaJSON []byte
+
+// DeliberationSessionReadModelSchemaJSON is the client-safe session projection
+// for the governed multi-provider deliberation flow.
+//
+//go:embed deliberation-session-readmodel.schema.json
+var DeliberationSessionReadModelSchemaJSON []byte
+
+// DeliberationTurnReadModelSchemaJSON is the client-safe turn projection. It
+// carries a question artifact reference and SHA-256, never question content.
+//
+//go:embed deliberation-turn-readmodel.schema.json
+var DeliberationTurnReadModelSchemaJSON []byte
+
+// DeliberationProviderLaneReadModelSchemaJSON is the adapter-lane projection
+// with separately declared release eligibility and runtime readiness.
+//
+//go:embed deliberation-provider-lane-readmodel.schema.json
+var DeliberationProviderLaneReadModelSchemaJSON []byte
+
+// DeliberationAutomationGrantReadModelSchemaJSON is the projection of a
+// Base-issued bounded automation grant; clients cannot self-mint its refs.
+//
+//go:embed deliberation-automation-grant-readmodel.schema.json
+var DeliberationAutomationGrantReadModelSchemaJSON []byte
+
+// DeliberationSynthesisCandidateSchemaJSON describes an AI synthesis output
+// that is permanently candidate_only and non_formal.
+//
+//go:embed deliberation-synthesis-candidate.schema.json
+var DeliberationSynthesisCandidateSchemaJSON []byte

@@ -47,8 +47,8 @@ class GoSchemaConsistencyTest(unittest.TestCase):
     def test_real_pairs_pass(self):
         result = run_map(os.path.join(ROOT, "scripts", "go-schema-map.json"))
         self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
-        self.assertIn("mapped_pairs=7", result.stdout)
-        self.assertIn("passed_pairs=7", result.stdout)
+        self.assertIn("mapped_pairs=9", result.stdout)
+        self.assertIn("passed_pairs=9", result.stdout)
 
     def test_schema_only_field_fails(self):
         path = write_map([{

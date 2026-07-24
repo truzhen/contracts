@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.dev/contracts/deliberation-turn-readmodel.schema.json",
+  "title": "DeliberationTurnReadModel",
+  "description": "单轮探讨的只读投影；问题正文由 question_artifact_ref 指向受控存储。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["turn_ref", "session_ref", "transaction_ref", "source_event_id", "sequence", "question_artifact_ref", "question_sha256", "status", "provider_lanes", "selected_lane_count", "imported_lane_count", "occ_version", "created_at", "updated_at", "candidate_only", "non_formal"],
+  "properties": {
+    "turn_ref": {"type": "string", "minLength": 1},
+    "session_ref": {"type": "string", "minLength": 1},
+    "transaction_ref": {"type": "string", "minLength": 1},
+    "source_event_id": {"type": "string", "minLength": 1},
+    "sequence": {"type": "integer", "minimum": 1},
+    "question_artifact_ref": {"type": "string", "minLength": 1},
+    "question_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "status": {"type": "string", "enum": ["created", "collecting", "dispatching", "ready_partial", "ready", "synthesizing", "synthesis_ready", "blocked", "recovery_required", "authorization_required"]},
+    "provider_lanes": {"type": "array", "items": {"$ref": "deliberation-provider-lane-readmodel.schema.json"}},
+    "selected_lane_count": {"type": "integer", "minimum": 0},
+    "imported_lane_count": {"type": "integer", "minimum": 0},
+    "synthesis_candidate_ref": {"type": "string", "minLength": 1},
+    "automation_attempt_ref": {"type": "string", "minLength": 1},
+    "occ_version": {"type": "integer", "minimum": 0},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "candidate_only": {"type": "boolean", "const": true},
+    "non_formal": {"type": "boolean", "const": true}
+  }
+}

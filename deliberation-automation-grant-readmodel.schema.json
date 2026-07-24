@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.dev/contracts/deliberation-automation-grant-readmodel.schema.json",
+  "title": "DeliberationAutomationGrantReadModel",
+  "description": "Base 签发的自动化授权只读投影。客户端只能展示与提交候选，不能自铸 decision_ref 或正式授权。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["grant_ref", "mode", "session_ref", "transaction_ref", "provider_adapter_refs", "allowed_operations", "dispatch_on_confirm", "idle_expires_at", "absolute_expires_at", "max_turns", "remaining_turns", "max_dispatches_per_lane", "status", "decision_ref", "policy_snapshot_ref", "evidence_refs", "candidate_only", "non_formal", "created_at", "updated_at"],
+  "properties": {
+    "grant_ref": {"type": "string", "minLength": 1},
+    "mode": {"type": "string", "enum": ["current_turn_auto", "session_auto"]},
+    "session_ref": {"type": "string", "minLength": 1},
+    "turn_ref": {"type": "string", "minLength": 1},
+    "transaction_ref": {"type": "string", "minLength": 1},
+    "provider_adapter_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "allowed_operations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["fill_prompt", "submit_prompt", "observe_response", "capture_response", "request_synthesis"]}},
+    "dispatch_on_confirm": {"type": "boolean", "const": true},
+    "question_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "idle_expires_at": {"type": "string", "format": "date-time"},
+    "absolute_expires_at": {"type": "string", "format": "date-time"},
+    "max_turns": {"type": "integer", "minimum": 1},
+    "remaining_turns": {"type": "integer", "minimum": 0},
+    "max_dispatches_per_lane": {"type": "integer", "const": 1},
+    "status": {"type": "string", "enum": ["prepared", "active", "consumed", "expired", "revoked", "suspended_reauthorization_required"]},
+    "decision_ref": {"type": "string", "minLength": 1, "readOnly": true},
+    "policy_snapshot_ref": {"type": "string", "minLength": 1, "readOnly": true},
+    "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "candidate_only": {"type": "boolean", "const": true},
+    "non_formal": {"type": "boolean", "const": true},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "current_turn_auto"}}, "required": ["mode"]},
+      "then": {"required": ["turn_ref", "question_sha256"]}
+    }
+  ]
+}

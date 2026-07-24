@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.dev/contracts/deliberation-session-readmodel.schema.json",
+  "title": "DeliberationSessionReadModel",
+  "description": "学习与探讨会话的只读投影；问题与供应商原文只以受控引用留在拥有方。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["session_ref", "transaction_ref", "source_event_id", "owner_ref", "status", "automation_mode", "turns", "selected_provider_adapter_refs", "occ_version", "created_at", "updated_at", "candidate_only", "non_formal"],
+  "properties": {
+    "session_ref": {"type": "string", "minLength": 1},
+    "transaction_ref": {"type": "string", "minLength": 1},
+    "source_event_id": {"type": "string", "minLength": 1},
+    "owner_ref": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["created", "collecting", "auto_active", "ready_partial", "ready", "synthesizing", "synthesis_ready", "blocked", "recovery_required", "suspended_reauthorization_required", "voided"]},
+    "automation_mode": {"type": "string", "enum": ["manual", "current_turn_auto", "session_auto"]},
+    "automation_grant": {"$ref": "deliberation-automation-grant-readmodel.schema.json"},
+    "active_turn_ref": {"type": "string", "minLength": 1},
+    "turns": {"type": "array", "items": {"$ref": "deliberation-turn-readmodel.schema.json"}},
+    "selected_provider_adapter_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "occ_version": {"type": "integer", "minimum": 0},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "candidate_only": {"type": "boolean", "const": true},
+    "non_formal": {"type": "boolean", "const": true}
+  }
+}
