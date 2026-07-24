@@ -88,7 +88,10 @@ def has_changed_composition(old, new):
     if not isinstance(old, dict) or not isinstance(new, dict):
         return None
     for key in COMPOSITION_KEYS:
-        if key in old or key in new:
+        # 组合关键字本身只有在内容发生变化时才阻断判定。父对象新增一个
+        # additive property 不应因为既有、未变化的根级 `not` 被误判为
+        # “变化子树”；真正变化的组合子树会在其自身节点再次被捕获。
+        if old.get(key) != new.get(key):
             return key
     return None
 

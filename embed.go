@@ -82,6 +82,19 @@ var ProviderRequirementSchemaJSON []byte
 //go:embed software-resolution-lock.schema.json
 var SoftwareResolutionLockSchemaJSON []byte
 
+// SceneRuntimePlanCandidateSchemaJSON is contracts/scene-runtime-plan-candidate.schema.json.
+// It is embedded so the SceneFlow producer can validate the fixed Pack
+// version and provider requirement reference boundary without re-declaring it.
+//
+//go:embed scene-runtime-plan-candidate.schema.json
+var SceneRuntimePlanCandidateSchemaJSON []byte
+
+// PackHandsRequirementReadModelSchemaJSON is the client-safe explanation
+// projection for one Pack Hands requirement. It is not an authority source.
+//
+//go:embed pack-hands-requirement-readmodel.schema.json
+var PackHandsRequirementReadModelSchemaJSON []byte
+
 // PackUsageContributionCandidateSchemaJSON is contracts/pack-usage-contribution-candidate.schema.json.
 //
 //go:embed pack-usage-contribution-candidate.schema.json

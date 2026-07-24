@@ -8,6 +8,7 @@
     {"go_dir": "readmodels", "go_type": "MobilePairingBootstrapCandidate", "schema": "mobile-pairing-bootstrap-candidate.schema.json"},
     {"go_dir": "readmodels", "go_type": "MobileSessionIssueIntent", "schema": "mobile-session-issue-intent.schema.json"},
     {"go_dir": "readmodels", "go_type": "DeliberationProviderLaneReadModel", "schema": "deliberation-provider-lane-readmodel.schema.json"},
-    {"go_dir": "readmodels", "go_type": "DeliberationAutomationGrantReadModel", "schema": "deliberation-automation-grant-readmodel.schema.json"}
+    {"go_dir": "readmodels", "go_type": "DeliberationAutomationGrantReadModel", "schema": "deliberation-automation-grant-readmodel.schema.json"},
+    {"go_dir": "readmodels", "go_type": "PackHandsRequirementReadModel", "schema": "pack-hands-requirement-readmodel.schema.json"}
   ]
 }

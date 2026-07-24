@@ -196,3 +196,99 @@ func TestSoftwareResolutionLockSupportsResolverMVPOutcomes(t *testing.T) {
 		}
 	}
 }
+
+func TestProviderRequirementSoftwareRefsValidateAgainstFixedPack(t *testing.T) {
+	softwareRequirements := []market.PackSoftwareRequirement{
+		{
+			RequirementID:   "frappe-suite-runtime",
+			SoftwareFamily:  "frappe-erpnext-stack",
+			ProviderFamily:  "frappe",
+			VersionRange:    ">=14.0.0,<16.0.0",
+			IsolationPolicy: market.SoftwareIsolationReusePreferred,
+			FallbackPolicy:  market.SoftwareFallbackProviderMissing,
+		},
+		{
+			RequirementID:   "frappe-mcp-runtime",
+			SoftwareFamily:  "frappe-mcp-server",
+			ProviderFamily:  "frappe",
+			VersionRange:    ">=1.0.0",
+			IsolationPolicy: market.SoftwareIsolationReusePreferred,
+			FallbackPolicy:  market.SoftwareFallbackProviderMissing,
+		},
+	}
+	provider := market.ProviderRequirement{
+		RequirementID:           "frappe-read",
+		ProviderFamily:          "frappe",
+		SoftwareRequirementRefs: []string{"frappe-suite-runtime", "frappe-mcp-runtime"},
+	}
+	if err := market.ValidateProviderRequirementSoftwareRefs(provider, softwareRequirements); err != nil {
+		t.Fatalf("valid same-pack refs rejected: %v", err)
+	}
+
+	tests := []struct {
+		name string
+		refs []string
+	}{
+		{name: "empty ref", refs: []string{""}},
+		{name: "duplicate ref", refs: []string{"frappe-suite-runtime", "frappe-suite-runtime"}},
+		{name: "cross pack ref", refs: []string{"other-pack-runtime"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			provider.SoftwareRequirementRefs = tt.refs
+			if err := market.ValidateProviderRequirementSoftwareRefs(provider, softwareRequirements); err == nil {
+				t.Fatalf("expected %s to be rejected", tt.name)
+			}
+		})
+	}
+
+	provider.SoftwareRequirementRefs = []string{"frappe-suite-runtime"}
+	softwareRequirements[0].ProviderFamily = "home_assistant"
+	if err := market.ValidateProviderRequirementSoftwareRefs(provider, softwareRequirements); err == nil {
+		t.Fatal("provider/software family mismatch must be rejected")
+	}
+}
+
+func TestProviderRequirementSoftwareRefsMarshalAsAdditiveField(t *testing.T) {
+	provider := market.ProviderRequirement{
+		RequirementID:           "frappe-read",
+		ProviderFamily:          "frappe",
+		SoftwareRequirementRefs: []string{"frappe-suite-runtime", "frappe-mcp-runtime"},
+	}
+	b, err := json.Marshal(provider)
+	if err != nil {
+		t.Fatalf("marshal provider requirement: %v", err)
+	}
+	if !strings.Contains(string(b), `"software_requirement_refs":["frappe-suite-runtime","frappe-mcp-runtime"]`) {
+		t.Fatalf("missing additive software refs: %s", string(b))
+	}
+}
+
+func TestSoftwareResolutionLockCarriesProviderBindingProjectionFields(t *testing.T) {
+	lock := market.SoftwareResolutionLock{
+		LockID:                   "software_lock://frappe-mcp",
+		PackRef:                  "scene_pack://smart-home-owner@1.0.0",
+		RequirementID:            "frappe-mcp-runtime",
+		SoftwareFamily:           "frappe-mcp-server",
+		ProviderRequirementRef:   "provider_requirement://frappe-read",
+		ProviderFamily:           "frappe",
+		ResolvedControlMethodRef: "control_method://frappe-mcp-read",
+		ResolvedExecutionMode:    "mcp",
+		Resolution:               market.SoftwareResolutionBound,
+		ResolvedAt:               "2026-07-24T00:00:00Z",
+	}
+	b, err := json.Marshal(lock)
+	if err != nil {
+		t.Fatalf("marshal lock: %v", err)
+	}
+	for _, want := range []string{
+		`"provider_requirement_ref":"provider_requirement://frappe-read"`,
+		`"provider_family":"frappe"`,
+		`"resolved_control_method_ref":"control_method://frappe-mcp-read"`,
+		`"resolved_execution_mode":"mcp"`,
+	} {
+		if !strings.Contains(string(b), want) {
+			t.Fatalf("missing %s in %s", want, string(b))
+		}
+	}
+}

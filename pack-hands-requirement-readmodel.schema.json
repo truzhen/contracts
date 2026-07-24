@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://truzhen.local/contracts/pack-hands-requirement-readmodel.schema.json",
+  "title": "PackHandsRequirementReadModel",
+  "description": "面向 Owner 的 Pack Hands 需求解释投影。它不是真相源，不授权安装或执行，也不允许客户端强制选择本机 provider 实例。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_ref",
+    "pack_version_ref",
+    "requirement_ref",
+    "required_capabilities",
+    "provider_family",
+    "software_requirement_refs",
+    "software_resolution_lock_refs",
+    "resolution_status",
+    "installable",
+    "risk_class",
+    "optional",
+    "stale"
+  ],
+  "properties": {
+    "pack_ref": { "type": "string", "minLength": 1 },
+    "pack_version_ref": { "type": "string", "minLength": 1 },
+    "requirement_ref": { "type": "string", "minLength": 1 },
+    "required_capabilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "provider_family": { "type": "string", "minLength": 1 },
+    "software_requirement_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "software_resolution_lock_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "readOnly": true
+    },
+    "resolution_status": {
+      "type": "string",
+      "enum": ["reused", "bound", "installed_isolated", "coexist", "install_required", "version_conflict", "isolation_required", "blocked", "not_ready", "provider_missing"]
+    },
+    "blocked_reason": { "type": "string", "maxLength": 280 },
+    "resolved_provider_resource_ref": {
+      "type": "string",
+      "minLength": 1,
+      "readOnly": true
+    },
+    "resolved_provider_display_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "readOnly": true,
+      "description": "仅供展示的脱敏标签，不得包含 endpoint、凭据、本机敏感路径或 secret。"
+    },
+    "resolved_control_method_ref": {
+      "type": "string",
+      "minLength": 1,
+      "readOnly": true
+    },
+    "resolved_execution_mode": {
+      "type": "string",
+      "enum": ["mcp", "cli", "gui"],
+      "readOnly": true
+    },
+    "installable": {
+      "type": "boolean",
+      "description": "是否存在受控安装候选；不代表已批准、可执行或允许绕过 Gate。"
+    },
+    "install_candidate_ref": {
+      "type": "string",
+      "minLength": 1,
+      "readOnly": true
+    },
+    "risk_class": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "optional": { "type": "boolean" },
+    "last_probe_receipt_ref": {
+      "type": "string",
+      "minLength": 1,
+      "readOnly": true
+    },
+    "last_resolution_receipt_ref": {
+      "type": "string",
+      "minLength": 1,
+      "readOnly": true
+    },
+    "stale": { "type": "boolean" },
+    "expires_at": { "type": "string", "format": "date-time" }
+  }
+}

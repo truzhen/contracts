@@ -35,10 +35,10 @@
 | `receipts/` | ReceiptEnvelope、AuditEnvelope。 | 不实现 append-only ledger、哈希链计算、回放查询或审计存储。 |
 | `gates/` | 轻量 AccessDecision、OwnerVerdict。 | 不替代 `base.GateDecision` / `base.OwnerDecision`；不能用于正式动作主权裁定。 |
 | `registry/` | RegistryRef、SkillRef、RegistrySlice、RegistrySliceItem、RegistrySliceBlockedRef、slice TTL / context refs helper。 | 不暴露 full registry，不保存 provider 实现，不提供真实解析服务。 |
-| `readmodels/` | ReadModelEnvelope、MobilePairingBootstrapRequest / Candidate、MobileSessionIssueIntent、Deliberation Session / Turn / Provider Lane / Automation Grant 投影及 fail-closed 形状校验。 | 不持有真相源，不实现前端状态管理、PC 审批、会话签发、浏览器自动化或凭据保存；合议投影不带问题、回答、DOM 或 client 自铸授权。 |
+| `readmodels/` | ReadModelEnvelope、MobilePairingBootstrapRequest / Candidate、MobileSessionIssueIntent、Deliberation Session / Turn / Provider Lane / Automation Grant、PackHandsRequirement 投影及 fail-closed 形状校验。 | 不持有真相源，不实现前端状态管理、PC 审批、会话签发、浏览器自动化、Provider 选择或凭据保存；合议投影不带问题、回答、DOM 或 client 自铸授权，PackHands 投影不授权安装/执行。 |
 | `monitoring/` | MonitoringRun、MonitoringEvent、CollectorSnapshot、RedactionFinding、FaultIncident、SupportDiagnosticBundle、SupportUploadCandidate、SupportUploadAck、BuildSymbolManifest 等。 | 不采集日志、不上传诊断包、不符号化、不实现监控服务。 |
 | `secrets/` | SecretRef、SensitivePayload。 | 不保存明文 secret、token、API key、cookie、private key。 |
-| `market/` | 市场表面契约（§18-A，2026-07-02 v0.4.0 新增；2026-07-03 v0.5.0 补 SessionProjection、session/payable/role 枚举和作者端 DTO / 枚举；2026-07-07 v0.7.0 新增 canonical PackManifest / ProviderRequirement / PackSoftwareRequirement / SoftwareResolutionLock；2026-07-08 v0.8.0 补 resolver MVP lock 结果 `install_required` / `version_conflict` / `isolation_required`）：SessionHeader、LoginRequest / LoginResponse、作者认证 / 收益 / 提现 / 上传 ReadModel、Pack manifest、软件依赖声明、resolver lock 形状、市场表面端点路径常量与路径构造器（LicenseOrderPath / WithdrawalCancelPath / PackDownloadPath）、AdminForwardAllowlist / AdminPathAllowed（admin 转发硬 allowlist 主权边界）。消费方：truzhenos 17-market / 02 registry、truzhen-cloud 03 上传链、client 软件目录投影。 | 不实现代理转发、不签发订单 / 价格 / 权益（服务端真相唯一在 truzhen-cloud），不解析本机 provider，不保存本机路径 / 端口 / secret / runtime state，不持会话状态。 |
+| `market/` | 市场表面契约（§18-A，2026-07-02 v0.4.0 新增；2026-07-03 v0.5.0 补 SessionProjection、session/payable/role 枚举和作者端 DTO / 枚举；2026-07-07 v0.7.0 新增 canonical PackManifest / ProviderRequirement / PackSoftwareRequirement / SoftwareResolutionLock；2026-07-08 v0.8.0 补 resolver MVP lock 结果 `install_required` / `version_conflict` / `isolation_required`；v0.16.0 增加复合 software requirement 引用与最终 binding 投影字段）：SessionHeader、LoginRequest / LoginResponse、作者认证 / 收益 / 提现 / 上传 ReadModel、Pack manifest、软件依赖声明、resolver lock 形状、市场表面端点路径常量与路径构造器（LicenseOrderPath / WithdrawalCancelPath / PackDownloadPath）、AdminForwardAllowlist / AdminPathAllowed（admin 转发硬 allowlist 主权边界）。消费方：truzhenos 17-market / 02 registry、truzhen-cloud 03 上传链、client 软件目录投影。 | 不实现代理转发、不签发订单 / 价格 / 权益（服务端真相唯一在 truzhen-cloud），不解析本机 provider，不保存本机路径 / 端口 / secret / runtime state，不持会话状态。 |
 | 顶层 `contracts` 包 | `embed.go` 嵌入 schema bytes；`pack_knowledge_mount.go` 定义 KnowledgeScopeDeclaration / KnowledgeMountReadModel。 | 不实现 schema 校验器、知识挂载服务或 Pack lifecycle。 |
 
 ## JSON Schema
@@ -49,6 +49,7 @@
 | `scene-flow-spec.schema.json` | 场景流程图 / GateFlowSpec。 | `truzhenos` 06 Scene Flow、Pack Studio |
 | `flow-view-spec.schema.json` | 流程视图投影。 | client layer、Pack Studio |
 | `scene-runtime-plan-candidate.schema.json` | 场景运行时计划候选。 | `truzhenos` Scene Runtime / CI |
+| `pack-hands-requirement-readmodel.schema.json` | Pack Hands 需求的 Owner 解释投影，含固定 Pack / requirement / 软件 lock / 脱敏绑定和阻断状态；不是真相源、不授权执行。 | `truzhenos` ReadModel producer、client 只读展示 |
 | `scene-studio-node-info.schema.json` | 制作台节点信息。 | Pack Studio / client layer |
 | `scene-studio-workflow.schema.json` | 制作台工作流。 | Pack Studio / client layer |
 | `visual-unit-spec.schema.json` | client layer 七类主权视觉单元（pod/object/capsule/candidate/execution/receipt/setting）封顶规格。 | client repo vendor / codegen / consistency test |
@@ -59,8 +60,8 @@
 | `candidate-envelope.schema.json` | `candidates.CandidateEnvelope` 的 JSON 表达。 | client candidate card、CI |
 | `receipt-envelope.schema.json` | `receipts.ReceiptEnvelope` 的 JSON 表达。 含可选 `actual_edits`（执行后事实，v0.10.0 additive，Owner O-1~O-4 裁定 2026-07-10）。 | client receipt card、CI |
 | `pack-manifest.schema.json` | 云端上传与 Pack 分发可校验的 canonical manifest，含 `software_requirements` 与可选 `lifecycle_status`（八档中文枚举，v0.9.0 additive，Owner 2026-07-10 裁定）。 | `truzhen-cloud` 上传校验、`truzhen-packs` CI、`truzhenos` Pack loader |
-| `provider-requirement.schema.json` | Pack 声明 provider 能力需求的 canonical 形状。 | `truzhen-packs`、`truzhenos` readiness / resolver |
-| `software-resolution-lock.schema.json` | `truzhenos` resolver 产出的本机软件依赖解析锁。 | `truzhenos`、client 软件目录、cloud 只读投影 |
+| `provider-requirement.schema.json` | Pack 声明 provider 能力需求的 canonical 形状，含同一固定 Pack 版本内的复数 software requirement 引用。 | `truzhen-packs`、`truzhenos` readiness / resolver |
+| `software-resolution-lock.schema.json` | `truzhenos` resolver 产出的本机软件依赖解析锁，含 provider requirement、family、控制方法和可选执行模式投影。 | `truzhenos`、client 软件目录、cloud 只读投影 |
 | `monitoring/monitoring-event.schema.json` | `monitoring.MonitoringEvent` 的 JSON 表达，含 additive `error_code` 稳定错误码字段。 | `truzhenos` 统一监控 / CI / support bundle |
 | `monitoring/fault-incident.schema.json` | `monitoring.FaultIncident` / `FaultSignature` 的 JSON 表达，约束 `error_code` 格式。 | `truzhenos` fault classifier / support bundle / cloud symbolication |
 | `spines/intent-event.schema.json` | IntentEvent JSON 表达。 | `truzhenos` 13 / 07 / 01、CI |
@@ -116,8 +117,8 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 
 当前状态：
 
-- 已通过 `embed.go` 暴露：`scene-flow-spec.schema.json`、`scene-pack-spec.schema.json`、`flow-view-spec.schema.json`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json`、移动首配对三件套 schema、`candidate-envelope.schema.json`、`receipt-envelope.schema.json`、`pack-manifest.schema.json`、`provider-requirement.schema.json`、`software-resolution-lock.schema.json`、`monitoring/monitoring-event.schema.json`、`monitoring/fault-incident.schema.json`、Intent Spine 五件套 schema、学习与探讨五件套 schema。
-- 当前未通过 `embed.go` 暴露：`scene-runtime-plan-candidate.schema.json`、`scene-studio-node-info.schema.json`、`scene-studio-workflow.schema.json`。后续如裁定它们需要 Go API 直接消费，应补 embed 变量；如裁定只作为文件级 schema，应在 `embed.go` 附近留下说明。
+- 已通过 `embed.go` 暴露：`scene-flow-spec.schema.json`、`scene-pack-spec.schema.json`、`scene-runtime-plan-candidate.schema.json`、`flow-view-spec.schema.json`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json`、移动首配对三件套 schema、`candidate-envelope.schema.json`、`receipt-envelope.schema.json`、`pack-manifest.schema.json`、`provider-requirement.schema.json`、`software-resolution-lock.schema.json`、`pack-hands-requirement-readmodel.schema.json`、`monitoring/monitoring-event.schema.json`、`monitoring/fault-incident.schema.json`、Intent Spine 五件套 schema、学习与探讨五件套 schema。
+- 当前未通过 `embed.go` 暴露：`scene-studio-node-info.schema.json`、`scene-studio-workflow.schema.json`。它们仍只作为文件级制作台 schema；如未来需要 Go API 直接消费，应另开影响评估。
 
 改动规则：
 
@@ -146,6 +147,7 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 > 2026-07-16（v0.13.0，已发布）：`pack-install-result.schema.json` 兼容新增可选 `decision_ref/run_id/nonce/artifact_sha256/gateway_proxy_required/no_raw_secret/status`。真实消费方为 truzhenos F10 市场安装 completion Receipt 与 client MarketPage；共享 DTO 保持字段可选兼容旧消费方，新的 OS HTTP success operation 将不可变 proof 设为必填。
 > 2026-07-17（v0.14.0 契约已定、未发布）：新增移动首配对请求、候选投影与会话签发意图三件套。均为加性 schema；显式排除 bootstrap proof、bearer、OwnerDecision 与 Receipt 真相。client 已 vendor/codegen，OS 保持 Host-owned 会话与 PC 审批，待 tag 后改为直接 module import。
 > 2026-07-24（v0.15.0 契约已定、未发布）：新增学习与探讨的 Session / Turn / Provider Lane / Automation Grant ReadModel 与 Synthesis Candidate 五件套及 schema。它们只传受控引用、hash、状态和脱敏摘要；不含问题、供应商回答、DOM、凭据或 client 自铸授权。授权沿用 Base `decision_ref` / 既有 `OwnerDelegationGrant`，合议结果固定 candidate-only，完整兼容策略见 `docs/compatibility/deliberation-v0.15.0.md`。
+> 2026-07-24（v0.16.0 契约已定、未发布）：为本地优先 AI 事务操作层增加复合 `software_requirement_refs[]`、`SoftwareResolutionLock` 的 provider/binding 投影字段、Scene Runtime 节点的固定 `provider_requirement_refs[]` 和 `PackHandsRequirementReadModel`。全部为加性字段/新 schema；ref 校验只检查固定 Pack 版本内的非空去重与 family 一致性，ReadModel 只读、不是真相源、不授权安装/执行。兼容策略见 `docs/compatibility/transaction-operation-layer-v0.16.0.md`。
 
 ## 包体积与完善状态（2026-07-03 集成分支实测，v0.5.0）
 

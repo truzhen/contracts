@@ -1,5 +1,7 @@
 package market
 
+import "fmt"
+
 // GatewayClass declares which Truzhen gateway owns a provider-backed
 // capability. It is a contract value only; it does not grant execution rights.
 type GatewayClass string
@@ -89,13 +91,14 @@ type PackSoftwareRequirement struct {
 // ProviderRequirement is the canonical pack-side provider capability shape.
 // Runtime readiness and final provider choice remain owned by truzhenos.
 type ProviderRequirement struct {
-	RequirementID        string                 `json:"requirement_id"`
-	ProviderFamily       string                 `json:"provider_family"`
-	GatewayClass         GatewayClass           `json:"gateway_class"`
-	RequiredCapabilities []string               `json:"required_capabilities,omitempty"`
-	RiskClass            RiskClass              `json:"risk_class"`
-	FallbackPolicy       SoftwareFallbackPolicy `json:"fallback_policy"`
-	Optional             bool                   `json:"optional,omitempty"`
+	RequirementID           string                 `json:"requirement_id"`
+	ProviderFamily          string                 `json:"provider_family"`
+	GatewayClass            GatewayClass           `json:"gateway_class"`
+	RequiredCapabilities    []string               `json:"required_capabilities,omitempty"`
+	SoftwareRequirementRefs []string               `json:"software_requirement_refs,omitempty"`
+	RiskClass               RiskClass              `json:"risk_class"`
+	FallbackPolicy          SoftwareFallbackPolicy `json:"fallback_policy"`
+	Optional                bool                   `json:"optional,omitempty"`
 }
 
 // PackLifecycleStatus is the unified eight-tier pack lifecycle declaration.
@@ -153,23 +156,64 @@ type PackManifest struct {
 // requirement against the local software registry. It is not authored by packs
 // or clients.
 type SoftwareResolutionLock struct {
-	LockID              string             `json:"lock_id"`
-	PackRef             string             `json:"pack_ref"`
-	RequirementID       string             `json:"requirement_id"`
-	SoftwareFamily      string             `json:"software_family"`
-	ResolvedSoftwareRef string             `json:"resolved_software_ref,omitempty"`
-	ResolvedVersion     string             `json:"resolved_version,omitempty"`
-	AdapterVersion      string             `json:"adapter_version,omitempty"`
-	ProviderResourceRef string             `json:"provider_resource_ref,omitempty"`
-	Resolution          SoftwareResolution `json:"resolution"`
-	ConflictNote        string             `json:"conflict_note,omitempty"`
-	DecisionRef         string             `json:"decision_ref,omitempty"`
-	ReceiptRef          string             `json:"receipt_ref,omitempty"`
-	ResolvedAt          string             `json:"resolved_at"`
-	SourceRegistryRef   string             `json:"source_registry_ref,omitempty"`
-	SourceLockFileRef   string             `json:"source_lock_file_ref,omitempty"`
-	ResolverVersion     string             `json:"resolver_version,omitempty"`
-	IdempotencyKey      string             `json:"idempotency_key,omitempty"`
-	TransactionRef      string             `json:"transaction_ref,omitempty"`
-	PackVersionRef      string             `json:"pack_version_ref,omitempty"`
+	LockID                   string             `json:"lock_id"`
+	PackRef                  string             `json:"pack_ref"`
+	RequirementID            string             `json:"requirement_id"`
+	SoftwareFamily           string             `json:"software_family"`
+	ProviderRequirementRef   string             `json:"provider_requirement_ref,omitempty"`
+	ProviderFamily           string             `json:"provider_family,omitempty"`
+	ResolvedSoftwareRef      string             `json:"resolved_software_ref,omitempty"`
+	ResolvedVersion          string             `json:"resolved_version,omitempty"`
+	AdapterVersion           string             `json:"adapter_version,omitempty"`
+	ProviderResourceRef      string             `json:"provider_resource_ref,omitempty"`
+	ResolvedControlMethodRef string             `json:"resolved_control_method_ref,omitempty"`
+	ResolvedExecutionMode    string             `json:"resolved_execution_mode,omitempty"`
+	Resolution               SoftwareResolution `json:"resolution"`
+	ConflictNote             string             `json:"conflict_note,omitempty"`
+	DecisionRef              string             `json:"decision_ref,omitempty"`
+	ReceiptRef               string             `json:"receipt_ref,omitempty"`
+	ResolvedAt               string             `json:"resolved_at"`
+	SourceRegistryRef        string             `json:"source_registry_ref,omitempty"`
+	SourceLockFileRef        string             `json:"source_lock_file_ref,omitempty"`
+	ResolverVersion          string             `json:"resolver_version,omitempty"`
+	IdempotencyKey           string             `json:"idempotency_key,omitempty"`
+	TransactionRef           string             `json:"transaction_ref,omitempty"`
+	PackVersionRef           string             `json:"pack_version_ref,omitempty"`
+}
+
+// ValidateProviderRequirementSoftwareRefs checks that a provider requirement
+// references only software requirements from the same fixed Pack version.
+// It is a pure contract-boundary check: it does not resolve local software,
+// choose a provider instance, install anything, or grant execution authority.
+func ValidateProviderRequirementSoftwareRefs(provider ProviderRequirement, softwareRequirements []PackSoftwareRequirement) error {
+	softwareByID := make(map[string]PackSoftwareRequirement, len(softwareRequirements))
+	for _, software := range softwareRequirements {
+		if software.RequirementID == "" {
+			return fmt.Errorf("software requirement id must not be empty")
+		}
+		if _, exists := softwareByID[software.RequirementID]; exists {
+			return fmt.Errorf("duplicate software requirement id %q", software.RequirementID)
+		}
+		softwareByID[software.RequirementID] = software
+	}
+
+	seen := make(map[string]struct{}, len(provider.SoftwareRequirementRefs))
+	for _, ref := range provider.SoftwareRequirementRefs {
+		if ref == "" {
+			return fmt.Errorf("provider requirement %q contains an empty software requirement ref", provider.RequirementID)
+		}
+		if _, exists := seen[ref]; exists {
+			return fmt.Errorf("provider requirement %q contains duplicate software requirement ref %q", provider.RequirementID, ref)
+		}
+		seen[ref] = struct{}{}
+
+		software, exists := softwareByID[ref]
+		if !exists {
+			return fmt.Errorf("provider requirement %q references software requirement %q outside the fixed Pack version", provider.RequirementID, ref)
+		}
+		if provider.ProviderFamily != "" && software.ProviderFamily != "" && provider.ProviderFamily != software.ProviderFamily {
+			return fmt.Errorf("provider requirement %q family %q conflicts with software requirement %q family %q", provider.RequirementID, provider.ProviderFamily, ref, software.ProviderFamily)
+		}
+	}
+	return nil
 }

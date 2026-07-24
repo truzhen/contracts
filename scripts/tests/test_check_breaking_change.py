@@ -126,6 +126,27 @@ class BreakingChangeTest(unittest.TestCase):
     def test_changed_composition_fails_closed(self):
         self.assert_case("unsupported-composition", 2, "anyOf")
 
+    def test_unchanged_composition_does_not_block_additive_property(self):
+        with tempfile.TemporaryDirectory() as directory:
+            old_dir = os.path.join(directory, "old")
+            new_dir = os.path.join(directory, "new")
+            os.makedirs(old_dir)
+            os.makedirs(new_dir)
+            schema = {
+                "type": "object",
+                "properties": {"value": {"type": "string"}},
+                "not": {"required": ["forbidden"]},
+            }
+            with open(os.path.join(old_dir, "x.json"), "w", encoding="utf-8") as handle:
+                json.dump(schema, handle)
+            new_schema = json.loads(json.dumps(schema))
+            new_schema["properties"]["extra"] = {"type": "string"}
+            with open(os.path.join(new_dir, "x.json"), "w", encoding="utf-8") as handle:
+                json.dump(new_schema, handle)
+            result = run_dirs(old_dir, new_dir)
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn("RESULT: PASS", result.stdout + result.stderr)
+
     def test_external_ref_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             old_dir = os.path.join(directory, "old")

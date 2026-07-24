@@ -67,13 +67,15 @@ go get github.com/truzhen/contracts@latest
 
 当前版本以仓根 `VERSION` 和已发布 tag 为准。破坏性变更按 SemVer 处理，不把删字段、改必填、改语义伪装成兼容更新。
 
-`market.PackSoftwareRequirement` 用于声明 Baserow / OCR 等底层软件需求；`market.SoftwareResolutionLock` 用于消费 `truzhenos` resolver 产出的复用、需安装、版本冲突、需隔离、blocked、not_ready 等结果。contracts 不解析用户本机环境，不保存本机软件事实。
+`market.PackSoftwareRequirement` 用于声明 Baserow / OCR 等底层软件需求；`market.ProviderRequirement` 可引用同一固定 Pack 版本内的多个软件需求；`market.SoftwareResolutionLock` 用于消费 `truzhenos` resolver 产出的复用、需安装、版本冲突、需隔离、blocked、not_ready 等结果，并可携带 provider family、控制方法和可选执行模式投影。`readmodels.PackHandsRequirementReadModel` 只向 Owner 解释依赖、解析、阻断和安装候选，不是真相源，不授权安装或执行。contracts 不解析用户本机环境，不保存本机软件事实。
 
 ## 子包速览
 
 核心：`base/`（主权门控核心类型，含 `OwnerDelegationGrant` 与可选代码执行委托边界）、`candidates/`（候选域）、`gates/`（门控裁定）、`receipts/`（回执 / 审计）、`spines/`（事务 / 意图 / 证据三主线）、`registry/`、`readmodels/`、`monitoring/`、`secrets/`（只有 secret 的**引用**形状，永无明文凭据）、`market/`。完整清单见 [MODULES.md](MODULES.md)。
 
 学习与探讨的 Session / Turn / Provider Lane / Automation Grant ReadModel 与 Synthesis Candidate 已在本仓定形；它们不携带问题或供应商原文，且候选永远不能直接成为正式结论。兼容边界见 [v0.15.0 说明](docs/compatibility/deliberation-v0.15.0.md)。
+
+本地优先 AI 事务操作层的 contracts 增量见 [v0.16.0 兼容说明](docs/compatibility/transaction-operation-layer-v0.16.0.md)。
 
 ## 我们的承诺
 

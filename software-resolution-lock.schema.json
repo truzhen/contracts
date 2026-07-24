@@ -11,10 +11,18 @@
     "pack_ref": { "type": "string", "minLength": 1 },
     "requirement_id": { "type": "string", "minLength": 1 },
     "software_family": { "type": "string", "minLength": 1 },
+    "provider_requirement_ref": { "type": "string", "minLength": 1 },
+    "provider_family": { "type": "string", "minLength": 1 },
     "resolved_software_ref": { "type": "string" },
     "resolved_version": { "type": "string" },
     "adapter_version": { "type": "string" },
     "provider_resource_ref": { "type": "string" },
+    "resolved_control_method_ref": { "type": "string", "minLength": 1 },
+    "resolved_execution_mode": {
+      "type": "string",
+      "enum": ["mcp", "cli", "gui"],
+      "description": "动作类控制方法的技术执行模式；生命周期方法不应填写。"
+    },
     "resolution": {
       "type": "string",
       "enum": ["reused", "bound", "installed_isolated", "coexist", "install_required", "version_conflict", "isolation_required", "blocked", "not_ready", "provider_missing"]
