@@ -35,10 +35,10 @@
 | `receipts/` | ReceiptEnvelope、AuditEnvelope。 | 不实现 append-only ledger、哈希链计算、回放查询或审计存储。 |
 | `gates/` | 轻量 AccessDecision、OwnerVerdict。 | 不替代 `base.GateDecision` / `base.OwnerDecision`；不能用于正式动作主权裁定。 |
 | `registry/` | RegistryRef、SkillRef、RegistrySlice、RegistrySliceItem、RegistrySliceBlockedRef、slice TTL / context refs helper。 | 不暴露 full registry，不保存 provider 实现，不提供真实解析服务。 |
-| `readmodels/` | ReadModelEnvelope、MobilePairingBootstrapRequest / Candidate、MobileSessionIssueIntent、Deliberation Session / Turn / Provider Lane / Automation Grant、PackHandsRequirement 投影及 fail-closed 形状校验。 | 不持有真相源，不实现前端状态管理、PC 审批、会话签发、浏览器自动化、Provider 选择或凭据保存；合议投影不带问题、回答、DOM 或 client 自铸授权，PackHands 投影不授权安装/执行。 |
+| `readmodels/` | ReadModelEnvelope、MobilePairingBootstrapRequest / Candidate、MobileSessionIssueIntent、Deliberation Session / Turn / Provider Lane / Automation Grant、PackHandsRequirement、ExperienceAssetCandidate 投影及 fail-closed 形状校验。 | 不持有真相源，不实现前端状态管理、PC 审批、会话签发、浏览器自动化、Provider 选择或凭据保存；经验投影不含 raw Receipt、Owner authority 或市场上传证明。 |
 | `monitoring/` | MonitoringRun、MonitoringEvent、CollectorSnapshot、RedactionFinding、FaultIncident、SupportDiagnosticBundle、SupportUploadCandidate、SupportUploadAck、BuildSymbolManifest 等。 | 不采集日志、不上传诊断包、不符号化、不实现监控服务。 |
 | `secrets/` | SecretRef、SensitivePayload。 | 不保存明文 secret、token、API key、cookie、private key。 |
-| `market/` | 市场表面契约（§18-A，2026-07-02 v0.4.0 新增；2026-07-03 v0.5.0 补 SessionProjection、session/payable/role 枚举和作者端 DTO / 枚举；2026-07-07 v0.7.0 新增 canonical PackManifest / ProviderRequirement / PackSoftwareRequirement / SoftwareResolutionLock；2026-07-08 v0.8.0 补 resolver MVP lock 结果 `install_required` / `version_conflict` / `isolation_required`；v0.16.0 增加复合 software requirement 引用与最终 binding 投影字段）：SessionHeader、LoginRequest / LoginResponse、作者认证 / 收益 / 提现 / 上传 ReadModel、Pack manifest、软件依赖声明、resolver lock 形状、市场表面端点路径常量与路径构造器（LicenseOrderPath / WithdrawalCancelPath / PackDownloadPath）、AdminForwardAllowlist / AdminPathAllowed（admin 转发硬 allowlist 主权边界）。消费方：truzhenos 17-market / 02 registry、truzhen-cloud 03 上传链、client 软件目录投影。 | 不实现代理转发、不签发订单 / 价格 / 权益（服务端真相唯一在 truzhen-cloud），不解析本机 provider，不保存本机路径 / 端口 / secret / runtime state，不持会话状态。 |
+| `market/` | 市场表面契约（§18-A，2026-07-02 v0.4.0 新增；2026-07-03 v0.5.0 补 SessionProjection、session/payable/role 枚举和作者端 DTO / 枚举；2026-07-07 v0.7.0 新增 canonical PackManifest / ProviderRequirement / PackSoftwareRequirement / SoftwareResolutionLock；2026-07-08 v0.8.0 补 resolver MVP lock 结果 `install_required` / `version_conflict` / `isolation_required`；v0.16.0 增加复合 software requirement 引用与最终 binding 投影字段；v0.17.0 增加 paired-host 签名的 approved artifact handoff attestation）：SessionHeader、LoginRequest / LoginResponse、作者认证 / 收益 / 提现 / 上传 ReadModel、Pack manifest、软件依赖声明、resolver lock、签名 handoff 形状、市场表面端点路径常量与路径构造器（LicenseOrderPath / WithdrawalCancelPath / PackDownloadPath）、AdminForwardAllowlist / AdminPathAllowed（admin 转发硬 allowlist 主权边界）。消费方：truzhenos 17-market / 02 registry、truzhen-cloud 03 上传链、client 软件目录投影。 | 不实现代理转发、不签发订单 / 价格 / 权益（服务端真相唯一在 truzhen-cloud），不解析本机 provider，不保存本机路径 / 端口 / secret / runtime state，不持会话状态。 |
 | 顶层 `contracts` 包 | `embed.go` 嵌入 schema bytes；`pack_knowledge_mount.go` 定义 KnowledgeScopeDeclaration / KnowledgeMountReadModel。 | 不实现 schema 校验器、知识挂载服务或 Pack lifecycle。 |
 
 ## JSON Schema
@@ -50,6 +50,8 @@
 | `flow-view-spec.schema.json` | 流程视图投影。 | client layer、Pack Studio |
 | `scene-runtime-plan-candidate.schema.json` | 场景运行时计划候选。 | `truzhenos` Scene Runtime / CI |
 | `pack-hands-requirement-readmodel.schema.json` | Pack Hands 需求的 Owner 解释投影，含固定 Pack / requirement / 软件 lock / 脱敏绑定和阻断状态；不是真相源、不授权执行。 | `truzhenos` ReadModel producer、client 只读展示 |
+| `experience-asset-candidate-readmodel.schema.json` | 已脱敏经验候选的 client-safe ReadModel，含来源 Receipt/事务/固定 Pack 版本和候选态证据引用；不含 raw payload、Owner authority 或上传证明。 | `truzhenos` os-18 producer、client 作者工作台 |
+| `approved-pack-artifact-handoff-attestation.schema.json` | paired-host 对固定 Owner-approved Pack artifact 的 canonical Ed25519 handoff 证明；Receipt ref 单独无效。 | `truzhenos` Cloud Market Hands、`truzhen-cloud` os-03 验签 |
 | `scene-studio-node-info.schema.json` | 制作台节点信息。 | Pack Studio / client layer |
 | `scene-studio-workflow.schema.json` | 制作台工作流。 | Pack Studio / client layer |
 | `visual-unit-spec.schema.json` | client layer 七类主权视觉单元（pod/object/capsule/candidate/execution/receipt/setting）封顶规格。 | client repo vendor / codegen / consistency test |
@@ -103,6 +105,7 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 | `candidate-envelope.schema.json` / `receipt-envelope.schema.json` | 契约已就绪：对齐 Go struct 真相源，候选卡 / 回执卡面向；待 client 仓 vendor / codegen。 |
 | Intent Spine 五件套 schema | 契约已就绪：面向 IntentEvent / inbox / classification / fan-out / receipt；下游接线状态按 `truzhenos` 与 client repo 记录为准。 |
 | 学习与探讨五件套 schema | 契约已定：Session / Turn / Provider Lane / Automation Grant / Synthesis Candidate 已定义；client 需在实际消费卡 D09 vendor/codegen，禁止自行扩展成正式授权。 |
+| P13 Experience / Market 两件套 schema | 契约已定：经验候选只读投影与签名 handoff attestation 已定义；发布后 client 必须 vendor/codegen，OS/cloud 必须共同验证 canonical bytes，不得手写平行 DTO。 |
 | ReadModel 具体形状 / 秘书动作 / 其它 candidate 子类型 | 待契约化 + 对齐，前端形态稳定后统一推进。 |
 
 消费机制：
@@ -117,7 +120,7 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 
 当前状态：
 
-- 已通过 `embed.go` 暴露：`scene-flow-spec.schema.json`、`scene-pack-spec.schema.json`、`scene-runtime-plan-candidate.schema.json`、`flow-view-spec.schema.json`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json`、移动首配对三件套 schema、`candidate-envelope.schema.json`、`receipt-envelope.schema.json`、`pack-manifest.schema.json`、`provider-requirement.schema.json`、`software-resolution-lock.schema.json`、`pack-hands-requirement-readmodel.schema.json`、`monitoring/monitoring-event.schema.json`、`monitoring/fault-incident.schema.json`、Intent Spine 五件套 schema、学习与探讨五件套 schema。
+- 已通过 `embed.go` 暴露：`scene-flow-spec.schema.json`、`scene-pack-spec.schema.json`、`scene-runtime-plan-candidate.schema.json`、`flow-view-spec.schema.json`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json`、移动首配对三件套 schema、`candidate-envelope.schema.json`、`receipt-envelope.schema.json`、`pack-manifest.schema.json`、`provider-requirement.schema.json`、`software-resolution-lock.schema.json`、`pack-hands-requirement-readmodel.schema.json`、P13 Experience / Market 两件套 schema、`monitoring/monitoring-event.schema.json`、`monitoring/fault-incident.schema.json`、Intent Spine 五件套 schema、学习与探讨五件套 schema。
 - 当前未通过 `embed.go` 暴露：`scene-studio-node-info.schema.json`、`scene-studio-workflow.schema.json`。它们仍只作为文件级制作台 schema；如未来需要 Go API 直接消费，应另开影响评估。
 
 改动规则：
@@ -148,6 +151,7 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 > 2026-07-17（v0.14.0 契约已定、未发布）：新增移动首配对请求、候选投影与会话签发意图三件套。均为加性 schema；显式排除 bootstrap proof、bearer、OwnerDecision 与 Receipt 真相。client 已 vendor/codegen，OS 保持 Host-owned 会话与 PC 审批，待 tag 后改为直接 module import。
 > 2026-07-24（v0.15.0 契约已定、未发布）：新增学习与探讨的 Session / Turn / Provider Lane / Automation Grant ReadModel 与 Synthesis Candidate 五件套及 schema。它们只传受控引用、hash、状态和脱敏摘要；不含问题、供应商回答、DOM、凭据或 client 自铸授权。授权沿用 Base `decision_ref` / 既有 `OwnerDelegationGrant`，合议结果固定 candidate-only，完整兼容策略见 `docs/compatibility/deliberation-v0.15.0.md`。
 > 2026-07-24（v0.16.0 契约已定、未发布）：为本地优先 AI 事务操作层增加复合 `software_requirement_refs[]`、`SoftwareResolutionLock` 的 provider/binding 投影字段、Scene Runtime 节点的固定 `provider_requirement_refs[]` 和 `PackHandsRequirementReadModel`。全部为加性字段/新 schema；ref 校验只检查固定 Pack 版本内的非空去重与 family 一致性，ReadModel 只读、不是真相源、不授权安装/执行。兼容策略见 `docs/compatibility/transaction-operation-layer-v0.16.0.md`。
+> 2026-07-25（v0.17.0 契约已定、未发布）：新增 `ExperienceAssetCandidateReadModel` 和 `ApprovedPackArtifactHandoffAttestation` 两个 additive schema。前者只投影脱敏候选与来源/版本/候选引用；后者以 canonical JSON + Ed25519 证明固定 Pack artifact 的 Owner-approved handoff。账户与 paired host 公钥绑定、云端重放幂等、OS 外部动作 Receipt 分别归 cloud / OS 真相源，完整兼容策略见 `docs/compatibility/experience-pack-market-p13-v0.17.0.md`。
 
 ## 包体积与完善状态（2026-07-03 集成分支实测，v0.5.0）
 
@@ -165,4 +169,4 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 | `gates/` | 15 | 轻量 AccessDecision / OwnerVerdict | 🔧 |
 | `readmodels/` | 约 430（含合议投影与授权校验） | ReadModelEnvelope、移动首配对请求 / 候选 / 签发意图、学习与探讨四类投影 | 🔧 合议实际消费者待 OS / client 接线；本仓不实现流程或自动化 |
 | `market/` | 约 330（+430 测试） | 市场表面契约：SessionHeader / Login DTO / SessionProjection / session-payable-role 枚举 / 作者端 DTO / 表面路径 / admin 硬 allowlist，黄金断言守护 | 🔧 v0.5.0 契约已落地；下游需在集成分支先吸收 / 发布 contracts 后再编译期引用 |
-| 根级 | 全仓 38 个 `*.schema.json`；其中 35 个由 `embed.go` 暴露，3 个 scene schema 未 embed | schema 嵌入 + 版本漂移门禁（`check-version-drift.sh`）+ 破坏性变更与 Go↔Schema 配对门禁（`contracts-check.sh`，type 变更一律判 breaking，Owner 2026-07-10 R-a 裁定） | ✅ |
+| 根级 | 全仓 40 个 `*.schema.json`；其中 37 个由 `embed.go` 暴露，3 个 scene schema 未 embed | schema 嵌入 + 版本漂移门禁（`check-version-drift.sh`）+ 破坏性变更与 Go↔Schema 配对门禁（`contracts-check.sh`，type 变更一律判 breaking，Owner 2026-07-10 R-a 裁定） | ✅ |

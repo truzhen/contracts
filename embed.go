@@ -105,6 +105,19 @@ var PackUsageContributionCandidateSchemaJSON []byte
 //go:embed pack-version-migration-candidate.schema.json
 var PackVersionMigrationCandidateSchemaJSON []byte
 
+// ExperienceAssetCandidateReadModelSchemaJSON is the client-safe projection
+// for a desensitized experience candidate. It carries neither raw receipt data
+// nor Owner authority.
+//
+//go:embed experience-asset-candidate-readmodel.schema.json
+var ExperienceAssetCandidateReadModelSchemaJSON []byte
+
+// ApprovedPackArtifactHandoffAttestationSchemaJSON is the signed canonical
+// proof required before cloud market accepts an approved Pack artifact.
+//
+//go:embed approved-pack-artifact-handoff-attestation.schema.json
+var ApprovedPackArtifactHandoffAttestationSchemaJSON []byte
+
 // ContributionReceiptSchemaJSON is contracts/contribution-receipt.schema.json.
 //
 //go:embed contribution-receipt.schema.json

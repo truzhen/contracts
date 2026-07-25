@@ -11,6 +11,8 @@ func TestTransactionOperationSchemasAreEmbeddedAndClosed(t *testing.T) {
 	for name, raw := range map[string][]byte{
 		"scene-runtime-plan-candidate":     contracts.SceneRuntimePlanCandidateSchemaJSON,
 		"pack-hands-requirement-readmodel": contracts.PackHandsRequirementReadModelSchemaJSON,
+		"experience-asset-candidate-readmodel": contracts.ExperienceAssetCandidateReadModelSchemaJSON,
+		"approved-pack-artifact-handoff-attestation": contracts.ApprovedPackArtifactHandoffAttestationSchemaJSON,
 	} {
 		t.Run(name, func(t *testing.T) {
 			var document struct {

@@ -75,7 +75,7 @@ go get github.com/truzhen/contracts@latest
 
 学习与探讨的 Session / Turn / Provider Lane / Automation Grant ReadModel 与 Synthesis Candidate 已在本仓定形；它们不携带问题或供应商原文，且候选永远不能直接成为正式结论。兼容边界见 [v0.15.0 说明](docs/compatibility/deliberation-v0.15.0.md)。
 
-本地优先 AI 事务操作层的 contracts 增量见 [v0.16.0 兼容说明](docs/compatibility/transaction-operation-layer-v0.16.0.md)。
+本地优先 AI 事务操作层的基础 contracts 增量见 [v0.16.0 兼容说明](docs/compatibility/transaction-operation-layer-v0.16.0.md)；P13 经验候选 ReadModel 与 paired-host 签名 handoff 的加法契约见 [v0.17.0 兼容说明](docs/compatibility/experience-pack-market-p13-v0.17.0.md)。
 
 ## 我们的承诺
 

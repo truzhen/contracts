@@ -11,6 +11,8 @@ func TestV071SchemasEmbeddedAndParse(t *testing.T) {
 	schemas := map[string][]byte{
 		"pack-usage-contribution-candidate":  contracts.PackUsageContributionCandidateSchemaJSON,
 		"pack-version-migration-candidate":   contracts.PackVersionMigrationCandidateSchemaJSON,
+		"experience-asset-candidate-readmodel": contracts.ExperienceAssetCandidateReadModelSchemaJSON,
+		"approved-pack-artifact-handoff-attestation": contracts.ApprovedPackArtifactHandoffAttestationSchemaJSON,
 		"contribution-receipt":               contracts.ContributionReceiptSchemaJSON,
 		"market-catalog-product":             contracts.MarketCatalogProductSchemaJSON,
 		"market-entitlement":                 contracts.MarketEntitlementSchemaJSON,
