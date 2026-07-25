@@ -108,6 +108,11 @@ const (
 	PathAuthorUploads               = "/v3/market/author/uploads"
 	PathAuthorProducts              = "/v3/market/author/products"
 	PathPackUpload                  = "/v3/market/packs/upload"
+	// PathApprovedPackArtifactHandoff is the separate, paired-Host signed
+	// ingress for a fixed Owner-approved artifact. It must never be collapsed
+	// into PathPackUpload: ordinary author uploads do not carry the P13
+	// attestation or sanitization-manifest proof.
+	PathApprovedPackArtifactHandoff = "/v3/market/packs/approved-artifact-handoff"
 	PathLicenseProducts             = "/v3/market/license/products"
 	PathLicenseCheckout             = "/v3/market/license/checkout"
 	PathLicenseEntitlements         = "/v3/market/license/entitlements"

@@ -111,6 +111,7 @@ func TestSurfacePathsGolden(t *testing.T) {
 		market.PathAuthorUploads:               "/v3/market/author/uploads",
 		market.PathAuthorProducts:              "/v3/market/author/products",
 		market.PathPackUpload:                  "/v3/market/packs/upload",
+		market.PathApprovedPackArtifactHandoff: "/v3/market/packs/approved-artifact-handoff",
 		market.PathLicenseProducts:             "/v3/market/license/products",
 		market.PathLicenseCheckout:             "/v3/market/license/checkout",
 		market.PathLicenseEntitlements:         "/v3/market/license/entitlements",
