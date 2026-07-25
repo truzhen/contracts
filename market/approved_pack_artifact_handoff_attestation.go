@@ -15,36 +15,38 @@ import (
 // a paired local host is handing one Owner-approved immutable Pack artifact to
 // the cloud market. It is transport-neutral and never stores key material.
 type ApprovedPackArtifactHandoffAttestation struct {
-	HandoffID          string   `json:"handoff_id"`
-	IssuerHostRef      string   `json:"issuer_host_ref"`
-	Audience           string   `json:"audience"`
-	CandidateRef       string   `json:"candidate_ref"`
-	ApprovalReceiptRef string   `json:"approval_receipt_ref"`
-	ArtifactRef        string   `json:"artifact_ref"`
-	PackRef            string   `json:"pack_ref"`
-	PackVersionRef     string   `json:"pack_version_ref"`
-	ArtifactSHA256     string   `json:"artifact_sha256"`
-	EvidenceRefs       []string `json:"evidence_refs"`
-	IssuedAt           string   `json:"issued_at"`
-	ExpiresAt          string   `json:"expires_at"`
-	Nonce              string   `json:"nonce"`
-	Signature          string   `json:"signature"`
+	HandoffID                  string   `json:"handoff_id"`
+	IssuerHostRef              string   `json:"issuer_host_ref"`
+	Audience                   string   `json:"audience"`
+	CandidateRef               string   `json:"candidate_ref"`
+	ApprovalReceiptRef         string   `json:"approval_receipt_ref"`
+	ArtifactRef                string   `json:"artifact_ref"`
+	PackRef                    string   `json:"pack_ref"`
+	PackVersionRef             string   `json:"pack_version_ref"`
+	ArtifactSHA256             string   `json:"artifact_sha256"`
+	SanitizationManifestSHA256 string   `json:"sanitization_manifest_sha256"`
+	EvidenceRefs               []string `json:"evidence_refs"`
+	IssuedAt                   string   `json:"issued_at"`
+	ExpiresAt                  string   `json:"expires_at"`
+	Nonce                      string   `json:"nonce"`
+	Signature                  string   `json:"signature"`
 }
 
 type approvedPackArtifactHandoffPayload struct {
-	HandoffID          string   `json:"handoff_id"`
-	IssuerHostRef      string   `json:"issuer_host_ref"`
-	Audience           string   `json:"audience"`
-	CandidateRef       string   `json:"candidate_ref"`
-	ApprovalReceiptRef string   `json:"approval_receipt_ref"`
-	ArtifactRef        string   `json:"artifact_ref"`
-	PackRef            string   `json:"pack_ref"`
-	PackVersionRef     string   `json:"pack_version_ref"`
-	ArtifactSHA256     string   `json:"artifact_sha256"`
-	EvidenceRefs       []string `json:"evidence_refs"`
-	IssuedAt           string   `json:"issued_at"`
-	ExpiresAt          string   `json:"expires_at"`
-	Nonce              string   `json:"nonce"`
+	HandoffID                  string   `json:"handoff_id"`
+	IssuerHostRef              string   `json:"issuer_host_ref"`
+	Audience                   string   `json:"audience"`
+	CandidateRef               string   `json:"candidate_ref"`
+	ApprovalReceiptRef         string   `json:"approval_receipt_ref"`
+	ArtifactRef                string   `json:"artifact_ref"`
+	PackRef                    string   `json:"pack_ref"`
+	PackVersionRef             string   `json:"pack_version_ref"`
+	ArtifactSHA256             string   `json:"artifact_sha256"`
+	SanitizationManifestSHA256 string   `json:"sanitization_manifest_sha256"`
+	EvidenceRefs               []string `json:"evidence_refs"`
+	IssuedAt                   string   `json:"issued_at"`
+	ExpiresAt                  string   `json:"expires_at"`
+	Nonce                      string   `json:"nonce"`
 }
 
 // ValidateApprovedPackArtifactHandoffAttestation checks signed-envelope shape.
@@ -73,7 +75,7 @@ func CanonicalApprovedPackArtifactHandoffBytes(attestation ApprovedPackArtifactH
 	return json.Marshal(approvedPackArtifactHandoffPayload{
 		HandoffID: attestation.HandoffID, IssuerHostRef: attestation.IssuerHostRef, Audience: attestation.Audience,
 		CandidateRef: attestation.CandidateRef, ApprovalReceiptRef: attestation.ApprovalReceiptRef, ArtifactRef: attestation.ArtifactRef,
-		PackRef: attestation.PackRef, PackVersionRef: attestation.PackVersionRef, ArtifactSHA256: strings.ToLower(attestation.ArtifactSHA256),
+		PackRef: attestation.PackRef, PackVersionRef: attestation.PackVersionRef, ArtifactSHA256: strings.ToLower(attestation.ArtifactSHA256), SanitizationManifestSHA256: strings.ToLower(attestation.SanitizationManifestSHA256),
 		EvidenceRefs: append([]string(nil), attestation.EvidenceRefs...), IssuedAt: attestation.IssuedAt, ExpiresAt: attestation.ExpiresAt, Nonce: attestation.Nonce,
 	})
 }
@@ -120,7 +122,8 @@ func validateUnsignedApprovedPackArtifactHandoff(attestation ApprovedPackArtifac
 		"handoff_id": attestation.HandoffID, "issuer_host_ref": attestation.IssuerHostRef, "audience": attestation.Audience,
 		"candidate_ref": attestation.CandidateRef, "approval_receipt_ref": attestation.ApprovalReceiptRef, "artifact_ref": attestation.ArtifactRef,
 		"pack_ref": attestation.PackRef, "pack_version_ref": attestation.PackVersionRef, "artifact_sha256": attestation.ArtifactSHA256,
-		"issued_at": attestation.IssuedAt, "expires_at": attestation.ExpiresAt, "nonce": attestation.Nonce,
+		"sanitization_manifest_sha256": attestation.SanitizationManifestSHA256,
+		"issued_at":                    attestation.IssuedAt, "expires_at": attestation.ExpiresAt, "nonce": attestation.Nonce,
 	} {
 		if strings.TrimSpace(value) == "" {
 			return fmt.Errorf("approved pack artifact handoff attestation %s is required", name)
@@ -131,6 +134,9 @@ func validateUnsignedApprovedPackArtifactHandoff(attestation ApprovedPackArtifac
 	}
 	if _, err := decodeSHA256(attestation.ArtifactSHA256); err != nil {
 		return fmt.Errorf("approved pack artifact handoff attestation artifact_sha256: %w", err)
+	}
+	if _, err := decodeSHA256(attestation.SanitizationManifestSHA256); err != nil {
+		return fmt.Errorf("approved pack artifact handoff attestation sanitization_manifest_sha256: %w", err)
 	}
 	return validateUniqueHandoffEvidence(attestation.EvidenceRefs)
 }

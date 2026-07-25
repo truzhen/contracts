@@ -51,7 +51,7 @@
 | `scene-runtime-plan-candidate.schema.json` | 场景运行时计划候选。 | `truzhenos` Scene Runtime / CI |
 | `pack-hands-requirement-readmodel.schema.json` | Pack Hands 需求的 Owner 解释投影，含固定 Pack / requirement / 软件 lock / 脱敏绑定和阻断状态；不是真相源、不授权执行。 | `truzhenos` ReadModel producer、client 只读展示 |
 | `experience-asset-candidate-readmodel.schema.json` | 已脱敏经验候选的 client-safe ReadModel，含来源 Receipt/事务/固定 Pack 版本和候选态证据引用；不含 raw payload、Owner authority 或上传证明。 | `truzhenos` os-18 producer、client 作者工作台 |
-| `approved-pack-artifact-handoff-attestation.schema.json` | paired-host 对固定 Owner-approved Pack artifact 的 canonical Ed25519 handoff 证明；Receipt ref 单独无效。 | `truzhenos` Cloud Market Hands、`truzhen-cloud` os-03 验签 |
+| `approved-pack-artifact-handoff-attestation.schema.json` | paired-host 对固定 Owner-approved Pack artifact 与 sanitization manifest digest 的 canonical Ed25519 handoff 证明；Receipt ref 单独无效。 | `truzhenos` Cloud Market Hands、`truzhen-cloud` os-03 验签 |
 | `scene-studio-node-info.schema.json` | 制作台节点信息。 | Pack Studio / client layer |
 | `scene-studio-workflow.schema.json` | 制作台工作流。 | Pack Studio / client layer |
 | `visual-unit-spec.schema.json` | client layer 七类主权视觉单元（pod/object/capsule/candidate/execution/receipt/setting）封顶规格。 | client repo vendor / codegen / consistency test |

@@ -5,7 +5,7 @@
 ## 变更范围
 
 - 新增 `experience-asset-candidate-readmodel.schema.json` 与 `readmodels.ExperienceAssetCandidateReadModel`。它仅投影已脱敏经验候选、来源 Receipt/事务/固定 Pack 版本、candidate-only 状态及已有候选/回执引用；明确不含 raw Receipt payload、OwnerDecision、token 或市场上传证明。
-- 新增 `approved-pack-artifact-handoff-attestation.schema.json` 与 `market.ApprovedPackArtifactHandoffAttestation`。它要求 paired host 对固定 `candidate_ref`、`approval_receipt_ref`、artifact digest、Pack/version、受众、时效、nonce 和证据引用的 canonical JSON 进行 Ed25519 签名。
+- 新增 `approved-pack-artifact-handoff-attestation.schema.json` 与 `market.ApprovedPackArtifactHandoffAttestation`。它要求 paired host 对固定 `candidate_ref`、`approval_receipt_ref`、artifact digest、已签名清洗清单摘要、Pack/version、受众、时效、nonce 和证据引用的 canonical JSON 进行 Ed25519 签名。
 - `market.CanonicalApprovedPackArtifactHandoffBytes`、`SignApprovedPackArtifactHandoff`、`VerifyApprovedPackArtifactHandoff` 均为无副作用的纯 helper；不保存私钥、不绑定账号、不上传制品。账号↔host 公钥绑定与幂等持久化由 cloud 真相源实现。
 
 ## 兼容性
