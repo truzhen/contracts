@@ -53,6 +53,12 @@ var MobilePairingBootstrapCandidateSchemaJSON []byte
 //go:embed mobile-session-issue-intent.schema.json
 var MobileSessionIssueIntentSchemaJSON []byte
 
+// ServiceCollaborationSchemaJSON is the additive, client-safe collaboration shape.
+// It excludes credentials, OwnerDecision and every host-owned truth source.
+//
+//go:embed service-collaboration.schema.json
+var ServiceCollaborationSchemaJSON []byte
+
 // CandidateEnvelopeSchemaJSON is contracts/candidate-envelope.schema.json
 // （candidates.CandidateEnvelope 的 JSON 表达，client layer 候选卡面向、CI 校验；
 // T12 阶段A：client layer 契约面补全）。
