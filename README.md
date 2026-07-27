@@ -77,6 +77,8 @@ go get github.com/truzhen/contracts@latest
 
 本地优先 AI 事务操作层的基础 contracts 增量见 [v0.16.0 兼容说明](docs/compatibility/transaction-operation-layer-v0.16.0.md)；P13 经验候选 ReadModel 与 paired-host 签名 handoff 的加法契约见 [v0.17.0 兼容说明](docs/compatibility/experience-pack-market-p13-v0.17.0.md)。
 
+客户限事务服务协作的邀请、版本化披露、对手方证据、每日交付与 scope 投影已在 v0.19.0 以加法形状定出；它们不授予 Owner 权力、不存凭据，也不替代 OS 的正式事务、Gate 或 Receipt。兼容边界见 [v0.19.0 说明](docs/compatibility/service-collaboration-v0.19.0.md)。
+
 ## 我们的承诺
 
 - contracts 只定义形状，不给任何 Pack 执行权。

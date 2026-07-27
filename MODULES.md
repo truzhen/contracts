@@ -35,7 +35,7 @@
 | `receipts/` | ReceiptEnvelope、AuditEnvelope。 | 不实现 append-only ledger、哈希链计算、回放查询或审计存储。 |
 | `gates/` | 轻量 AccessDecision、OwnerVerdict。 | 不替代 `base.GateDecision` / `base.OwnerDecision`；不能用于正式动作主权裁定。 |
 | `registry/` | RegistryRef、SkillRef、RegistrySlice、RegistrySliceItem、RegistrySliceBlockedRef、slice TTL / context refs helper。 | 不暴露 full registry，不保存 provider 实现，不提供真实解析服务。 |
-| `readmodels/` | ReadModelEnvelope、MobilePairingBootstrapRequest / Candidate、MobileSessionIssueIntent、Deliberation Session / Turn / Provider Lane / Automation Grant、PackHandsRequirement、ExperienceAssetCandidate 投影及 fail-closed 形状校验。 | 不持有真相源，不实现前端状态管理、PC 审批、会话签发、浏览器自动化、Provider 选择或凭据保存；经验投影不含 raw Receipt、Owner authority 或市场上传证明。 |
+| `readmodels/` | ReadModelEnvelope、移动首配对三件套、服务协作邀请/披露/客户证据/交付/限事务 scope 投影、Deliberation Session / Turn / Provider Lane / Automation Grant、PackHandsRequirement、ExperienceAssetCandidate 投影及 fail-closed 形状校验。 | 不持有真相源，不实现前端状态管理、PC 审批、会话签发、浏览器自动化、Provider 选择或凭据保存；服务协作形状不含凭据、OwnerDecision 或正式 Agreement。 |
 | `monitoring/` | MonitoringRun、MonitoringEvent、CollectorSnapshot、RedactionFinding、FaultIncident、SupportDiagnosticBundle、SupportUploadCandidate、SupportUploadAck、BuildSymbolManifest 等。 | 不采集日志、不上传诊断包、不符号化、不实现监控服务。 |
 | `secrets/` | SecretRef、SensitivePayload。 | 不保存明文 secret、token、API key、cookie、private key。 |
 | `market/` | 市场表面契约（§18-A，2026-07-02 v0.4.0 新增；2026-07-03 v0.5.0 补 SessionProjection、session/payable/role 枚举和作者端 DTO / 枚举；2026-07-07 v0.7.0 新增 canonical PackManifest / ProviderRequirement / PackSoftwareRequirement / SoftwareResolutionLock；2026-07-08 v0.8.0 补 resolver MVP lock 结果 `install_required` / `version_conflict` / `isolation_required`；v0.16.0 增加复合 software requirement 引用与最终 binding 投影字段；v0.17.0 增加 paired-host 签名的 approved artifact handoff attestation）：SessionHeader、LoginRequest / LoginResponse、作者认证 / 收益 / 提现 / 上传 ReadModel、Pack manifest、软件依赖声明、resolver lock、签名 handoff 形状、市场表面端点路径常量与路径构造器（LicenseOrderPath / WithdrawalCancelPath / PackDownloadPath）、AdminForwardAllowlist / AdminPathAllowed（admin 转发硬 allowlist 主权边界）。消费方：truzhenos 17-market / 02 registry、truzhen-cloud 03 上传链、client 软件目录投影。 | 不实现代理转发、不签发订单 / 价格 / 权益（服务端真相唯一在 truzhen-cloud），不解析本机 provider，不保存本机路径 / 端口 / secret / runtime state，不持会话状态。 |
@@ -59,6 +59,7 @@
 | `mobile-pairing-bootstrap-request.schema.json` | 手机首次请求 PC Host 配对的无权限设备描述。 | mobile client、truzhenos 16-auth；不得携带身份、Gate 或凭据。 |
 | `mobile-pairing-bootstrap-candidate.schema.json` | PC Host 创建并回放的移动首配对候选投影。 | client 手机配对页、client PC 安全核心、truzhenos 16-auth。 |
 | `mobile-session-issue-intent.schema.json` | PC 批准后的会话签发 JSON body；bootstrap proof 固定 header-only，不进入 schema。 | mobile client、truzhenos 16-auth。 |
+| `service-collaboration.schema.json` | 客户限事务邀请、版本化约定披露、对手方决定证据、每日交付披露与只读 scope 投影。 | truzhenos os-05/os-16 producer、client PC/手机 consumer；不是真相源、不授权。 |
 | `candidate-envelope.schema.json` | `candidates.CandidateEnvelope` 的 JSON 表达。 | client candidate card、CI |
 | `receipt-envelope.schema.json` | `receipts.ReceiptEnvelope` 的 JSON 表达。 含可选 `actual_edits`（执行后事实，v0.10.0 additive，Owner O-1~O-4 裁定 2026-07-10）。 | client receipt card、CI |
 | `pack-manifest.schema.json` | 云端上传与 Pack 分发可校验的 canonical manifest，含 `software_requirements` 与可选 `lifecycle_status`（八档中文枚举，v0.9.0 additive，Owner 2026-07-10 裁定）。 | `truzhen-cloud` 上传校验、`truzhen-packs` CI、`truzhenos` Pack loader |
@@ -120,7 +121,7 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 
 当前状态：
 
-- 已通过 `embed.go` 暴露：`scene-flow-spec.schema.json`、`scene-pack-spec.schema.json`、`scene-runtime-plan-candidate.schema.json`、`flow-view-spec.schema.json`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json`、移动首配对三件套 schema、`candidate-envelope.schema.json`、`receipt-envelope.schema.json`、`pack-manifest.schema.json`、`provider-requirement.schema.json`、`software-resolution-lock.schema.json`、`pack-hands-requirement-readmodel.schema.json`、P13 Experience / Market 两件套 schema、`monitoring/monitoring-event.schema.json`、`monitoring/fault-incident.schema.json`、Intent Spine 五件套 schema、学习与探讨五件套 schema。
+- 已通过 `embed.go` 暴露：`scene-flow-spec.schema.json`、`scene-pack-spec.schema.json`、`scene-runtime-plan-candidate.schema.json`、`flow-view-spec.schema.json`、`visual-unit-spec.schema.json`、`transaction-object-projection.schema.json`、移动首配对三件套 schema、`service-collaboration.schema.json`、`candidate-envelope.schema.json`、`receipt-envelope.schema.json`、`pack-manifest.schema.json`、`provider-requirement.schema.json`、`software-resolution-lock.schema.json`、`pack-hands-requirement-readmodel.schema.json`、P13 Experience / Market 两件套 schema、`monitoring/monitoring-event.schema.json`、`monitoring/fault-incident.schema.json`、Intent Spine 五件套 schema、学习与探讨五件套 schema。
 - 当前未通过 `embed.go` 暴露：`scene-studio-node-info.schema.json`、`scene-studio-workflow.schema.json`。它们仍只作为文件级制作台 schema；如未来需要 Go API 直接消费，应另开影响评估。
 
 改动规则：
