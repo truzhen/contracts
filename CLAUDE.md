@@ -62,6 +62,8 @@ python3 -c "import json,glob;fs=glob.glob('**/*.schema.json',recursive=True);ass
 - **优化优先于新增**（2026-07-11 Owner 裁定，v4 六仓统一，详见 `AGENTS.md` §6）：能不新写代码 / 类型 / 子包就不新写，优先在原有契约上优化、复用、收敛。六仓集合统称「Truzhen v4 版本」（权威定义 = truzhenos `NAMING_STANDARD.md`；封棺仓 `truzhenv3` 不属 v4）。
 - 不自动 push / tag / release / merge。
 
+复杂任务的节点、交接、单写者、独立验收、预算和停止条件以 `AGENTS.md`“任务图执行纪律”为准；本文件不重复正文。
+
 ## 6. P6 防回潮纪律
 
 - 本仓只保存公开契约、schema、类型、版本与兼容说明；内部执行计划、客户压力记录、生产核对清单和 Owner-gated 操作材料不得放回本仓正文目录。
