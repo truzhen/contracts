@@ -153,6 +153,7 @@ client layer（Web / Desktop / 后续移动端）面向本仓 schema 收敛跨�
 > 2026-07-24（v0.15.0 契约已定、未发布）：新增学习与探讨的 Session / Turn / Provider Lane / Automation Grant ReadModel 与 Synthesis Candidate 五件套及 schema。它们只传受控引用、hash、状态和脱敏摘要；不含问题、供应商回答、DOM、凭据或 client 自铸授权。授权沿用 Base `decision_ref` / 既有 `OwnerDelegationGrant`，合议结果固定 candidate-only，完整兼容策略见 `docs/compatibility/deliberation-v0.15.0.md`。
 > 2026-07-24（v0.16.0 契约已定、未发布）：为本地优先 AI 事务操作层增加复合 `software_requirement_refs[]`、`SoftwareResolutionLock` 的 provider/binding 投影字段、Scene Runtime 节点的固定 `provider_requirement_refs[]` 和 `PackHandsRequirementReadModel`。全部为加性字段/新 schema；ref 校验只检查固定 Pack 版本内的非空去重与 family 一致性，ReadModel 只读、不是真相源、不授权安装/执行。兼容策略见 `docs/compatibility/transaction-operation-layer-v0.16.0.md`。
 > 2026-07-25（v0.17.0 契约已定、未发布）：新增 `ExperienceAssetCandidateReadModel` 和 `ApprovedPackArtifactHandoffAttestation` 两个 additive schema。前者只投影脱敏候选与来源/版本/候选引用；后者以 canonical JSON + Ed25519 证明固定 Pack artifact 的 Owner-approved handoff。账户与 paired host 公钥绑定、云端重放幂等、OS 外部动作 Receipt 分别归 cloud / OS 真相源，完整兼容策略见 `docs/compatibility/experience-pack-market-p13-v0.17.0.md`。
+> 2026-07-29（v0.20.0 开发线，未发布）：在既有移动首配对三件套 schema 不变的前提下，新增纯 Go 的严格 JSON Decode / schema 级 Validate helper 与枚举常量，明确拒绝 OwnerDecision、Receipt、credential、bootstrap proof 等 authority smuggling，并覆盖 required=false 布尔字段缺失与多顶层 JSON 值回归。该加性 API 不签发配对、会话、OwnerDecision 或 Receipt；OS / client 必须独立接线并验收后才可声称实际生效。无 tag、无 push、无发布；兼容与消费影响见 `docs/compatibility/mobile-pairing-strict-hardening-v0.20.0.md`。
 
 ## 包体积与完善状态（2026-07-03 集成分支实测，v0.5.0）
 

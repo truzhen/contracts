@@ -79,6 +79,8 @@ go get github.com/truzhen/contracts@latest
 
 客户限事务服务协作的邀请、版本化披露、对手方证据、每日交付与 scope 投影已在 v0.19.0 以加法形状定出；它们不授予 Owner 权力、不存凭据，也不替代 OS 的正式事务、Gate 或 Receipt。兼容边界见 [v0.19.0 说明](docs/compatibility/service-collaboration-v0.19.0.md)。
 
+移动首配对三件套在 v0.20.0 开发线补充了纯 Go 的闭合 JSON 解码与 schema 级校验 helper，用于拒绝 OwnerDecision、Receipt 与 bootstrap proof 等 authority smuggling；JSON Schema 未变，运行时是否消费仍由 OS / client 各自接线和验收决定。兼容边界与消费影响见 [v0.20.0 说明](docs/compatibility/mobile-pairing-strict-hardening-v0.20.0.md)。
+
 ## 我们的承诺
 
 - contracts 只定义形状，不给任何 Pack 执行权。
